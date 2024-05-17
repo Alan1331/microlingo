@@ -7,6 +7,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/whatsapp/send', 'App\Http\Controllers\WhatsAppController@sendMessage');
+Route::post('/whatsapp/receive', 'App\Http\Controllers\WhatsAppController@receiveMessage');
+
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
