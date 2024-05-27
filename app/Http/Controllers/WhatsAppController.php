@@ -7,6 +7,7 @@ use Twilio\Rest\Client;
 
 class WhatsAppController extends Controller
 {
+
     public function sendMessage()
     {
         $sid = env('TWILIO_ACCOUNT_SID');

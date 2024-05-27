@@ -10,6 +10,12 @@ Route::get('/', function () {
 Route::get('/whatsapp/send', 'App\Http\Controllers\WhatsAppController@sendMessage');
 Route::post('/whatsapp/receive', 'App\Http\Controllers\WhatsAppController@receiveMessage');
 
+Route::get('/users', 'App\Http\Controllers\UserController@showUsers');
+Route::get('/users/{noWhatsapp}', 'App\Http\Controllers\UserController@showUserById');
+Route::post('/users', 'App\Http\Controllers\UserController@createUser');
+Route::put('/users/{noWhatsapp}', 'App\Http\Controllers\UserController@updateUser');
+Route::delete('/users/{noWhatsapp}', 'App\Http\Controllers\UserController@deleteUser');
+
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
