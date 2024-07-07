@@ -10,6 +10,15 @@ use Illuminate\Support\Facades\App;
 
 class WhatsAppController extends Controller
 {
+    protected $twilioClient;
+    protected $twilioWhatsAppNumber;
+
+    public function __construct(Client $twilioClient)
+    {
+        $this->twilioClient = $twilioClient;
+        $this->twilioWhatsAppNumber = env('TWILIO_WHATSAPP_NUMBER');
+    }
+
     public function sendMessage()
     {
         $sid = env('TWILIO_ACCOUNT_SID');
@@ -39,42 +48,62 @@ class WhatsAppController extends Controller
         # Ensure that the user was registered
         $lokasiMenu = $this->checkUser($recipient_number);
 
-        switch($lokasiMenu) {
-            case "userProfile": # show userProfile menu
-                switch($input_message) {
-                    case "1": # select 1 to edit profile
-                        $message = $this->comingSoon($recipient_number);
-                        break;
-                    case "2": # select 2 to back to main menu
-                        $message = $this->backToMainMenu($recipient_number);
-                        break;
-                    default:
-                        $message = $this->showProfileMenu($recipient_number);
-                }
-                break;
-            default: # show mainMenu by default
-                switch($input_message) {
-                    case "1": # menu to start/continue learning
-                        $message = $this->comingSoon($recipient_number);
-                        break;
-                    case "2": # menu to show user profile
-                        $message = $this->showProfileMenu($recipient_number);
-                        break;
-                    case "3": # menu to show about MicroLingo
-                        $message = $this->comingSoon($recipient_number);
-                        break;
-                    default:
-                        $message = $this->showMainMenu($recipient_number);
-                }
-        }
+        $message = $this->handleMenuLocation($lokasiMenu, $input_message, $recipient_number);
 
-        return response()->json(['message' => 'Message was replied!', 'sid' => $message->sid, 'status' => $message->status]);
+        $this->sendMessageToUser($recipient_number, $message);
+    }
+
+    private function sendMessageToUser($recipient_number, $message)
+    {
+        $this->twilioClient->messages->create(
+            $recipient_number,
+            [
+                'from' => $this->twilioWhatsAppNumber,
+                'body' => $message
+            ]
+        );
+    }
+
+    private function handleMenuLocation($lokasiMenu, $input_message, $recipient_number)
+    {
+        switch ($lokasiMenu) {
+            case "userProfile":
+                return $this->handleUserProfileMenu($input_message, $recipient_number);
+            // Add more cases as needed
+            default:
+                return $this->handleMainMenu($input_message, $recipient_number);
+        }
+    }
+
+    private function handleMainMenu($input_message, $recipient_number)
+    {
+        switch ($input_message) {
+            case "1":
+                return $this->comingSoon($recipient_number);
+            case "2":
+                return $this->showProfileMenu($recipient_number);
+            case "3":
+                return $this->comingSoon($recipient_number);
+            default:
+                return $this->showMainMenu($recipient_number);
+        }
+    }
+
+    private function handleUserProfileMenu($input_message, $recipient_number)
+    {
+        switch ($input_message) {
+            case "1":
+                return $this->comingSoon($recipient_number);
+            case "2":
+                return $this->backToMainMenu($recipient_number);
+            default:
+                return $this->showProfileMenu($recipient_number);
+        }
     }
 
     private function comingSoon($recipient_number)
     {
-        $response = "Feature is still in development";
-        $message = $this->replyUser($recipient_number, $response);
+        $message = "Feature is still in development";
         return $message;
     }
 
@@ -92,11 +121,10 @@ class WhatsAppController extends Controller
 
     private function showMainMenu($recipient_number)
     {
-        $response = "Main Menu
+        $message = "Main Menu
         1. Mulai/Lanjut Pembelajaran
         2. Profil Anda
         3. Tentang MicroLingo";
-        $message = $this->replyUser($recipient_number, $response);
         return $message;
     }
 
@@ -126,34 +154,15 @@ class WhatsAppController extends Controller
             }
         }
 
-        $response = "Berikut merupakan profil Anda saat ini:
+        $message = "Berikut merupakan profil Anda saat ini:
         - Nama: $user_name
         - Pekerjaan: $user_job
 Pilih menu berikut untuk melanjutkan:
         1. Ubah profil
         2. Kembali ke Main Menu";
-        $message = $this->replyUser($recipient_number, $response);
         return $message;
     }
 
-    private function replyUser($recipient_number, $response)
-    {
-        $sid = env('TWILIO_ACCOUNT_SID');
-        $token = env('TWILIO_AUTH_TOKEN');
-        $twilio_whatsapp_number = env('TWILIO_WHATSAPP_NUMBER');
-
-        $client = new Client($sid, $token);
-
-        $message = $client->messages->create(
-            $recipient_number,
-            [
-                'from' => $twilio_whatsapp_number,
-                'body' => $response
-            ]
-        );
-
-        return $message;
-    }
 
     private function checkUser($recipient_number)
     {
