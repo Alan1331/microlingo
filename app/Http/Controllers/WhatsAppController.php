@@ -69,7 +69,10 @@ class WhatsAppController extends Controller
         switch ($lokasiMenu) {
             case "userProfile":
                 return $this->handleUserProfileMenu($input_message, $recipient_number);
-            // Add more cases as needed
+            case "userProfileSetName":
+                return $this->handleUserProfileSetName($input_message, $recipient_number);
+            case "userProfileSetJob":
+                return $this->handleUserProfileSetJob($input_message, $recipient_number);
             default:
                 return $this->handleMainMenu($input_message, $recipient_number);
         }
@@ -79,11 +82,11 @@ class WhatsAppController extends Controller
     {
         switch ($input_message) {
             case "1":
-                return $this->comingSoon($recipient_number);
+                return $this->comingSoon();
             case "2":
                 return $this->showProfileMenu($recipient_number);
             case "3":
-                return $this->comingSoon($recipient_number);
+                return $this->showAboutUs();
             default:
                 return $this->showMainMenu($recipient_number);
         }
@@ -93,7 +96,7 @@ class WhatsAppController extends Controller
     {
         switch ($input_message) {
             case "1":
-                return $this->comingSoon($recipient_number);
+                return $this->setProfile($recipient_number);
             case "2":
                 return $this->backToMainMenu($recipient_number);
             default:
@@ -101,9 +104,56 @@ class WhatsAppController extends Controller
         }
     }
 
-    private function comingSoon($recipient_number)
+    private function setProfile($recipient_number)
+    {
+        $user_number = $this->formatUserPhoneNumber($recipient_number);
+        # change menu location to userProfileSetName to ask user their name
+        $data = [
+            'lokasiMenu' => 'userProfileSetName'
+        ];
+        $request = Request::create('/users/$recipient_number', 'PUT', $data);
+        App::call('App\Http\Controllers\UserController@updateUser', ['request' => $request, 'noWhatsapp' => $user_number]);
+        $message = "Masukkan nama Anda:";
+        return $message;
+    }
+
+    private function handleUserProfileSetName($input_message, $recipient_number)
+    {
+        $user_number = $this->formatUserPhoneNumber($recipient_number);
+        # set user name and change menu location to userProfileSetJob to ask user their job
+        $data = [
+            'nama' => $input_message,
+            'lokasiMenu' => 'userProfileSetJob'
+        ];
+        $request = Request::create('/users/$recipient_number', 'PUT', $data);
+        App::call('App\Http\Controllers\UserController@updateUser', ['request' => $request, 'noWhatsapp' => $user_number]);
+        $message = "Hallo, $input_message!! Apa pekerjaan Anda:";
+        return $message;
+    }
+
+    private function handleUserProfileSetJob($input_message, $recipient_number)
+    {
+        $user_number = $this->formatUserPhoneNumber($recipient_number);
+        # set user job and change menu location back to userProfile
+        $data = [
+            'pekerjaan' => $input_message,
+            'lokasiMenu' => 'userProfile'
+        ];
+        $request = Request::create('/users/$recipient_number', 'PUT', $data);
+        App::call('App\Http\Controllers\UserController@updateUser', ['request' => $request, 'noWhatsapp' => $user_number]);
+        $message = "Profil Anda berhasil diatur, ketik dan kirim apapun untuk melihat profil Anda!";
+        return $message;
+    }
+
+    private function comingSoon()
     {
         $message = "Feature is still in development";
+        return $message;
+    }
+
+    private function showAboutUs()
+    {
+        $message = "MicroLingo adalah chatbot WhatsApp yang didesain untuk menemani UMKM muda Indonesia dalam mempelajari Bahasa Inggris untuk kebutuhan bisnis mereka.";
         return $message;
     }
 
@@ -146,11 +196,11 @@ class WhatsAppController extends Controller
         if ($user_query->getStatusCode() == 200) {
             // Decode the JSON user_query to get required data
             $user_data = $user_query->getData();
-            if (isset($user_data->user_name)) {
-                $user_name = $user_data->user_name;
+            if (isset($user_data->nama)) {
+                $user_name = $user_data->nama;
             }
-            if (isset($user_data->user_job)) {
-                $user_job = $user_data->user_job;
+            if (isset($user_data->pekerjaan)) {
+                $user_job = $user_data->pekerjaan;
             }
         }
 
