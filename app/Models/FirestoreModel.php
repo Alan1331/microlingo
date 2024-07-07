@@ -20,7 +20,10 @@ class FirestoreModel
         $data = [];
         foreach ($documents as $document) {
             if ($document->exists()) {
-                $data[] = $document->data();
+                $retrievedId = array("id" => $document->id());  // Add the document ID to the data array
+                $doc_data = $document->data();
+                $doc_data = array_merge($retrievedId, $doc_data);
+                $data[] = $doc_data;
             }
         }
         return $data;
@@ -83,5 +86,22 @@ class FirestoreModel
 
         $this->firestore->collection($this->collection)->document($id)->delete();
         return true;
+    }
+
+    public function getSubcollection($documentId)
+    {
+        $subcollection = $this->subcollection;
+        $subcollectionRef = $this->firestore->collection($this->collection)->document($documentId)->collection($subcollection);
+        $documents = $subcollectionRef->documents();
+        $data = [];
+        foreach ($documents as $document) {
+            if ($document->exists()) {
+                $retrievedId = array("id" => $document->id());  // Add the document ID to the data array
+                $doc_data = $document->data();
+                $doc_data = array_merge($retrievedId, $doc_data);
+                $data[] = $doc_data;
+            }
+        }
+        return $data;
     }
 }

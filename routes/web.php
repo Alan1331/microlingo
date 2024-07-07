@@ -16,6 +16,18 @@ Route::post('/users', 'App\Http\Controllers\UserController@createUser');
 Route::put('/users/{noWhatsapp}', 'App\Http\Controllers\UserController@updateUser');
 Route::delete('/users/{noWhatsapp}', 'App\Http\Controllers\UserController@deleteUser');
 
+Route::get('/units', 'App\Http\Controllers\LearningUnitController@showLearningUnits');
+Route::get('/units/{id}', 'App\Http\Controllers\LearningUnitController@showLearningUnitById');
+Route::post('/units', 'App\Http\Controllers\LearningUnitController@createLearningUnit');
+Route::put('/units/{id}', 'App\Http\Controllers\LearningUnitController@updateLearningUnit');
+Route::delete('/units/{id}', 'App\Http\Controllers\LearningUnitController@deleteLearningUnit');
+
+Route::get('/units/{unitId}/levels', 'App\Http\Controllers\LearningUnitController@showLearningUnitById');
+Route::get('/units/{unitId}/levels/{levelId}', 'App\Http\Controllers\LearningUnitController@showLearningUnitById');
+Route::post('/units/{unitId}', 'App\Http\Controllers\LearningUnitController@createLearningUnit');
+Route::put('/units/{unitId}', 'App\Http\Controllers\LearningUnitController@updateLearningUnit');
+Route::delete('/units/{unitId}/levels/{levelId}', 'App\Http\Controllers\LearningUnitController@deleteLearningUnit');
+
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');

@@ -48,8 +48,7 @@ class UserController extends Controller
         ]);
 
         // Return a status message instead of user data
-        // return response()->json(['message' => 'User created successfully'], 201);
-        return $user;
+        return response()->json(['message' => 'User created successfully'], 201);
     }
 
     public function updateUser(Request $request, $noWhatsapp)

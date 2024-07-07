@@ -1,0 +1,85 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Models\Level;
+
+class LevelController extends Controller
+{
+    protected $learningUnit;
+
+    public function __construct(Level $learningUnit)
+    {
+        $this->learningUnit = $learningUnit;
+    }
+
+    public function showLearningUnits()
+    {
+        $learningUnits = $this->learningUnit->all();
+
+        return response()->json($learningUnits);
+    }
+
+    public function showLearningUnitById($id)
+    {
+        $learingUnitDocument = $this->learningUnit->find($id);
+        if (!$learingUnitDocument) {
+            return response()->json(['message' => 'Learning unit not found'], 404);
+        }
+
+        return response()->json($learingUnitDocument);
+    }
+
+    public function createLearningUnit(Request $request)
+    {
+        // Validate the incoming request
+        $request->validate([
+            'id' => 'required|integer',
+            'topic' => 'required|string',
+        ]);
+
+        // Ensure the unique of id
+        $learingUnitDocument = $this->learningUnit->find($request->id);
+        if ($learingUnitDocument) {
+            return response()->json(['message' => 'Invalid input: id was used'], 403);
+        }
+
+        // Create the learning unit document in Firestore
+        $learningUnitDoc = $this->learningUnit->create([
+            'id' => $request->id,
+            'topic' => $request->topic,
+        ]);
+
+        // Return a status message instead of learning unit data
+        return response()->json(['message' => 'Learning unit created successfully'], 201);
+    }
+
+    public function updateLearningUnit(Request $request, $id)
+    {
+        // Update the learning unit document in Firestore
+        $result = $this->learningUnit->update($id, $request->all());
+
+        // Verify learning unit was found
+        if (!$result) {
+            return response()->json(['message' => 'Learning unit not found'], 404);
+        }
+
+        // Return a status message
+        return response()->json(['message' => 'Learning unit updated successfully'], 200);
+    }
+
+    public function deleteLearningUnit($id)
+    {
+        // Delete the learning unit document in Firestore
+        $result = $this->learningUnit->delete($id);
+
+        // Verify learning unit was found
+        if (!$result) {
+            return response()->json(['message' => 'Learning unit not found'], 404);
+        }
+
+        // Return a status message
+        return response()->json(['message' => 'Learning unit deleted successfully'], 200);
+    }
+}

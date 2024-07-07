@@ -15,6 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
             '/whatsapp/receive',
             '/users',
             '/users/*',
+            '/units',
+            '/units/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
