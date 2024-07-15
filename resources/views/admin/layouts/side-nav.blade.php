@@ -32,121 +32,55 @@
 
       <!-- Sidebar Manajemen Data -->
       <nav class="mt-2">
-        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-          <li class="nav-item menu-open">
+    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+        <!-- Manajemen Data -->
+        <li class="nav-item has-treeview">
             <a href="#" class="nav-link active">
-              <i class="nav-icon fas fa-tachometer-alt"></i>
-              <p>
-                Manajemen Data
-                <i class="right fas fa-angle-left"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="./index.html" class="nav-link active">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Kelola Data</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="./index2.html" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Hapus Data</p>
-                </a>
-              </li>
-            </ul>
-          </li>
-          <!-- Sidebar Materi Pembelajaran -->
-      <nav class="mt-2">
-        <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-          <li class="nav-item menu-open">
-            <a href="#" class="nav-link active">
-              <i class="nav-icon fas fa-tachometer-alt"></i>
-              <p>
-                Materi Pembelajaran dan Perkembangan
-                <i class="right fas fa-angle-left"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="./index.html" class="nav-link active">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Modifikasi Materi</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="./index2.html" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Perkembangan Pengguna</p>
-                </a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-header">Level Pembelajaran</li>
-          <li class="nav-item">
-            <a href="#" class="nav-link">
-              <i class="fas fa-circle nav-icon"></i>
-              <p>Level 1</p>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-circle"></i>
-              <p>
-                Level 1
-                <i class="right fas fa-angle-left"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Level 2</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>
-                    Level 2
+            <img src="managedata.png" class="nav-icon" alt="Manajemen Data Icon" style="width: 25px; height: 25px;">
+                <p>
+                    Manajemen Data
                     <i class="right fas fa-angle-left"></i>
-                  </p>
-                </a>
-                <ul class="nav nav-treeview">
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-dot-circle nav-icon"></i>
-                      <p>Level 3</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-dot-circle nav-icon"></i>
-                      <p>Level 3</p>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a href="#" class="nav-link">
-                      <i class="far fa-dot-circle nav-icon"></i>
-                      <p>Level 3</p>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-              <li class="nav-item">
-                <a href="#" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Level 2</p>
-                </a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-item">
-            <a href="#" class="nav-link">
-              <i class="fas fa-circle nav-icon"></i>
-              <p>Level 1</p>
+                </p>
             </a>
-          </li>
+            <ul class="nav nav-treeview">
+                <li class="nav-item">
+                    <a href="./index.html" class="nav-link">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p>Kelola Data</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="./index2.html" class="nav-link">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p>Hapus Data</p>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <!-- Materi Pembelajaran dan Perkembangan -->
+        <li class="nav-item has-treeview">
+            <a href="#" class="nav-link active">
+            <img src="materi.png" class="nav-icon" alt="Materi Icon" style="width: 25px; height: 25px;">
+                <p>
+                    Materi Pembelajaran & Perkembangan
+                    <i class="right fas fa-angle-left"></i>
+                </p>
+            </a>
+            <ul class="nav nav-treeview">
+                <li class="nav-item">
+                    <a href="./index.html" class="nav-link">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p>Modifikasi Materi</p>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="./index2.html" class="nav-link">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p>Perkembangan Pengguna</p>
+                    </a>
+                </li>
+            </ul>
+        </li>
           <li class="nav-header">Catatan Admin</li>
           <li class="nav-item">
             <a href="#" class="nav-link">
