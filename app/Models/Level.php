@@ -11,6 +11,9 @@ class Level extends FirestoreModel
         'topic',
         'videos',
     ];
+    protected $casts = [
+        'videos' => 'array',
+    ];
 
     public function __construct($parentId)
     {

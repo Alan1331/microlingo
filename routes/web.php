@@ -22,11 +22,11 @@ Route::post('/units', 'App\Http\Controllers\LearningUnitController@createLearnin
 Route::put('/units/{id}', 'App\Http\Controllers\LearningUnitController@updateLearningUnit');
 Route::delete('/units/{id}', 'App\Http\Controllers\LearningUnitController@deleteLearningUnit');
 
-Route::get('/units/{unitId}/levels', 'App\Http\Controllers\LearningUnitController@showLearningUnitById');
-Route::get('/units/{unitId}/levels/{levelId}', 'App\Http\Controllers\LearningUnitController@showLearningUnitById');
-Route::post('/units/{unitId}', 'App\Http\Controllers\LearningUnitController@createLearningUnit');
-Route::put('/units/{unitId}', 'App\Http\Controllers\LearningUnitController@updateLearningUnit');
-Route::delete('/units/{unitId}/levels/{levelId}', 'App\Http\Controllers\LearningUnitController@deleteLearningUnit');
+Route::get('/units/{unitId}/levels', 'App\Http\Controllers\LevelController@showLevels');
+Route::get('/units/{unitId}/levels/{levelId}', 'App\Http\Controllers\LevelController@showLevelById');
+Route::post('/units/{unitId}/levels/', 'App\Http\Controllers\LevelController@createLevel');
+Route::put('/units/{unitId}/levels/{levelId}', 'App\Http\Controllers\LevelController@updateLevel');
+Route::delete('/units/{unitId}/levels/{levelId}', 'App\Http\Controllers\LevelController@deleteLevel');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
