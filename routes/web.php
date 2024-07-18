@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -27,6 +28,9 @@ Route::get('/units/{unitId}/levels/{levelId}', 'App\Http\Controllers\LevelContro
 Route::post('/units/{unitId}/levels/', 'App\Http\Controllers\LevelController@createLevel');
 Route::put('/units/{unitId}/levels/{levelId}', 'App\Http\Controllers\LevelController@updateLevel');
 Route::delete('/units/{unitId}/levels/{levelId}', 'App\Http\Controllers\LevelController@deleteLevel');
+
+Route::post('/adminRegister', 'App\Http\Controllers\AdminController@register');
+Route::post('/adminLogin', 'App\Http\Controllers\AdminController@login');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
