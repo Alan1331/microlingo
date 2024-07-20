@@ -153,7 +153,7 @@ class WhatsAppController extends Controller
 
     private function showAboutUs()
     {
-        $message = "MicroLingo adalah chatbot WhatsApp yang didesain untuk menemani UMKM muda Indonesia dalam mempelajari Bahasa Inggris untuk kebutuhan bisnis mereka.";
+        $message = env('ABOUT_US_PROMPT');
         return $message;
     }
 
@@ -171,10 +171,7 @@ class WhatsAppController extends Controller
 
     private function showMainMenu($recipient_number)
     {
-        $message = "Main Menu
-        1. Mulai/Lanjut Pembelajaran
-        2. Profil Anda
-        3. Tentang MicroLingo";
+        $message = env('MAIN_MENU_PROMPT');
         return $message;
     }
 
