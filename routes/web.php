@@ -1,8 +1,9 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\AdminController;
+use App\Http\Controllers\FirebaseLoginController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\CheckFirebaseRole;
 
 Route::get('/', function () {
     return view('welcome');
@@ -29,8 +30,8 @@ Route::post('/units/{unitId}/levels/', 'App\Http\Controllers\LevelController@cre
 Route::put('/units/{unitId}/levels/{levelId}', 'App\Http\Controllers\LevelController@updateLevel');
 Route::delete('/units/{unitId}/levels/{levelId}', 'App\Http\Controllers\LevelController@deleteLevel');
 
-Route::post('/adminRegister', 'App\Http\Controllers\AdminController@register');
-Route::post('/adminLogin', 'App\Http\Controllers\AdminController@login');
+Route::get('login/google', [FirebaseLoginController::class, 'redirectToGoogle']);
+Route::get('login/google/callback', [FirebaseLoginController::class, 'handleGoogleCallback'])->name('login.google.callback');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -40,14 +41,12 @@ Route::get('/loginAdmin', function () {
     return view('loginAdmin');
 })->name('loginAdmin');
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+Route::middleware(CheckFirebaseRole::class)->group(function () {
+    Route::get('admin-page', function(){
+        return view('admin.index');
+    });
+    Route::get('/logoutAdmin', [FirebaseLoginController::class, 'logout'])->name('logoutAdmin');
 });
 
-Route::get('admin-page', function(){
-    return view('admin.index');
-});
 
 require __DIR__.'/auth.php';

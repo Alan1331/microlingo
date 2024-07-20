@@ -16,9 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             '/users',
             '/users/*',
             '/units',
-            '/units/*',
-            '/adminRegister',
-            'adminLogin'
+            '/units/*'
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

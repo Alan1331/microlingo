@@ -62,43 +62,4 @@ class AdminController extends Controller
         // Return a status message
         return response()->json(['message' => 'Email deleted successfully'], 200);
     }
-
-    // Method to handle user registration
-    public function register(Request $request)
-    {
-        // Validate the request data
-        $request->validate([
-            'email' => 'required|string|email|max:255',
-            'password' => 'required|string|min:8',
-        ]);
-
-        // Create a new user
-        $adminDocument = $this->admin->create([
-            'id' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-
-        // Return a success response
-        return response()->json(['message' => 'Admin registered successfully'], 201);
-    }
-
-    // Method to handle user login
-    public function login(Request $request)
-    {
-        // Validate the request data
-        $request->validate([
-            'email' => 'required|string|email|max:255',
-            'password' => 'required|string|min:8',
-        ]);
-
-        // Attempt to log the user in
-        if (Auth::attempt(['email' => $request->id, 'password' => $request->password])) {
-            // Authentication passed
-            $user = Auth::user();
-            return response()->json(['message' => 'Login successful', 'user' => $user], 200);
-        } else {
-            // Authentication failed
-            return response()->json(['message' => 'Invalid credentials'], 401);
-        }
-    }
 }

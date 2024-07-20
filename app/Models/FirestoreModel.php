@@ -14,6 +14,11 @@ class FirestoreModel
         $this->firestore = app('firebase.firestore')->database();
     }
 
+    public function getFirestoreCollection()
+    {
+        return $this->firestore->collection($this->collection);
+    }
+
     public function all()
     {
         $documents = $this->firestore->collection($this->collection)->documents();
