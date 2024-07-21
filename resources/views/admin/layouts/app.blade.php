@@ -1,4 +1,4 @@
-<!-- home dan contact diapus aja -->
+<!-- home dan contact diapus aja (app.blade.php)-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,6 +8,12 @@
 
   <!-- Google Font: Source Sans Pro -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <style>
+        .font-poppins-semibold {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+        }
+    </style>
   <!-- Font Awesome -->
   <link rel="stylesheet" href="{{ asset('admin/plugins/fontawesome-free/css/all.min.css') }}">
   <!-- Ionicons -->
@@ -30,20 +36,15 @@
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
 
-  <!-- Preloader -->
-  <!-- <div class="preloader flex-column justify-content-center align-items-center">
-    <img class="animation__shake" src="admin/dist/img/AdminLTELogo.png" alt="AdminLTELogo" height="60" width="60">
-  </div> -->
-
   <!-- Navbar -->
-  @include('admin.layouts.nav-top');
+  @include('admin.layouts.nav-top')
   <!-- /.navbar -->
 
   <!-- Main Sidebar Container -->
-  @include('admin.layouts.side-nav');
+  @include('admin.layouts.side-nav')
 
   <!-- Content Wrapper. Contains page content -->
-  <div class="content-wrapper">
+  <div class="content-wrapper" style="min-height: 600.px;">
     @yield('content')
   </div>
   

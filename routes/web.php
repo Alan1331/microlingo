@@ -46,4 +46,20 @@ Route::get('admin-page', function(){
     return view('admin.index');
 });
 
+Route::get('/kelolaData', function () {
+    return view('admin.layouts.kelolaData');
+});
+
+Route::get('/hapusData', function () {
+    return view('admin.layouts.hapusData');
+});
+
+Route::get('/modifikasiMateri', function () {
+    return view('admin.layouts.modifikasiMateri');
+});
+
+Route::get('/perkembanganPengguna', function () {
+    return view('admin.layouts.perkembanganPengguna');
+});
+
 require __DIR__.'/auth.php';
