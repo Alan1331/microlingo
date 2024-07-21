@@ -56,11 +56,14 @@
     <div class="login-container">
         <img src="{{ asset('microLingo.png') }}" alt="Micro Lingo Logo">
         <h1>Login Admin</h1>
-        <form action="{{ route('login') }}" method="POST">
+        <form action="" method="POST">
             @csrf
-            <input type="text" name="username" placeholder="Username" required>
+            <input type="email" name="email" placeholder="Email" required>
             <input type="password" name="password" placeholder="Password" required>
             <button type="submit">Login</button>
+            <hr>
+            <!-- Google Login Button -->
+            <a href="{{ url('login/google') }}" class="btn btn-primary">Login with Google</a>
         </form>
     </div>
 </body>

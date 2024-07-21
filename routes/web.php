@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\FirebaseLoginController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\CheckFirebaseRole;
 
 Route::get('/', function () {
     return view('welcome');
@@ -22,11 +24,14 @@ Route::post('/units', 'App\Http\Controllers\LearningUnitController@createLearnin
 Route::put('/units/{id}', 'App\Http\Controllers\LearningUnitController@updateLearningUnit');
 Route::delete('/units/{id}', 'App\Http\Controllers\LearningUnitController@deleteLearningUnit');
 
-Route::get('/units/{unitId}/levels', 'App\Http\Controllers\LearningUnitController@showLearningUnitById');
-Route::get('/units/{unitId}/levels/{levelId}', 'App\Http\Controllers\LearningUnitController@showLearningUnitById');
-Route::post('/units/{unitId}', 'App\Http\Controllers\LearningUnitController@createLearningUnit');
-Route::put('/units/{unitId}', 'App\Http\Controllers\LearningUnitController@updateLearningUnit');
-Route::delete('/units/{unitId}/levels/{levelId}', 'App\Http\Controllers\LearningUnitController@deleteLearningUnit');
+Route::get('/units/{unitId}/levels', 'App\Http\Controllers\LevelController@showLevels');
+Route::get('/units/{unitId}/levels/{levelId}', 'App\Http\Controllers\LevelController@showLevelById');
+Route::post('/units/{unitId}/levels/', 'App\Http\Controllers\LevelController@createLevel');
+Route::put('/units/{unitId}/levels/{levelId}', 'App\Http\Controllers\LevelController@updateLevel');
+Route::delete('/units/{unitId}/levels/{levelId}', 'App\Http\Controllers\LevelController@deleteLevel');
+
+Route::get('login/google', [FirebaseLoginController::class, 'redirectToGoogle']);
+Route::get('login/google/callback', [FirebaseLoginController::class, 'handleGoogleCallback'])->name('login.google.callback');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -36,15 +41,13 @@ Route::get('/loginAdmin', function () {
     return view('loginAdmin');
 })->name('loginAdmin');
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+Route::middleware(CheckFirebaseRole::class)->group(function () {
+    Route::get('admin-page', function(){
+        return view('admin.index');
+    });
+    Route::get('/logoutAdmin', [FirebaseLoginController::class, 'logout'])->name('logoutAdmin');
 });
 
-Route::get('admin-page', function(){
-    return view('admin.index');
-});
 
 Route::get('/kelolaData', function () {
     return view('admin.layouts.kelolaData');
