@@ -48,6 +48,9 @@ class CheckFirebaseRole
             // Add admin data to request
             $request->attributes->set('admin', $admin);
 
+            // Add the $admin variable to the request, making it accessible in all routes
+            view()->share('admin', $admin);
+
             return $next($request);
         } catch (AuthException $e) {
             return redirect('/loginAdmin');
