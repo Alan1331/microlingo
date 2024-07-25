@@ -88,11 +88,11 @@
         <!-- Sidebar user panel (optional) -->
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
             <div class="image">
-                <img src="{{ asset('user.png') }}" class="img-circle elevation-2" alt="User Image">
+                <img src="{{ $admin->photoUrl }}" class="img-circle elevation-2" alt="User Image">
             </div>
             <div class="info">
                 <!-- ganti user sesuai siapa yang login -->
-                <a href="/admin-page" class="brand-text font-poppins-regular" style="color: black; padding-top: 5px;"  >Admin 1</a>
+                <a href="/admin-page" class="brand-text font-poppins-regular" style="color: black; padding-top: 5px;">{{explode('(', $admin->displayName)[0]}}</a>
             </div>
         </div>
 
