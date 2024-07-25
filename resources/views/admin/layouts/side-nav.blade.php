@@ -96,34 +96,24 @@
             </div>
         </div>
 
-        <!-- Sidebar Manajemen Data -->
+        <!-- Sidebar Manajemen Pengguna -->
         <nav class="mt-2">
-    <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
-        <!-- Manajemen Data -->
-        <li class="nav-item menu-open">
-            <a href="#" class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'kelolaData') !== false|| strpos($_SERVER['REQUEST_URI'], 'hapusData') !== false) ? 'open-menu' : ''; ?>">
-                <img src="managedata.png" class="nav-icon">
+    <ul class="nav nav-pills nav-sidebar flex-column">
+        <!-- Kelola Pengguna -->
+        <li>
+            <a href="/kelolaPengguna" class="nav-link">
+                <img src="managedata.png" class="nav-icon" alt="kelola Icon" style="width: 25px; height: 25px;">
                 <p class="brand-text font-poppins-regular" style="color: black;">
-                    Manajemen Pengguna
-                    <i class="right fas fa-angle-left"></i>
+                    Kelola Pengguna
                 </p>
             </a>
-            <ul class="nav nav-treeview" style="display: block;">
-                <li class="nav-item">
-                    <a href="/kelolaPengguna" class="nav-link ">
-                    <i class="circle <?php echo (strpos($_SERVER['REQUEST_URI'], 'kelolaPengguna') !== false) ? 'active-circle' : ''; ?>"></i>
-                    <p class="brand-text font-poppins-small" style="color: black;">Kelola Pengguna</p>
-                    </a>
-                </li>
-            </ul>
         </li>
                 <!-- Materi Pembelajaran dan Perkembangan -->
                 <li class="nav-item has-treeview <?php echo (strpos($_SERVER['REQUEST_URI'], 'modifikasiMateri') !== false || strpos($_SERVER['REQUEST_URI'], 'perkembanganPengguna') !== false) ? 'menu-open' : ''; ?>">
             <a href="#" class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'modifikasiMateri') !== false || strpos($_SERVER['REQUEST_URI'], 'perkembanganPengguna') !== false) ? 'open-menu' : ''; ?>">
                 <img src="materi.png" class="nav-icon" alt="Materi Icon" style="width: 25px; height: 25px;">
                 <p class="brand-text font-poppins-regular" style="color: black;">
-                    Materi & Perkembangan
-                    <i class="right fas fa-angle-left"></i>
+                   Modifikasi Materi
                 </p>
             </a>
             <ul class="nav nav-treeview" style="display: block;">
@@ -140,15 +130,6 @@
                     </a>
                 </li>
             </ul>
-        </li>
-        <li>
-            <a href="/catatanAdmin" class="nav-link">
-                <img src="notes.png" class="nav-icon" alt="Notes Icon" style="width: 25px; height: 25px;">
-                <p class="brand-text font-poppins-regular" style="color: black;">
-                    Catatan Admin
-                    <i class="right fas fa-angle-left"></i>
-                </p>
-            </a>
         </li>
     </ul>
 </nav>

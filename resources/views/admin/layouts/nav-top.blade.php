@@ -74,7 +74,7 @@
         }
 
         .confirm-button {
-            background-color: blue;
+            background-color: #bd2130;
             color: white;
         }
 
@@ -84,7 +84,7 @@
         }
 
         .confirm-button:hover {
-            background-color: #03346E;
+            background-color: #A91D3A;
             color: white;
         }
 
