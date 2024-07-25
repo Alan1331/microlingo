@@ -1,0 +1,16 @@
+.image-text-button {
+    display: flex;
+    align-items: center;
+    background-color: transparent;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    color: #000;
+}
+
+.button-logo {
+    width: 18px;
+    height: auto;
+    margin-right: 10px;
+}

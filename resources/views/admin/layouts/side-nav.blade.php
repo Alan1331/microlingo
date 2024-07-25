@@ -4,14 +4,16 @@
     <style>
         .font-poppins-semibold {
             font-family: 'Poppins', sans-serif;
-            font-weight: 600;
+            font-weight: 800;
             font-size: large;
         }
         .font-poppins-regular {
             font-family: 'Poppins', sans-serif;
-            font-weight: 400;
+            font-weight: 600;
             font-size: small;
-            
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
         }
         .font-poppins-small {
             font-family: 'Poppins', sans-serif;
@@ -19,17 +21,18 @@
             font-size: smaller;
         }
         .circle {
-            width: 16px; /* Diameter lingkaran */
-            height: 16px; /* Diameter lingkaran */
-            background-color: white; /* Warna latar belakang default */
-            border: 2px solid black; /* Warna border */
-            border-radius: 50%; /* Membuat bentuk lingkaran */
-            display: inline-block; /* Menjaga elemen tetap inline */
-            color: black; /* Warna teks */
-            cursor: pointer; /* Menampilkan kursor pointer saat hover */
-            transition: background-color 0.3s, color 0.3s; /* Menambahkan transisi */
-            line-height: 16px; /* Menyesuaikan line-height agar teks berada di tengah */
+            width: 16px;
+            height: 16px; 
+            background-color: white; 
+            border: 2px solid black; 
+            border-radius: 50%; 
+            display: inline-block; 
+            color: black; 
+            cursor: pointer; 
+            transition: background-color 0.3s, color 0.3s; 
+            line-height: 16px;
             margin-left: 20px;
+            margin-right: 10px;
         }
         .active-circle {
             background-color: #7288C7;
@@ -38,6 +41,38 @@
         .open-menu {
             background-color: #7288C7;
             border-color: black;
+        }
+
+         .nav-header {
+        display: flex;
+        align-items: center;
+        font-size: 16px;
+        margin-bottom: 10px;
+        }
+
+        .notes-logo {
+        width: 24px; 
+        height: auto;
+        margin-right: 8px; 
+        }
+
+        .nav-item {
+        margin-bottom: 5px; 
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            color: #333; 
+            text-decoration: none; 
+        }
+
+        .nav-icon {
+            margin-right: 8px; 
+        }
+
+        .text {
+            font-size: 14px; 
         }
     </style>
 </head> 
@@ -69,21 +104,15 @@
             <a href="#" class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'kelolaData') !== false|| strpos($_SERVER['REQUEST_URI'], 'hapusData') !== false) ? 'open-menu' : ''; ?>">
                 <img src="managedata.png" class="nav-icon">
                 <p class="brand-text font-poppins-regular" style="color: black;">
-                    Manajemen Data
+                    Manajemen Pengguna
                     <i class="right fas fa-angle-left"></i>
                 </p>
             </a>
             <ul class="nav nav-treeview" style="display: block;">
                 <li class="nav-item">
-                    <a href="/kelolaData" class="nav-link">
-                        <i class="circle <?php echo (strpos($_SERVER['REQUEST_URI'], 'kelolaData') !== false ) ? 'active-circle' : ''; ?>"></i>
-                        <p class="brand-text font-poppins-small" style="color: black;">Kelola Data</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="/hapusData" class="nav-link ">
-                        <i class="circle <?php echo (strpos($_SERVER['REQUEST_URI'], 'hapusData') !== false) ? 'active-circle' : ''; ?>"></i>
-                        <p class="brand-text font-poppins-small" style="color: black;">Hapus Data</p>
+                    <a href="/kelolaPengguna" class="nav-link ">
+                    <i class="circle <?php echo (strpos($_SERVER['REQUEST_URI'], 'kelolaPengguna') !== false) ? 'active-circle' : ''; ?>"></i>
+                    <p class="brand-text font-poppins-small" style="color: black;">Kelola Pengguna</p>
                     </a>
                 </li>
             </ul>
@@ -112,11 +141,13 @@
                 </li>
             </ul>
         </li>
-        <li class="nav-header">Catatan Admin</li>
-        <li class="nav-item">
-            <a href="#" class="nav-link">
-                <i class="nav-icon far fa-circle text-danger"></i>
-                <p class="text">Catatan</p>
+        <li>
+            <a href="/catatanAdmin" class="nav-link">
+                <img src="notes.png" class="nav-icon" alt="Notes Icon" style="width: 25px; height: 25px;">
+                <p class="brand-text font-poppins-regular" style="color: black;">
+                    Catatan Admin
+                    <i class="right fas fa-angle-left"></i>
+                </p>
             </a>
         </li>
     </ul>

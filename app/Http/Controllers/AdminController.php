@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use App\Models\Admin;
+use App\Models\User;
 
 class AdminController extends Controller
 {
     protected $admin;
+    protected $user;
 
-    public function __construct(Admin $admin)
+    public function __construct(Admin $admin, User $user)
     {
         $this->admin = $admin;
+        $this->user = $user;
     }
 
     public function showAdmins()
@@ -61,5 +61,12 @@ class AdminController extends Controller
 
         // Return a status message
         return response()->json(['message' => 'Email deleted successfully'], 200);
+    }
+
+    public function showUsers()
+    {
+        $users = $this->user->all();
+
+        return view('admin.layouts.kelolaPengguna', ['users' => $users]);
     }
 }

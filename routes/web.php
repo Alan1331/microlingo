@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FirebaseLoginController;
+use App\Http\Controllers\AdminController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\CheckFirebaseRole;
 
@@ -46,23 +47,24 @@ Route::middleware(CheckFirebaseRole::class)->group(function () {
         return view('admin.index');
     });
     Route::get('/logoutAdmin', [FirebaseLoginController::class, 'logout'])->name('logoutAdmin');
+    Route::get('/kelolaPengguna', [AdminController::class, 'showUsers'])->name('kelolaPengguna');
+    
+    Route::get('/modifikasiMateri', function () {
+        return view('admin.layouts.modifikasiMateri');
+    });
+    
+    Route::get('/perkembanganPengguna', function () {
+        return view('admin.layouts.perkembanganPengguna');
+    });
+
+    Route::get('/catatanAdmin', function () {
+        return view('admin.layouts.catatanAdmin');
+    });
 });
 
-
-Route::get('/kelolaData', function () {
-    return view('admin.layouts.kelolaData');
+Route::get('/unauthorizedAccess', function () {
+    return view('admin.layouts.unauthorizedAccess');
 });
 
-Route::get('/hapusData', function () {
-    return view('admin.layouts.hapusData');
-});
-
-Route::get('/modifikasiMateri', function () {
-    return view('admin.layouts.modifikasiMateri');
-});
-
-Route::get('/perkembanganPengguna', function () {
-    return view('admin.layouts.perkembanganPengguna');
-});
 
 require __DIR__.'/auth.php';
