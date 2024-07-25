@@ -89,4 +89,17 @@ class AdminController extends Controller
 
         return redirect()->route('kelolaPengguna')->with('success', 'User updated successfully!');
     }
+
+    public function deleteUser($noWhatsapp)
+    {
+        // Delete the user document in Firestore
+        $result = $this->user->delete($noWhatsapp);
+
+        // Verify user was found
+        if (!$result) {
+            return redirect()->route('kelolaPengguna')->with('failed', 'Failed to delete user data!');
+        }
+
+        return redirect()->route('kelolaPengguna')->with('success', 'User deleted successfully!');
+    }
 }

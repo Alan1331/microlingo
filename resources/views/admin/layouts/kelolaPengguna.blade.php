@@ -82,11 +82,16 @@
                                                     </form>
                                                 </div>
                                             </div>
-
-                                            <a class="delete-button">
-                                                <img src="{{ asset('delete.png') }}" alt="Delete Button">
-                                                Delete
-                                                
+                                            <form id="user-delete-form-{{ $user['id'] }}" action="{{ route('users.delete', $user['id']) }}" method="POST" style="display: none;">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
+                                            <a onclick="event.preventDefault(); if(confirm('Are you sure you want to delete this user?')) document.getElementById('user-delete-form-{{ $user['id'] }}').submit();">
+                                                @method('DELETE')
+                                                <button type="button" class="delete-button">
+                                                    <img src="{{ asset('delete.png') }}" alt="Delete Button">
+                                                    Delete
+                                                </button>
                                             </a>
                                         </td>
                                     </tr>
@@ -301,5 +306,9 @@
             modalAction.style.display = "none";
         }
     });
+
+    function confirmDelete(userName) {
+        return confirm('Are you sure you want to delete user named' + userName + '?')
+    }
 </script>
 @endsection

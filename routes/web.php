@@ -63,6 +63,7 @@ Route::middleware(CheckFirebaseRole::class)->group(function () {
     });
 
     Route::put('/admin-page/users/{noWhatsapp}', [AdminController::class, 'updateUser'])->name('users.update');
+    Route::delete('/admin-page/users/{noWhatsapp}', [AdminController::class, 'deleteUser'])->name('users.delete');
 });
 
 Route::get('/unauthorizedAccess', function () {
