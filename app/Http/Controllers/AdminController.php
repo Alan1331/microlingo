@@ -69,4 +69,37 @@ class AdminController extends Controller
 
         return view('admin.layouts.kelolaPengguna', ['users' => $users]);
     }
+
+    public function updateUser(Request $request, $noWhatsapp)
+    {
+        // Get all request data
+        $data = $request->all();
+
+        // Concat unit and level from request into progress variable
+        $data['progress'] = $data['unit'] . "-" . $data['level'];
+        unset($data['unit'], $data['level']);
+
+        // Update the user document in Firestore
+        $result = $this->user->update($noWhatsapp, $data);
+
+        // Verify user was found
+        if (!$result) {
+            return redirect()->route('kelolaPengguna')->with('failed', 'Failed to update user data!');
+        }
+
+        return redirect()->route('kelolaPengguna')->with('success', 'User updated successfully!');
+    }
+
+    public function deleteUser($noWhatsapp)
+    {
+        // Delete the user document in Firestore
+        $result = $this->user->delete($noWhatsapp);
+
+        // Verify user was found
+        if (!$result) {
+            return redirect()->route('kelolaPengguna')->with('failed', 'Failed to delete user data!');
+        }
+
+        return redirect()->route('kelolaPengguna')->with('success', 'User deleted successfully!');
+    }
 }

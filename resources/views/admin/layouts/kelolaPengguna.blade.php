@@ -28,84 +28,73 @@
                             <tfoot>
                                 @foreach ($users as $user)
                                     <tr>
-                                        <?php
-                                    $progress = explode("-", $user['progress']);
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ?>
-                                                                    <td>{{$user['id']}}</td>
-                                                                    <td>{{$user['nama']}}</td>
-                                                                    <td>{{$user['pekerjaan']}}</td>
-                                                                    <td>{{$progress[0]}}</td>
-                                                                    <td>{{$progress[1]}}</td>
-                                                                    <td colspan="6" style="text-align: right;">
-                                                                        <a class="edit-button">
-                                                                            <img src="{{ asset('edit.png') }}" alt="Edit Button">
-                                                                            Edit
-                                                                        </a>
-                                                                        <div id="editModal" class="modalAction">
-                                                                            <div class="modal-content2" data-dismiss="modalAction" aria-label="Close">
-                                                                                <h2 class="modal-title">Edit Pengguna</h2>
-                                                                                
-                            <div class="form-group mb-3">
-                                <label class="font-weight-bold" style="text-align: right;">Nama</label>
-                                <input type="text" class="form-control @error('nama') is-invalid @enderror" name="nama" value="{{ old('nama') }}">
-                            
-                                @error('nama')
-                                    <div class="alert alert-danger mt-2">
-                                        {{ $message }}
-                                    </div>
-                                @enderror
-                            </div>
-                            <div class="form-group mb-3">
-                                <label class="font-weight-bold">Pekerjaan</label>
-                                <input type="text" class="form-control @error('pekerjaan') is-invalid @enderror" name="pekerjaan" value="{{ old('pekerjaan') }}">
-                            
-                                
-                                @error('pekerjaan')
-                                    <div class="alert alert-danger mt-2">
-                                        {{ $message }}
-                                    </div>
-                                @enderror
-                            </div>
-                            <div class="form-group mb-3">
-                                <label class="font-weight-bold">Unit</label>
-                                <input type="text" class="form-control @error('unit') is-invalid @enderror" name="unit" value="{{ old('unit') }}">
-                                @error('unit')
-                                    <div class="alert alert-danger mt-2">
-                                        {{ $message }}
-                                    </div>
-                                @enderror
-                            </div>
-                            <div class="form-group mb-3">
-                                <label class="font-weight-bold">Level</label>
-                                <input type="text" class="form-control @error('level') is-invalid @enderror" name="level" value="{{ old('level') }}">
-                            
-                               
-                                @error('level')
-                                    <div class="alert alert-danger mt-2">
-                                        {{ $message }}
-                                    </div>
-                                @enderror
-                            </div>
-                                                                                    <div class="form-group row">
-                                                                                        <div class="col-sm-10 offset-sm-2">
-                                                                                            <button id="confirmLogout"
-                                                                                                class="btn btn-primary">Simpan</button>
-                                                                                            <button id="cancelLogout"
-                                                                                                class="btn btn-secondary">Batalkan</button>
-
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </form>
-                                                                            </div>
-                                                                        </div>
-
-                                                                        <a class="delete-button">
-                                                                            <img src="{{ asset('delete.png') }}" alt="Delete Button">
-                                                                            Delete
-                                                                            
-                                                                        </a>
-                                                                    </td>
-                                                                </tr>
+                                        <?php $progress = explode("-", $user['progress']); ?>
+                                        <td>{{$user['id']}}</td>
+                                        <td>{{$user['nama']}}</td>
+                                        <td>{{$user['pekerjaan']}}</td>
+                                        <td>{{$progress[0]}}</td>
+                                        <td>{{$progress[1]}}</td>
+                                        <td colspan="6" style="text-align: right;">
+                                            <a class="edit-button" data-id="{{$user['id']}}">
+                                                <img src="{{ asset('edit.png') }}" alt="Edit Button">
+                                                Edit
+                                            </a>
+                                            <div id="editModal" class="modalAction">
+                                                <div class="modal-content2" data-dismiss="modalAction" aria-label="Close">
+                                                    <h2 class="modal-title">Edit Pengguna</h2>
+                                                    <form id="editUserForm" method="POST" action="{{ route('users.update', $user['id']) }}">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <div class="form-group mb-3">
+                                                            <label class="font-weight-bold" style="text-align: right;">Nama</label>
+                                                            <input type="text" class="form-control @error('nama') is-invalid @enderror" name="nama" id="editNama">
+                                                            @error('nama')
+                                                                <div class="alert alert-danger mt-2">{{ $message }}</div>
+                                                            @enderror
+                                                        </div>
+                                                        <div class="form-group mb-3">
+                                                            <label class="font-weight-bold">Pekerjaan</label>
+                                                            <input type="text" class="form-control @error('pekerjaan') is-invalid @enderror" name="pekerjaan" id="editPekerjaan">
+                                                            @error('pekerjaan')
+                                                                <div class="alert alert-danger mt-2">{{ $message }}</div>
+                                                            @enderror
+                                                        </div>
+                                                        <div class="form-group mb-3">
+                                                            <label class="font-weight-bold">Unit</label>
+                                                            <input type="text" class="form-control @error('unit') is-invalid @enderror" name="unit" id="editUnit">
+                                                            @error('unit')
+                                                                <div class="alert alert-danger mt-2">{{ $message }}</div>
+                                                            @enderror
+                                                        </div>
+                                                        <div class="form-group mb-3">
+                                                            <label class="font-weight-bold">Level</label>
+                                                            <input type="text" class="form-control @error('level') is-invalid @enderror" name="level" id="editLevel">
+                                                            @error('level')
+                                                                <div class="alert alert-danger mt-2">{{ $message }}</div>
+                                                            @enderror
+                                                        </div>
+                                                        <div class="form-group row">
+                                                            <div class="col-sm-10 offset-sm-2">
+                                                                <button type="submit" class="btn btn-primary">Simpan</button>
+                                                                <button id="cancelButton" class="btn btn-secondary">Batalkan</button>
+                                                            </div>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                            <form id="user-delete-form-{{ $user['id'] }}" action="{{ route('users.delete', $user['id']) }}" method="POST" style="display: none;">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
+                                            <a onclick="event.preventDefault(); if(confirm('Are you sure you want to delete this user?')) document.getElementById('user-delete-form-{{ $user['id'] }}').submit();">
+                                                @method('DELETE')
+                                                <button type="button" class="delete-button">
+                                                    <img src="{{ asset('delete.png') }}" alt="Delete Button">
+                                                    Delete
+                                                </button>
+                                            </a>
+                                        </td>
+                                    </tr>
                                 @endforeach
                             </tfoot>
                         </table>
@@ -280,24 +269,41 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         var modalAction = document.getElementById("editModal");
-        var btn = document.querySelector(".edit-button");
+        var btn = document.querySelectorAll(".edit-button");
+
+        btn.forEach(function(button) {
+            button.addEventListener('click', function() {
+                var userId = this.getAttribute('data-id');
+                fetch(`/users/${userId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('editNama').value = data.nama;
+                        document.getElementById('editPekerjaan').value = data.pekerjaan;
+                        document.getElementById('editUnit').value = data.progress.split("-")[0];
+                        document.getElementById('editLevel').value = data.progress.split("-")[1];
+                        modalAction.style.display = "block";
+                    });
+            });
+        });
+
         var span = document.getElementsByClassName("close")[0];
-
-        btn.onclick = function () {
-            modalAction.style.display = "block";
-        }
-
         span.onclick = function () {
             modalAction.style.display = "none";
         }
 
         window.onclick = function (event) {
-            if (event.target == modal) {
+            if (event.target == modalAction) {
                 modalAction.style.display = "none";
             }
         }
 
+        cancelButton.onclick = function () {
+            modalAction.style.display = "none";
+        }
     });
 
+    function confirmDelete(userName) {
+        return confirm('Are you sure you want to delete user named' + userName + '?')
+    }
 </script>
 @endsection
