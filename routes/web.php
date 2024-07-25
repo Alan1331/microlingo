@@ -11,6 +11,7 @@ Route::get('/', function () {
 
 Route::get('/whatsapp/send', 'App\Http\Controllers\WhatsAppController@sendMessage');
 Route::post('/whatsapp/receive', 'App\Http\Controllers\WhatsAppController@receiveMessage');
+Route::get('/whatsapp/status-callback', 'App\Http\Controllers\WhatsAppController@statusCallback');
 
 Route::get('/users', 'App\Http\Controllers\UserController@showUsers');
 Route::get('/users/{noWhatsapp}', 'App\Http\Controllers\UserController@showUserById');

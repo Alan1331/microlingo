@@ -9,6 +9,7 @@ class Level extends FirestoreModel
     protected $collection = 'Levels';
     protected $fillable = [
         'topic',
+        'content',
         'videos',
     ];
     protected $casts = [

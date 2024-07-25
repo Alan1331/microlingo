@@ -2,21 +2,31 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Twilio\Rest\Client;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\App;
+use App\Models\LearningUnit;
+use App\Models\Level;
+use OpenAI;
+use Illuminate\Support\Facades\Storage;
 
 class WhatsAppController extends Controller
 {
     protected $twilioClient;
     protected $twilioWhatsAppNumber;
+    protected $learningUnit;
+    protected $openai;
 
-    public function __construct(Client $twilioClient)
+    public function __construct(Client $twilioClient, LearningUnit $learningUnit)
     {
         $this->twilioClient = $twilioClient;
+        $this->twilioClient->setLogLevel('debug');
         $this->twilioWhatsAppNumber = env('TWILIO_WHATSAPP_NUMBER');
+        $this->learningUnit = $learningUnit;
+        $this->openai = OpenAI::client(env('OPENAI_API_KEY'));
     }
 
     public function sendMessage()
@@ -41,27 +51,55 @@ class WhatsAppController extends Controller
 
     public function receiveMessage(Request $request)
     {
+        // Set the maximum execution time to 300 seconds (5 minutes)
+        set_time_limit(300);
+
         $recipient_number = $request->input('From'); // Change to the recipient's number
         $input_message = $request->input('Body'); // Message from user
-        $message = "Feature is still in development";
+        $messages = "Feature is still in development";
 
         # Ensure that the user was registered
         $lokasiMenu = $this->checkUser($recipient_number);
 
-        $message = $this->handleMenuLocation($lokasiMenu, $input_message, $recipient_number);
+        $response = $this->handleMenuLocation($lokasiMenu, $input_message, $recipient_number);
 
-        $this->sendMessageToUser($recipient_number, $message);
+        $messages = explode('|', $response);
+        
+        foreach ($messages as $message) {
+            Log::info("Sending message: " . $message);
+            if(str_contains($message, '/storage/videos/')) {
+                $videos = [$message];
+                // send video if contains typical video url
+                $this->sendMessageToUser($recipient_number, 'Sending video', $videos);
+            } else {
+                // send message instead
+                $this->sendMessageToUser($recipient_number, $message);
+            }
+        }
     }
 
-    private function sendMessageToUser($recipient_number, $message)
+    private function sendMessageToUser($recipient_number, $message, $mediaUrls=null)
     {
-        $this->twilioClient->messages->create(
-            $recipient_number,
-            [
-                'from' => $this->twilioWhatsAppNumber,
-                'body' => $message
-            ]
-        );
+        if($mediaUrls != null) {
+            Log::info("mediaUrls type: ". gettype($mediaUrls));
+            
+            $this->twilioClient->messages->create(
+                $recipient_number,
+                [
+                    'mediaUrl' => $mediaUrls,
+                    'from' => $this->twilioWhatsAppNumber,
+                    'body' => $message,
+                ]
+            );
+        } else {
+            $this->twilioClient->messages->create(
+                $recipient_number,
+                [
+                    'from' => $this->twilioWhatsAppNumber,
+                    'body' => $message,
+                ]
+            );
+        }
     }
 
     private function handleMenuLocation($lokasiMenu, $input_message, $recipient_number)
@@ -73,6 +111,8 @@ class WhatsAppController extends Controller
                 return $this->handleUserProfileSetName($input_message, $recipient_number);
             case "userProfileSetJob":
                 return $this->handleUserProfileSetJob($input_message, $recipient_number);
+            case "learningQuestion":
+                return $this->handleUserQuestion($input_message, $recipient_number);
             default:
                 return $this->handleMainMenu($input_message, $recipient_number);
         }
@@ -82,7 +122,7 @@ class WhatsAppController extends Controller
     {
         switch ($input_message) {
             case "1":
-                return $this->comingSoon();
+                return $this->showLearningMenu($recipient_number);
             case "2":
                 return $this->showProfileMenu($recipient_number);
             case "3":
@@ -210,6 +250,151 @@ Pilih menu berikut untuk melanjutkan:
         return $message;
     }
 
+    private function showLearningMenu($recipient_number)
+    {
+        $user_number = $this->formatUserPhoneNumber($recipient_number);
+
+        # get user progress
+        $learning_unit_id = null;
+        $level_id = null;
+        $user_query = App::call('App\Http\Controllers\UserController@showUserById', ['noWhatsapp' => $user_number]);
+        if ($user_query->getStatusCode() == 200) {
+            // Decode the JSON user_query to get required data
+            $user_data = $user_query->getData();
+            if (isset($user_data->progress)) {
+                $user_progress = $user_data->progress;
+                $user_progress = explode('-', $user_progress);
+                $learning_unit_id = $user_progress[0];
+                $level_id = $user_progress[1];
+            }
+        }
+
+        // instantiate level and unit model
+        $learningUnitDocument = $this->learningUnit->find($learning_unit_id);
+        $level = new Level($learning_unit_id);
+        $levelDocument = $level->find($level_id);
+
+        $prompt = $this->generateLevelPrompt($learningUnitDocument, $levelDocument);
+        $message = $prompt;
+        $message .= "\nKetik '!exit' dan kirim untuk kembali ke Main Menu!";
+        if(is_array($levelDocument['videos'])) {
+            $videos = $levelDocument['videos'];
+            Log::info("Video url is detected");
+            foreach($videos as $video) {
+                $videoUrl = env('NGROK_URL') . Storage::url($video);
+                Log::info("Retrieved video url: " . $videoUrl);
+                $message .= '|' . $videoUrl;
+            }
+        } else {
+            Log::info("Failed to retrive the video");
+        }
+        
+        if(isset($levelDocument['topic']) && isset($levelDocument['content'])) {
+            $topic = $levelDocument['topic'];
+            $content = $levelDocument['content'];
+            $generatedQuestion = $this->generateQuestion($topic, $content);
+            $message .= '|' . "Setelah menonton, jawab pertanyaan berikut:" . $generatedQuestion;
+
+            # update user current question
+            $data = [
+                'currentQuestion' => $generatedQuestion
+            ];
+            $request = Request::create('/users/$recipient_number', 'PUT', $data);
+            App::call('App\Http\Controllers\UserController@updateUser', ['request' => $request, 'noWhatsapp' => $user_number]);
+
+            # change menu location to learningQuestion
+            $data = [
+                'lokasiMenu' => 'learningQuestion'
+            ];
+            $request = Request::create('/users/$recipient_number', 'PUT', $data);
+            App::call('App\Http\Controllers\UserController@updateUser', ['request' => $request, 'noWhatsapp' => $user_number]);
+        } else {
+            Log::info("Failed to generate the question due to undetected topic or content");
+        }
+
+        return $message;
+    }
+
+    private function handleUserQuestion($input_message, $recipient_number) {
+        $user_number = $this->formatUserPhoneNumber($recipient_number);
+
+        # get user progress
+        $learning_unit_id = null;
+        $level_id = null;
+        $user_current_question = null;
+        $user_query = App::call('App\Http\Controllers\UserController@showUserById', ['noWhatsapp' => $user_number]);
+        if ($user_query->getStatusCode() == 200) {
+            // Decode the JSON user_query to get required data
+            $user_data = $user_query->getData();
+            if (isset($user_data->progress)) {
+                $user_progress = $user_data->progress;
+                $user_progress = explode('-', $user_progress);
+                $learning_unit_id = $user_progress[0];
+                $level_id = $user_progress[1];
+                $user_current_question = $user_data->currentQuestion;
+            }
+        }
+
+        // instantiate level and unit model
+        $learningUnitDocument = $this->learningUnit->find($learning_unit_id);
+        $level = new Level($learning_unit_id);
+        $levelDocument = $level->find($level_id);
+        if(isset($levelDocument['topic']) && isset($levelDocument['content'])) {
+            $topic = $levelDocument['topic'];
+            $content = $levelDocument['content'];
+            $evaluation = $this->evaluateUserAnswer($topic, $content, $user_current_question, $input_message);
+            return $evaluation;
+        } else {
+            return "Internal service error: topic and learning material not found";
+        }
+    }
+
+    private function generateLevelPrompt($learningUnitDocument, $levelDocument)
+    {
+        // Base prompt for ChatGPT
+        $basePrompt = "Berikut adalah materi pembelajaran untuk topik: {$learningUnitDocument['topic']}. ";
+        $basePrompt .= "Hari ini, kita akan membahas level: {$levelDocument['id']}. {$levelDocument['topic']}.";
+        $basePrompt .= "Silakan tonton video-video berikut ini untuk memperdalam pemahamanmu:\n";
+
+        // Humanize the prompt using ChatGPT
+        $response = $this->openai->completions()->create([
+            'model' => 'gpt-3.5-turbo-instruct',
+            'prompt' => $basePrompt . "\nHumanize the above information into a friendly and engaging conversation in brief in Bahasa Indonesia without changing the meaning.",
+            'max_tokens' => 250,
+            'temperature' => 0.7,
+        ]);
+
+        return $response['choices'][0]['text'];
+    }
+
+    private function generateQuestion($topic, $content)
+    {
+        $response = $this->openai->completions()->create([
+            'model' => 'gpt-3.5-turbo-instruct',
+            'prompt' => "Analyze the following learning materials, then generate a question about " . $topic . " for user in english:" . "\n" . $content,
+            'max_tokens' => 150,
+            'temperature' => 0.7,
+        ]);
+
+        return $response['choices'][0]['text'];
+    }
+
+    private function evaluateUserAnswer($topic, $content, $question, $answer)
+    {
+        $prompt = "Analyze the following learning material: " . "\n" . $content . "\n";
+        $prompt .= "From the given material, user has answered the following question about " . $topic . ":\n";
+        $prompt .= $question . "\nAnd, the user answer:\n";
+        $prompt .= $answer . "\nEvaluate the answer and return grade in percentage (0%-100%) and feedback in Bahasa Indonesia!";
+        $prompt .= "The grade and feedback are seperated by '|' character to ease me to parse the return message in my program before shown to user.";
+        $response = $this->openai->completions()->create([
+            'model' => 'gpt-3.5-turbo-instruct',
+            'prompt' => $prompt,
+            'max_tokens' => 150,
+            'temperature' => 0.7,
+        ]);
+
+        return $response['choices'][0]['text'];
+    }
 
     private function checkUser($recipient_number)
     {
@@ -244,5 +429,10 @@ Pilih menu berikut untuk melanjutkan:
     {
         // only include the phone number without 'whatsapp:' text behind it
         return explode(":", $recipient_number)[1];
+    }
+
+    public function statusCallback()
+    {
+        return $this->twilioClient->$queues;
     }
 }

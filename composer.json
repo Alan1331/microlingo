@@ -13,6 +13,7 @@
         "laravel/breeze": "^2.0",
         "laravel/framework": "^11.0",
         "laravel/tinker": "^2.9",
+        "openai-php/client": "^0.10.1",
         "twilio/sdk": "^8.0"
     },
     "require-dev": {

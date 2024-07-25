@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Request;
 use App\Models\LearningUnit;
 use App\Models\Level;
+use Illuminate\Support\Facades\Http;
 
 class LevelController extends Controller
 {
@@ -35,6 +36,9 @@ class LevelController extends Controller
 
     public function createLevel($unitId, Request $request)
     {
+        // Set the maximum execution time to 300 seconds (5 minutes)
+        set_time_limit(300);
+
         // instantiate level model
         $level = new Level($unitId);
 
@@ -73,22 +77,27 @@ class LevelController extends Controller
         }
 
         // Handle the files
+        $content = '';
         $filePaths = [];
         if ($request->hasFile('videos')) {
             Log::info('Video is detected');
+            $videoNames = array();
             foreach ($request->file('videos') as $video) {
                 // Generate a unique filename
                 $uniqueFileName = Str::uuid() . '.' . $video->getClientOriginalExtension();
 
                 // Save the video to the storage
-                $path = $video->storeAs('videos', $uniqueFileName);
+                $path = $video->storeAs('public/videos', $uniqueFileName);
+                $path = trim($path, 'public/');
                 if($path) {
                     Log::info('Video stored at: ' . $path);
                     $filePaths[] = $path;
+                    $videoNames[] = $uniqueFileName;
                 } else {
                     Log::error('Failed to store video: ' . $video->getClientOriginalName());
                 }
             }
+            $content = $this->analyzeVideo($videoNames) . "\n";
         } else {
             Log::info('Video is not detected');
         }
@@ -98,10 +107,28 @@ class LevelController extends Controller
             'id' => $request->input('id'),
             'topic' => $request->input('topic'),
             'videos' => $filePaths,
+            'content' => $content,
         ]);
 
         // Return a status message instead of level data
         return response()->json(['message' => 'Level created successfully'], 201);
+    }
+
+    public function analyzeVideo($videoNames)
+    {
+        // Set the maximum execution time to 300 seconds (5 minutes)
+        set_time_limit(300);
+        // Call the Flask API
+        $response = Http::timeout(300)->post(env('VIDEO_ANALYZER_ENDPOINT'), [
+            'video_names' => $videoNames,
+        ]);
+
+        if ($response->failed()) {
+            Log::info("Failed analyzing the video");
+            return "Content not available due to analyze video failure";
+        }
+
+        return $response['message'];
     }
 
     public function updateLevel(Request $request, $unitId, $levelId)
@@ -143,6 +170,7 @@ class LevelController extends Controller
         Log::info('Video paths: ' . json_encode($videoPaths));
         
         foreach ($videoPaths as $path) {
+            $path = 'public/' . $path;
             Log::info('Deleting video at: ' . $path);
             if (Storage::exists($path)) {
                 Storage::delete($path);

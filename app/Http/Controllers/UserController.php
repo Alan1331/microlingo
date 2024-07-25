@@ -45,6 +45,7 @@ class UserController extends Controller
             'progress' => '1-1',
             'lokasiMenu' => 'mainMenu',
             'pekerjaan' => 'unknown',
+            'currentQuestion' => 'unset',
         ]);
 
         // Return a status message instead of user data

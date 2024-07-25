@@ -11,5 +11,6 @@ class User extends FirestoreModel
         'pekerjaan',
         'progress',
         'lokasiMenu',
+        'currentQuestion',
     ];
 }
