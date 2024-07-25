@@ -57,7 +57,7 @@ class FirebaseLoginController extends Controller
         // Store ID token in session
         $request->session()->put('firebase_id_token', $firebaseUser->idToken());
 
-        return redirect()->intended('/admin-page');
+        return redirect('/admin-page');
     }
 
     public function logout(Request $request)

@@ -108,7 +108,8 @@
             </a>
         </li>
     </ul>
-    <ul class="navbar-nav ml-auto" style="display: flex; align-items: center; list-style: none; margin: 0; padding: 0;">
+    
+    <ul class="navbar-nav">
             <li class="nav-item">
                 <a class="nav-link" href="#" id="logout-link" style="text-decoration: none; color: white;">
                     <button type="button" class="image-text-button">
@@ -117,7 +118,8 @@
                     </button>
                 </a>
             </li>
-        </ul>
+    </ul>
+        
     <ul class="navbar-nav ml-auto"></ul>
     <!-- logoutModal -->
     <div class="modal" id="logoutModal">

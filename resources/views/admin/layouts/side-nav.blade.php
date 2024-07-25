@@ -92,7 +92,7 @@
             </div>
             <div class="info">
                 <!-- ganti user sesuai siapa yang login -->
-                <a href="#" class="brand-text font-poppins-regular" style="color: black;">Admin 1</a>
+                <a href="/admin-page" class="brand-text font-poppins-regular" style="color: black; padding-top: 5px;"  >Admin 1</a>
             </div>
         </div>
 
