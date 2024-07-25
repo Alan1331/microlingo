@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FirebaseLoginController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\CheckFirebaseRole;
 
@@ -60,6 +61,8 @@ Route::middleware(CheckFirebaseRole::class)->group(function () {
     Route::get('/catatanAdmin', function () {
         return view('admin.layouts.catatanAdmin');
     });
+
+    Route::put('/admin-page/users/{noWhatsapp}', [AdminController::class, 'updateUser'])->name('users.update');
 });
 
 Route::get('/unauthorizedAccess', function () {

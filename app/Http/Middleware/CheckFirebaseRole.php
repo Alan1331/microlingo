@@ -39,6 +39,7 @@ class CheckFirebaseRole
 
             // Verify the ID token using Firebase Auth
             $verifiedIdToken = $this->auth->verifyIdToken($idToken);
+
             $claims = $verifiedIdToken->claims();
             $uid = $claims->get('sub'); // Extract UID from the verified ID token
 
@@ -49,7 +50,9 @@ class CheckFirebaseRole
 
             return $next($request);
         } catch (AuthException $e) {
-            return redirect('/loginAdmin');;
+            return redirect('/loginAdmin');
+        } catch (\Exception $e) {
+            return redirect('/loginAdmin');
         }
     }
 }
