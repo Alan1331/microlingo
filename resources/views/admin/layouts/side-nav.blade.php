@@ -60,10 +60,10 @@
         margin-bottom: 5px; 
         }
 
-        .nav-link {
+        .nav-link:hover {
             display: flex;
             align-items: center;
-            color: #333; 
+            background-color: #7288C7; 
             text-decoration: none; 
         }
 
@@ -92,7 +92,7 @@
             </div>
             <div class="info">
                 <!-- ganti user sesuai siapa yang login -->
-                <a href="/admin-page" class="brand-text font-poppins-regular" style="color: black; padding-top: 5px;">{{explode('(', $admin->displayName)[0]}}</a>
+                <a href="/admin-page" class="brand-text font-poppins-regular" style="color: black;">{{explode('(', $admin->displayName)[0]}}</a>
             </div>
         </div>
 
@@ -108,30 +108,17 @@
                 </p>
             </a>
         </li>
-                <!-- Materi Pembelajaran dan Perkembangan -->
-                <li class="nav-item has-treeview <?php echo (strpos($_SERVER['REQUEST_URI'], 'modifikasiMateri') !== false || strpos($_SERVER['REQUEST_URI'], 'perkembanganPengguna') !== false) ? 'menu-open' : ''; ?>">
-            <a href="#" class="nav-link <?php echo (strpos($_SERVER['REQUEST_URI'], 'modifikasiMateri') !== false || strpos($_SERVER['REQUEST_URI'], 'perkembanganPengguna') !== false) ? 'open-menu' : ''; ?>">
+        <!-- Materi Pembelajaran dan Perkembangan -->
+        <li style="margin-top: 20px;">
+            <a href="/materiPembelajaran" class="nav-link">
                 <img src="materi.png" class="nav-icon" alt="Materi Icon" style="width: 25px; height: 25px;">
                 <p class="brand-text font-poppins-regular" style="color: black;">
-                   Modifikasi Materi
+                   Materi Pembelajaran
                 </p>
             </a>
-            <ul class="nav nav-treeview" style="display: block;">
-                <li class="nav-item">
-                    <a href="/modifikasiMateri" class="nav-link ">
-                        <i class="circle <?php echo (strpos($_SERVER['REQUEST_URI'], 'modifikasiMateri') !== false) ? 'active-circle' : ''; ?>"></i>
-                        <p class="brand-text font-poppins-small" style="color: black;">Modifikasi Materi</p>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="/perkembanganPengguna" class="nav-link">
-                        <i class="circle <?php echo (strpos($_SERVER['REQUEST_URI'], 'perkembanganPengguna') !== false) ? 'active-circle' : ''; ?>"></i>
-                        <p class="brand-text font-poppins-small" style="color: black;">Perkembangan Pengguna</p>
-                    </a>
-                </li>
-            </ul>
         </li>
     </ul>
 </nav>
     </div>
+
 </aside>

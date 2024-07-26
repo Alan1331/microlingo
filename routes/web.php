@@ -50,16 +50,12 @@ Route::middleware(CheckFirebaseRole::class)->group(function () {
     Route::get('/logoutAdmin', [FirebaseLoginController::class, 'logout'])->name('logoutAdmin');
     Route::get('/kelolaPengguna', [AdminController::class, 'showUsers'])->name('kelolaPengguna');
     
-    Route::get('/modifikasiMateri', function () {
-        return view('admin.layouts.modifikasiMateri');
-    });
-    
-    Route::get('/perkembanganPengguna', function () {
-        return view('admin.layouts.perkembanganPengguna');
+    Route::get('/materiPembelajaran', function () {
+        return view('admin.layouts.materiPembelajaran');
     });
 
-    Route::get('/catatanAdmin', function () {
-        return view('admin.layouts.catatanAdmin');
+    Route::get('/viewLevel', function () {
+        return view('admin.layouts.viewLevel');
     });
 
     Route::put('/admin-page/users/{noWhatsapp}', [AdminController::class, 'updateUser'])->name('users.update');
