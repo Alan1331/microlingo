@@ -78,7 +78,7 @@
 </head> 
 <aside class="main-sidebar sidebar-light elevation-4">
     <!-- Brand Logo -->
-    <a href="index3.html" class="brand-link">
+    <a href="/admin-page" class="brand-link">
         <img src="{{ asset('microLingo.png') }}" alt="MicroLingo Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
         <span class="brand-text font-poppins-semibold" style="color: #7288C7;">Micro Lingo</span>
     </a>
@@ -92,7 +92,7 @@
             </div>
             <div class="info">
                 <!-- ganti user sesuai siapa yang login -->
-                <a href="/admin-page" class="brand-text font-poppins-regular" style="color: black;">{{explode('(', $admin->displayName)[0]}}</a>
+                <a class="brand-text font-poppins-regular" style="color: black;">{{explode('(', $admin->displayName)[0]}}</a>
             </div>
         </div>
 

@@ -94,7 +94,7 @@
         }
 
         .button-container {
-            display: flex; /* Menggunakan flexbox untuk layout tombol dalam modal */
+            display: flex; 
             justify-content: center;
             margin-top: 20px;
             padding-left: 100px;
@@ -110,7 +110,7 @@
     </ul>
     
     <ul class="navbar-nav">
-            <li class="nav-item">
+            <li class="">
                 <a class="d-flex justify-content-end" href="#" id="logout-link" style="text-decoration: none; color: white;">
                     <button type="button" class="image-text-button">
                         <img src="{{ asset('logoutLogo.png') }}" alt="Sign Out Logo" class="button-logo">

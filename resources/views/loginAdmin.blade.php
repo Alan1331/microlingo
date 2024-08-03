@@ -9,7 +9,7 @@
         .font-poppins-semibold {
             font-family: 'Poppins', sans-serif;
             font-weight: 600;
-            font-size: 30px;
+            font-size: 20px;
         }
         .font-poppins-regular {
             font-family: 'Poppins', sans-serif;
@@ -39,7 +39,8 @@
             margin-bottom: 20px;
         }
         h1 {
-            color: #F0F0F0;
+            color: black;
+            margin-top: auto;
         }
         .login-container {
             text-align: center;
@@ -50,7 +51,7 @@
         }
         .login-container img {
             width: 180px;
-            margin-bottom: 20px;
+            
         }
         .login-button {
             background-color: #4285F4; /* Google Blue color */
@@ -88,11 +89,9 @@
     </style>
 </head>
 <body>
-    <div class="header">
-        <h1 class="brand-text font-poppins-semibold">Login Admin</h1>
-    </div>
     <div class="login-container">
         <img src="{{ asset('microLingo.png') }}" alt="Micro Lingo Logo">
+        <h1 class="brand-text font-poppins-semibold">Login Admin</h1>
         <form action="" method="POST">
             @csrf
             <!-- Google Login Button -->
