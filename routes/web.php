@@ -4,13 +4,16 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FirebaseLoginController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\CheckFirebaseRole;
+use App\Http\Middleware\ReplyUser;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
 Route::get('/whatsapp/send', 'App\Http\Controllers\WhatsAppController@sendMessage');
-Route::post('/whatsapp/receive', 'App\Http\Controllers\WhatsAppController@receiveMessage');
+Route::post('/whatsapp/receive',
+    'App\Http\Controllers\WhatsAppController@receiveMessage'
+)->middleware(ReplyUser::class);
 Route::get('/whatsapp/status-callback', 'App\Http\Controllers\WhatsAppController@statusCallback');
 
 Route::get('/users', 'App\Http\Controllers\UserController@showUsers');
