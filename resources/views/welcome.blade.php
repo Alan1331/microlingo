@@ -14,7 +14,7 @@
         }
         .hero-section {
             flex: 1;
-            background: #007bff;
+            background: #7288C7;
             color: white;
             display: flex;
             justify-content: center;
@@ -36,15 +36,11 @@
             <h1>Microlingo</h1>
             <p>chatbot inovatif yang dirancang untuk membantu Anda belajar dan meningkatkan kemampuan bahasa Inggris 
                 melalui percakapan interaktif di WhatsApp. Temukan cara baru untuk belajar bahasa dengan lebih menyenangkan dan efektif.</p>
-            <!-- ganti sama button nomer microlingo -->
             <a href="https://wa.me/14155238886" class="btn btn-light btn-lg">Mulai Belajar sekarang!</a> 
         </div>
     </div>
 
     <div class="container features-section" id="features">
-        <!-- <div class="text-center mb-4">
-            <h2>Kenapa Microlingo?</h2>
-        </div> -->
         <div class="row">
             <div class="col-md-4">
                 <h2>Interaktif</h2>

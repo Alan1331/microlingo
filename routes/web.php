@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FirebaseLoginController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\CheckFirebaseRole;
 use App\Http\Middleware\ReplyUser;
@@ -50,23 +52,20 @@ Route::middleware(CheckFirebaseRole::class)->group(function () {
         return view('admin.index');
     });
     Route::get('/logoutAdmin', [FirebaseLoginController::class, 'logout'])->name('logoutAdmin');
+    Route::get('/kelolaPengguna', [AdminController::class, 'showUsers'])->name('kelolaPengguna');
+    
+    Route::get('/materiPembelajaran', [AdminController::class, 'showLearningUnits'])->name('materiPembelajaran');
+
+    Route::get('/materiPembelajaran/{id}', [AdminController::class, 'showLearningUnitById'])->name('learningUnits.levels');
+    Route::delete('/materiPembelajaran/{id}', [AdminController::class, 'deleteUnit'])->name('units.delete');
+
+    Route::put('/admin-page/users/{noWhatsapp}', [AdminController::class, 'updateUser'])->name('users.update');
+    Route::delete('/admin-page/users/{noWhatsapp}', [AdminController::class, 'deleteUser'])->name('users.delete');
 });
 
-
-Route::get('/kelolaData', function () {
-    return view('admin.layouts.kelolaData');
+Route::get('/unauthorizedAccess', function () {
+    return view('admin.layouts.unauthorizedAccess');
 });
 
-Route::get('/hapusData', function () {
-    return view('admin.layouts.hapusData');
-});
-
-Route::get('/modifikasiMateri', function () {
-    return view('admin.layouts.modifikasiMateri');
-});
-
-Route::get('/perkembanganPengguna', function () {
-    return view('admin.layouts.perkembanganPengguna');
-});
 
 require __DIR__.'/auth.php';
