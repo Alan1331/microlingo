@@ -10,10 +10,12 @@ use Illuminate\Support\Facades\Log;
 class LearningUnitController extends Controller
 {
     protected $learningUnit;
+    protected $notFoundMessage;
 
     public function __construct(LearningUnit $learningUnit)
     {
         $this->learningUnit = $learningUnit;
+        $this->notFoundMessage = 'Learning unit not found';
     }
 
     public function showLearningUnits()
@@ -27,7 +29,7 @@ class LearningUnitController extends Controller
     {
         $learingUnitDocument = $this->learningUnit->find($id);
         if (!$learingUnitDocument) {
-            return response()->json(['message' => 'Learning unit not found'], 404);
+            return response()->json(['message' => $this->notFoundMessage], 404);
         }
 
         return response()->json($learingUnitDocument);
@@ -48,7 +50,7 @@ class LearningUnitController extends Controller
         }
 
         // Create the learning unit document in Firestore
-        $learningUnitDoc = $this->learningUnit->create([
+        $this->learningUnit->create([
             'id' => $request->id,
             'topic' => $request->topic,
         ]);
@@ -64,7 +66,7 @@ class LearningUnitController extends Controller
 
         // Verify learning unit was found
         if (!$result) {
-            return response()->json(['message' => 'Learning unit not found'], 404);
+            return response()->json(['message' => $this->notFoundMessage], 404);
         }
 
         // Return a status message
@@ -91,7 +93,7 @@ class LearningUnitController extends Controller
 
         // Verify learning unit was found
         if (!$result) {
-            return response()->json(['message' => 'Learning unit not found'], 404);
+            return response()->json(['message' => $this->notFoundMessage], 404);
         }
 
         // Return a status message

@@ -8,10 +8,12 @@ use App\Models\User;
 class UserController extends Controller
 {
     protected $user;
+    protected $notFoundMessage;
 
     public function __construct(User $user)
     {
         $this->user = $user;
+        $this->notFoundMessage = 'User not found';
     }
 
     public function showUsers()
@@ -25,7 +27,7 @@ class UserController extends Controller
     {
         $userDocument = $this->user->find($noWhatsapp);
         if (!$userDocument) {
-            return response()->json(['message' => 'User not found'], 404);
+            return response()->json(['message' => $this->notFoundMessage], 404);
         }
 
         return response()->json($userDocument);
@@ -39,7 +41,7 @@ class UserController extends Controller
         ]);
 
         // Create the user document in Firestore
-        $user = $this->user->create([
+        $this->user->create([
             'id' => $request->noWhatsapp,
             'nama' => 'unknown',
             'progress' => '1-1',
@@ -59,7 +61,7 @@ class UserController extends Controller
 
         // Verify user was found
         if (!$result) {
-            return response()->json(['message' => 'User not found'], 404);
+            return response()->json(['message' => $this->notFoundMessage], 404);
         }
 
         // Return a status message
@@ -73,7 +75,7 @@ class UserController extends Controller
 
         // Verify user was found
         if (!$result) {
-            return response()->json(['message' => 'User not found'], 404);
+            return response()->json(['message' => $this->notFoundMessage], 404);
         }
 
         // Return a status message
