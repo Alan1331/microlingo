@@ -51,6 +51,9 @@ class WhatsAppController extends Controller
 
     public function receiveMessage(Request $request)
     {
+        // Set the maximum execution time to 300 seconds (5 minutes)
+        set_time_limit(300);
+
         $recipient_number = $request->input('From'); // Change to the recipient's number
         $input_message = $request->input('Body'); // Message from user
         $messages = "Feature is still in development";
@@ -478,14 +481,9 @@ Pilih menu berikut untuk melanjutkan:
         $grade = explode('|', $evaluation)[0];
         $feedback = explode('|', $evaluation)[1];
 
-        while(!ctype_digit($grade)) {
-            $grade = $this->openai->completions()->create([
-                'model' => 'gpt-3.5-turbo-instruct',
-                'prompt' => "Extract integer from this text:" . $grade,
-                'max_tokens' => 150,
-                'temperature' => 0.7,
-            ]);
-            $grade = $grade['choices'][0]['text'];
+        if(!ctype_digit($grade)) {
+            $grade = $this->extractNumbers($grade);
+            $grade = (string)$grade[0];
         }
 
         $result = array(
@@ -494,6 +492,16 @@ Pilih menu berikut untuk melanjutkan:
         );
 
         return $result;
+    }
+
+    private function extractNumbers($string) {
+        // This pattern matches sequences of digits
+        $pattern = '/\d+/';
+        // Find all sequences of digits in the string
+        preg_match_all($pattern, $string, $matches);
+        // Convert the matched sequences to integers
+        $numbers = array_map('intval', $matches[0]);
+        return $numbers;
     }
 
     private function checkUser($recipient_number)
