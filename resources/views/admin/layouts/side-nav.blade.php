@@ -102,7 +102,7 @@
         <!-- Kelola Pengguna -->
         <li>
             <a href="/kelolaPengguna" class="nav-link">
-                <img src="managedata.png" class="nav-icon" alt="kelola Icon" style="width: 25px; height: 25px;">
+                <img src="{{ asset('managedata.png') }}" class="nav-icon" alt="kelola Icon" style="width: 25px; height: 25px;">
                 <p class="brand-text font-poppins-regular" style="color: black;">
                     Kelola Pengguna
                 </p>
@@ -111,7 +111,7 @@
         <!-- Materi Pembelajaran dan Perkembangan -->
         <li style="margin-top: 20px;">
             <a href="/materiPembelajaran" class="nav-link">
-                <img src="materi.png" class="nav-icon" alt="Materi Icon" style="width: 25px; height: 25px;">
+                <img src="{{ asset('materi.png') }}" class="nav-icon" alt="Materi Icon" style="width: 25px; height: 25px;">
                 <p class="brand-text font-poppins-regular" style="color: black;">
                    Materi Pembelajaran
                 </p>

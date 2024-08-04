@@ -50,13 +50,10 @@ Route::middleware(CheckFirebaseRole::class)->group(function () {
     Route::get('/logoutAdmin', [FirebaseLoginController::class, 'logout'])->name('logoutAdmin');
     Route::get('/kelolaPengguna', [AdminController::class, 'showUsers'])->name('kelolaPengguna');
     
-    Route::get('/materiPembelajaran', function () {
-        return view('admin.layouts.materiPembelajaran');
-    });
+    Route::get('/materiPembelajaran', [AdminController::class, 'showLearningUnits'])->name('materiPembelajaran');
 
-    Route::get('/viewLevel', function () {
-        return view('admin.layouts.viewLevel');
-    });
+    Route::get('/materiPembelajaran/{id}', [AdminController::class, 'showLearningUnitById'])->name('learningUnits.levels');
+    Route::delete('/materiPembelajaran/{id}', [AdminController::class, 'deleteUnit'])->name('units.delete');
 
     Route::put('/admin-page/users/{noWhatsapp}', [AdminController::class, 'updateUser'])->name('users.update');
     Route::delete('/admin-page/users/{noWhatsapp}', [AdminController::class, 'deleteUser'])->name('users.delete');

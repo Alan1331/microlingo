@@ -62,15 +62,21 @@
                                     <!-- Table rows will be added here dynamically -->
                                 </tbody>
                                 <tfoot>
+                                    @foreach ($learningUnits as $unit)
                                     <tr>
-                                        <td></td>
-                                        <td></td>
+                                        <td>{{ $unit['id'] }}</td>
+                                        <td>{{ $unit['topic'] }}</td>
                                         <td colspan="6" style="text-align: center;">
-                                            <a href="/viewLevel " class="view-button">
+                                            <a href="/materiPembelajaran/{{ $unit['id'] }}" class="view-button">
                                                 <img src="{{ asset('view.png') }}" alt="View Button">
                                                 View Level
                                             </a>
-                                            <a>
+                                            <form id="unit-delete-form-{{ $unit['id'] }}" action="{{ route('units.delete', $unit['id']) }}" method="POST" style="display: none;">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
+                                            <a onclick="event.preventDefault(); if(confirm('Are you sure you want to delete this unit?')) document.getElementById('unit-delete-form-{{ $unit['id'] }}').submit();">
+                                                @method('DELETE')
                                                 <button type="button" class="delete-button">
                                                     <img src="{{ asset('delete.png') }}" alt="Delete Button">
                                                     Delete
@@ -78,6 +84,7 @@
                                             </a>
                                         </td>
                                     </tr>
+                                    @endforeach
                                 </tfoot>
                             </table>
                         </div>

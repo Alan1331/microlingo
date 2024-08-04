@@ -25,9 +25,10 @@
                                     <!-- Your table rows here -->
                                 </tbody>
                                 <tfoot>
+                                    @foreach ($levels as $level)
                                     <tr>
-                                        <td>...</td>
-                                        <td>...</td>
+                                        <td>{{ $level['id'] }}</td>
+                                        <td>{{ $level['topic'] }}</td>
                                         <td colspan="6" style="text-align: center;">
                                             <a href="/viewLevel " class="view-button" id="editBtn">
                                                 <img src="{{ asset('edit.png') }}" alt="View Button">
@@ -93,6 +94,7 @@
                                         </td>
 
                                     </tr>
+                                    @endforeach
                                 </tfoot>
                             </table>
                         </div>

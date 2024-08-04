@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\LearningUnit;
+use App\Models\Level;
+use Illuminate\Support\Facades\Log;
 
 class LearningUnitController extends Controller
 {
@@ -71,6 +73,19 @@ class LearningUnitController extends Controller
 
     public function deleteLearningUnit($id)
     {
+        // Delete all levels inside the unit
+        // instantiate level model
+        $level = new Level($id);
+        $levels = $level->all();
+
+        foreach($levels as $level) {
+            try {
+                app()->call([LevelController::class, 'deleteLevel'], ['unitId' => $id, 'levelId' => $level['id']]);
+            } catch(\Exception $e) {
+                Log::info("Failed to delete a level");
+            }
+        }
+
         // Delete the learning unit document in Firestore
         $result = $this->learningUnit->delete($id);
 

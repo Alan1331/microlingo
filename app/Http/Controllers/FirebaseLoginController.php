@@ -48,7 +48,7 @@ class FirebaseLoginController extends Controller
         // prevent user login for non-admin
         $adminDocument = $this->admin->find($googleUser->email);
         if (!$adminDocument) {
-            return "Unauthorized access: You are not an administrator";
+            return view('admin.layouts.unauthorizedAccess');
         }
         Log::info("User picture: " . $googleUser->picture);
 
