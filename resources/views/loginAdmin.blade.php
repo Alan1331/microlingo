@@ -99,7 +99,7 @@
                 <span class="logo-container">
                     <img src="{{ asset('googleColor.png') }}" alt="Google Logo">
                 </span>
-                Sign in with Google
+                Masuk dengan Google
             </a>
         </form>
     </div>

@@ -45,7 +45,7 @@
                                                 @enderror
                                             </div>
                                             <div class="form-group row">
-                                                <div class="col-sm-10 offset-sm-2">
+                                                <div class="col-sm-10 offset-sm-2" style="display: flex; justify-content: center; gap: 10px;">
                                                     <button type="submit" class="btn btn-primary">Submit</button>
                                                     <button type="button" id="cancelBtn" class="btn btn-secondary">Batalkan</button>
                                                 </div>
@@ -74,7 +74,7 @@
                                         <td colspan="6" style="text-align: center;">
                                             <a href="/materiPembelajaran/{{ $unit['id'] }}" class="view-button">
                                                 <img src="{{ asset('view.png') }}" alt="View Button">
-                                                View Level
+                                                Lihat Level
                                             </a>
                                             <form id="unit-delete-form-{{ $unit['id'] }}" action="{{ route('units.delete', $unit['id']) }}" method="POST" style="display: none;">
                                                 @csrf
@@ -84,7 +84,7 @@
                                                 @method('DELETE')
                                                 <button type="button" class="delete-button">
                                                     <img src="{{ asset('delete.png') }}" alt="Delete Button">
-                                                    Delete
+                                                    Hapus
                                                 </button>
                                             </a>
                                         </td>

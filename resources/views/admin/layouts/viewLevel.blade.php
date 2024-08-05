@@ -30,9 +30,10 @@
                                         <td>{{ $level['id'] }}</td>
                                         <td>{{ $level['topic'] }}</td>
                                         <td colspan="6" style="text-align: center;">
+                                        <div class="action-buttons">
                                             <a class="edit-button" unit-id="{{ $unitId }}" level-id="{{ $level['id'] }}">
                                                 <img src="{{ asset('edit.png') }}" alt="Edit Button">
-                                                Edit
+                                                Edit/Lihat
                                             </a>
                                             <div id="editModal" class="modalAction">
                                                 <div class="modal-content3" data-dismiss="modalAction" aria-label="Close">
@@ -47,7 +48,7 @@
                                                                 <div class="alert alert-danger mt-2">{{ $message }}</div>
                                                             @enderror
                                                             <label for="editContent" class="font-weight-bold">Konten Pembelajaran</label>
-                                                            <textarea type="text" class="form-control @error('content') is-invalid @enderror" name="content" id="editContent"></textarea>
+                                                            <textarea type="text" class="form-control @error('content') is-invalid @enderror" name="content" id="editContent" rows="10" style="min-height: 200px;"></textarea>
                                                             @error('content')
                                                                 <div class="alert alert-danger mt-2">{{ $message }}</div>
                                                             @enderror
@@ -62,7 +63,7 @@
                                             <a>
                                                 <button type="button" class="upload-button" id="uploadBtn">
                                                     <img src="{{ asset('upload.png') }}" alt="Delete Button">
-                                                    Upload
+                                                    Unggah
                                                 </button>
                                             </a>
                                             <div id="modalUpload" class="modalUpload">
@@ -76,7 +77,10 @@
                                                         <input type="file" name="video" id="video" accept="video/*"required class="form-control">
                                                     </div>
                                                     <div>
-                                                        <button type="submit">Upload</button>
+                                                    <button type="button" class="upload-button" id="uploadBtn">
+                                                    <img src="{{ asset('upload.png') }}" alt="Delete Button">
+                                                    Unggah
+                                                </button>
                                                     </div>
                                                 </form>
                                                 </div>
@@ -89,11 +93,11 @@
                                                 @method('DELETE')
                                                 <button type="button" class="delete-button" id="deleteBtn">
                                                     <img src="{{ asset('delete.png') }}" alt="Delete Button">
-                                                    Delete
+                                                    Hapus
                                                 </button>
                                             </a>
                                         </td>
-
+                                        </div>
                                     </tr>
                                     @endforeach
                                 </tfoot>
@@ -166,6 +170,13 @@ document.getElementById('deleteBtn').addEventListener('click', function(event) {
     </script>
 </body>
 <style>
+
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 10px; /* Jarak antara tombol */
+    }
+
     .delete-button {
         display: inline-block;
         padding: 10px 20px;

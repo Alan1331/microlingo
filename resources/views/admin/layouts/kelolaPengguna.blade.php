@@ -88,7 +88,7 @@
                                                 @method('DELETE')
                                                 <button type="button" class="delete-button">
                                                     <img src="{{ asset('delete.png') }}" alt="Delete Button">
-                                                    Delete
+                                                    Hapus
                                                 </button>
                                             </a>
                                         </td>

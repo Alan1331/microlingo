@@ -114,7 +114,7 @@
                 <a class="d-flex justify-content-end" href="#" id="logout-link" style="text-decoration: none; color: white;">
                     <button type="button" class="image-text-button">
                         <img src="{{ asset('logoutLogo.png') }}" alt="Sign Out Logo" class="button-logo">
-                        Log Out
+                        Keluar
                     </button>
                 </a>
             </li>
