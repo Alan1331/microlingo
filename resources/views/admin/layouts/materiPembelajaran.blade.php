@@ -5,6 +5,13 @@
 <body>
     <section class="content">
         <div class="container-fluid">
+            <!-- Alert Message for Failed -->
+            @if(session('failed'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ session('failed') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
             <div class="row">
                 <div class="col-12">
                     <div class="card" style="margin-top: 25px;">
@@ -19,30 +26,28 @@
                                 </a>
                                 <div id="editModal" class="modalAction">
                                     <div class="modal-content4" data-dismiss="modalAction" aria-label="Close">
-                                        <h2 class="modal-title">Tambah Topik</h2>
-                                        <form id="editUserForm">
+                                        <h2 class="modal-title">Tambah Unit Pembelajaran</h2>
+                                        <form id="addUnitForm" method="POST" action="{{ route('units.create') }}">
                                             @csrf
-                                            @method('PUT')
                                             <div class="form-group mb-3">
-                                                <label class="font-weight-bold" style="text-align: right;">Unit</label>
-                                                <input type="text"
-                                                    class="form-control @error('unit') is-invalid @enderror" name="unit"
-                                                    id="editUnit">
+                                                <label for="unit" class="font-weight-bold" style="text-align: right;">Unit</label>
+                                                <input type="number"
+                                                    class="form-control @error('unit') is-invalid @enderror" name="id"
+                                                    id="unit">
                                                 @error('unit')
                                                     <div class="alert alert-danger mt-2">{{ $message }}</div>
                                                 @enderror
-                                                <label class="font-weight-bold" style="text-align: right;">Topik</label>
+                                                <label for="topik" class="font-weight-bold" style="text-align: right;">Topik</label>
                                                 <textarea class="form-control @error('topik') is-invalid @enderror"
-                                                    name="topik" id="editTopik" rows="5"></textarea>
+                                                    name="topic" id="topik" rows="5"></textarea>
                                                 @error('topik')
                                                     <div class="alert alert-danger mt-2">{{ $message }}</div>
                                                 @enderror
                                             </div>
                                             <div class="form-group row">
                                                 <div class="col-sm-10 offset-sm-2">
-                                                    <button type="button" class="btn btn-primary" id="saveButton">Simpan</button>
-                                                    <button id="cancelButton"
-                                                        class="btn btn-secondary">Batalkan</button>
+                                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                                    <button type="button" id="cancelBtn" class="btn btn-secondary">Batalkan</button>
                                                 </div>
                                             </div>
                                         </form>
@@ -239,7 +244,7 @@
     var topikBtn = document.getElementById('topikBtn');
     var editModal = document.getElementById('editModal');
     var dataTableBody = document.getElementById('dataTableBody');
-    var saveButton = document.getElementById('saveButton');
+    var cancelBtn = document.getElementById('cancelBtn');
     var editUnit = document.getElementById('editUnit');
     var editTopik = document.getElementById('editTopik');
 
@@ -255,51 +260,9 @@
         }
     });
 
-    // Fungsi untuk menyimpan data dan menambahkannya ke tabel
-    saveButton.addEventListener('click', function () {
-        var unit = editUnit.value.trim(); // Menghilangkan spasi di awal dan akhir
-        var topik = editTopik.value.trim(); // Menghilangkan spasi di awal dan akhir
-
-        if (unit && topik) {
-            // Buat elemen baris tabel baru
-            var row = document.createElement('tr');
-
-            // Buat elemen sel tabel untuk unit
-            var cellUnit = document.createElement('td');
-            cellUnit.textContent = unit;
-            row.appendChild(cellUnit);
-
-            // Buat elemen sel tabel untuk topik
-            var cellTopik = document.createElement('td');
-            cellTopik.textContent = topik;
-            row.appendChild(cellTopik);
-
-            // Buat elemen sel tabel untuk aksi
-            var cellAction = document.createElement('td');
-            cellAction.innerHTML = `
-            <a href="/viewLevel" class="view-button">
-                <img src="{{ asset('view.png') }}" alt="View Button" style="width: 20px; height: 20px;">
-                View Level
-            </a>
-            <a href="#" class="delete-link">
-                <button type="button" class="delete-button">Delete</button>
-            </a>
-            `;
-            
-            row.appendChild(cellAction);
-
-            // Tambahkan baris ke tabel
-            dataTableBody.appendChild(row);
-
-            // Kosongkan input setelah menyimpan
-            editUnit.value = '';
-            editTopik.value = '';
-
-            // Sembunyikan modal
-            editModal.style.display = 'none';
-        } else {
-            alert('Harap isi semua kolom.');
-        }
+    // Menutup modal ketika klik batalkan
+    cancelBtn.addEventListener('click', function () {
+        editModal.style.display = 'none';
     });
 });
 </script>

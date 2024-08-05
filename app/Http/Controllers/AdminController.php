@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Log;
 use App\Models\Admin;
 use App\Models\User;
 use App\Models\LearningUnit;
@@ -120,7 +122,31 @@ class AdminController extends Controller
         $level = new Level($id);
         $levels = $level->all();
 
-        return view('admin.layouts.viewLevel', ['levels' => $levels]);
+        return view('admin.layouts.viewLevel', ['levels' => $levels, 'unitId' => $id]);
+    }
+
+    public function createLearningUnit(Request $request)
+    {
+        // Validate the incoming request
+        $request->validate([
+            'id' => 'required|integer',
+            'topic' => 'required|string',
+        ]);
+
+        // Ensure the unique of id
+        $learingUnitDocument = $this->learningUnit->find($request->id);
+        if ($learingUnitDocument) {
+            return redirect()->route('materiPembelajaran')->with('failed', 'Invalid input: id was used!');
+        }
+
+        // Create the learning unit document in Firestore
+        $this->learningUnit->create([
+            'id' => $request->id,
+            'topic' => $request->topic,
+        ]);
+
+        // Return a status message instead of learning unit data
+        return redirect()->route('materiPembelajaran')->with('success', 'Learning unit created successfully');
     }
 
     public function deleteUnit($id)
@@ -147,5 +173,87 @@ class AdminController extends Controller
         }
 
         return redirect()->route('materiPembelajaran')->with('success', 'Unit deleted successfully!');
+    }
+    
+    public function deleteLevel($id, $levelId) {
+        try {
+            App::call('App\Http\Controllers\LevelController@deleteLevel', ['unitId' => $id, 'levelId' => $levelId]);
+            return redirect()->route('units.levels', $id)->with('success', 'Level deleted successfully!');
+        } catch(\Exception $e) {
+            Log::info("Failed to delete a level");
+            return redirect()->route('units.levels', $id)->with('failed', 'Failed to delete level!');
+        }
+    }
+
+    public function updateLevel(Request $request, $id, $levelId)
+    {
+        // instantiate level model
+        $level = new Level($id);
+
+        // Update the level document in Firestore
+        $result = $level->update($levelId, $request->all());
+
+        // Verify learning unit was found
+        if (!$result) {
+            return redirect()->route('units.levels', $id)->with('failed', 'Failed to update level!');
+        }
+
+        Log::info("Success update level" . $levelId . "at unit" . $id);
+
+        return redirect()->route('units.levels', $id)->with('success', 'Level updated successfully!');
+    }
+
+    public function uploadVideo(Request $request, $id, $levelId)
+    {
+        // upload video
+        $content = '';
+        $filePaths = [];
+        if ($request->hasFile('videos')) {
+            Log::info('Video is detected');
+            $videoNames = array();
+            foreach ($request->file('videos') as $video) {
+                // Generate a unique filename
+                $uniqueFileName = Str::uuid() . '.' . $video->getClientOriginalExtension();
+
+                // Save the video to the storage
+                $path = $video->storeAs('public/videos', $uniqueFileName);
+                $path = trim($path, 'public/');
+                if($path) {
+                    Log::info('Video stored at: ' . $path);
+                    $filePaths[] = $path;
+                    $videoNames[] = $uniqueFileName;
+                } else {
+                    $message = 'Failed to store video: ' . $video->getClientOriginalName();
+                    Log::error($message);
+                    return redirect()->route('units.levels', $id)->with('failed', $message);
+                }
+            }
+            $content = $this->analyzeVideo($videoNames) . "\n";
+
+            // instantiate level model
+            $level = new Level($id);
+
+            // Update video in the level document in Firestore
+            $result = $level->update($levelId, [
+                'videos' => $filePaths,
+                'content' => $content,
+            ]);
+
+            // ensure video paths were added
+            if (!$result) {
+                $message = 'Failed to update video paths!';
+                Log::info($message);
+                return redirect()->route('units.levels', $id)->with('failed', $message);
+            }
+
+            $message = 'Videos were uploaded!';
+            Log::info($message);
+            return redirect()->route('units.levels', $id)->with('success', $message);
+            
+        } else {
+            $message = 'No videos detected!';
+            Log::info($message);
+            return redirect()->route('units.levels', $id)->with('failed', $message);
+        }
     }
 }

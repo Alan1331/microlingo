@@ -30,35 +30,31 @@
                                         <td>{{ $level['id'] }}</td>
                                         <td>{{ $level['topic'] }}</td>
                                         <td colspan="6" style="text-align: center;">
-                                            <a href="/viewLevel " class="view-button" id="editBtn">
-                                                <img src="{{ asset('edit.png') }}" alt="View Button">
+                                            <a class="edit-button" unit-id="{{ $unitId }}" level-id="{{ $level['id'] }}">
+                                                <img src="{{ asset('edit.png') }}" alt="Edit Button">
                                                 Edit
                                             </a>
                                             <div id="editModal" class="modalAction">
                                                 <div class="modal-content3" data-dismiss="modalAction" aria-label="Close">
                                                     <h2 class="modal-title">Edit Level</h2>
-                                                    <form id="editUserForm">
+                                                    <form id="level-update-form" method="POST">
                                                         @csrf
                                                         @method('PUT')
                                                         <div class="form-group mb-3">
-                                                            <label class="font-weight-bold" style="text-align: right;">Level</label>
-                                                            <input type="text" class="form-control @error('level') is-invalid @enderror" name="level" id="editLevel">
-                                                            @error('level')
+                                                            <label for="editTopik" class="font-weight-bold">Topik</label>
+                                                            <input type="text" class="form-control @error('topic') is-invalid @enderror" name="topic" id="editTopik">
+                                                            @error('topic')
+                                                                <div class="alert alert-danger mt-2">{{ $message }}</div>
+                                                            @enderror
+                                                            <label for="editContent" class="font-weight-bold">Konten Pembelajaran</label>
+                                                            <textarea type="text" class="form-control @error('content') is-invalid @enderror" name="content" id="editContent"></textarea>
+                                                            @error('content')
                                                                 <div class="alert alert-danger mt-2">{{ $message }}</div>
                                                             @enderror
                                                         </div>
-                                                        <div class="form-group mb-3">
-                                                            <label class="font-weight-bold">Topik</label>
-                                                            <input type="text" class="form-control @error('topik') is-invalid @enderror" name="topik" id="editTopik">
-                                                            @error('topik')
-                                                                <div class="alert alert-danger mt-2">{{ $message }}</div>
-                                                            @enderror
-                                                        </div>
-                                                        <div class="form-group row">
-                                                            <div class="col-sm-10 offset-sm-2">
-                                                                <button type="submit" class="btn btn-primary">Simpan</button>
-                                                                <button id="cancelButton" class="btn btn-secondary">Batalkan</button>
-                                                            </div>
+                                                        <div class="col-sm-10 offset-sm-2">
+                                                            <button type="submit" class="btn btn-primary">Simpan</button>
+                                                            <button id="cancelButton" class="btn btn-secondary">Batalkan</button>
                                                         </div>
                                                     </form>
                                                 </div>
@@ -85,7 +81,12 @@
                                                 </form>
                                                 </div>
                                             </div>
-                                            <a>
+                                            <form id="level-delete-form-{{ $level['id'] }}" action="{{ route('units.levels.delete', ['id' => $unitId, 'levelId' => $level['id']]) }}" method="POST" style="display: none;">
+                                                @csrf
+                                                @method('DELETE')
+                                            </form>
+                                            <a onclick="event.preventDefault(); if(confirm('Are you sure you want to delete this level?')) document.getElementById('level-delete-form-{{ $level['id'] }}').submit();">
+                                                @method('DELETE')
                                                 <button type="button" class="delete-button" id="deleteBtn">
                                                     <img src="{{ asset('delete.png') }}" alt="Delete Button">
                                                     Delete
@@ -111,11 +112,12 @@
         </div>
         <!-- /.container-fluid -->
     </section>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
+<script>
+document.addEventListener('DOMContentLoaded', function() {
     var uploadBtn = document.getElementById('uploadBtn');
     var modalUpload = document.getElementById('modalUpload');
-    var editBtn = document.getElementById('editBtn');
+    var cancelButton = document.getElementById('cancelButton');
+    var editBtn = document.querySelectorAll('.edit-button');
     var editModal = document.getElementById('editModal');
 
     // Fungsi untuk menampilkan modal upload
@@ -124,9 +126,19 @@
     });
 
     // Fungsi untuk menampilkan modal edit
-    editBtn.addEventListener('click', function(event) {
-        event.preventDefault(); // Mencegah default action dari elemen <a>
-        editModal.style.display = 'block';
+    editBtn.forEach(function(button) {
+        button.addEventListener('click', function() {
+            var unitId = this.getAttribute('unit-id');
+            var levelId = this.getAttribute('level-id');
+            fetch(`/units/${unitId}/levels/${levelId}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('editTopik').value = data.topic;
+                    document.getElementById('editContent').value = data.content;
+                    document.getElementById('level-update-form').action = `/materiPembelajaran/${unitId}/levels/${levelId}`;
+                    editModal.style.display = "block";
+                });
+        });
     });
 
     // Menutup modal ketika klik di luar konten modal
@@ -136,6 +148,11 @@
         } else if (event.target == editModal) {
             editModal.style.display = 'none';
         }
+    });
+
+    // Menutup modal ketika klik batalkan
+    cancelButton.addEventListener('click', function () {
+        editModal.style.display = 'none';
     });
 });
 document.getElementById('deleteBtn').addEventListener('click', function(event) {
@@ -184,7 +201,7 @@ document.getElementById('deleteBtn').addEventListener('click', function(event) {
         /* Warna merah lebih gelap saat ditekan */
     }
 
-    .view-button {
+    .edit-button {
         display: inline-block;
         padding: 10px 20px;
         font-size: 14px;
@@ -199,7 +216,7 @@ document.getElementById('deleteBtn').addEventListener('click', function(event) {
         text-align: center;
     }
 
-    .view-button img {
+    .edit-button img {
         width: 20px;
         /* Sesuaikan ukuran gambar */
         height: 20px;
@@ -208,7 +225,7 @@ document.getElementById('deleteBtn').addEventListener('click', function(event) {
         /* Jarak antara gambar dan teks */
     }
 
-    .view-button:hover {
+    .edit-button:hover {
         background-color: #03346E;
         /* Warna merah gelap saat hover */
         color: #ffffff;
@@ -294,7 +311,7 @@ document.getElementById('deleteBtn').addEventListener('click', function(event) {
         border-radius: 8px;
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         width: 50%;
-        margin: 15% auto;
+        margin: 5% auto;
     }
 
     .modal-title {

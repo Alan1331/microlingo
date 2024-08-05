@@ -162,7 +162,6 @@ class LevelController extends Controller
         // Check if the videos attribute exists and is not empty
         if (!isset($levelDocument['videos']) || empty($levelDocument['videos'])) {
             Log::info('No videos found for this level.');
-            return response()->json(['message' => 'No videos to delete for this level'], 200);
         }
 
         // Delete the associated video files from storage
