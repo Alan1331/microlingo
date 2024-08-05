@@ -61,6 +61,7 @@ Route::middleware(CheckFirebaseRole::class)->group(function () {
     Route::post('/materiPembelajaran', [AdminController::class, 'createLearningUnit'])->name('units.create');
     Route::get('/materiPembelajaran/{id}', [AdminController::class, 'showLearningUnitById'])->name('units.levels');
     Route::put('/materiPembelajaran/{id}/levels/{levelId}', [AdminController::class, 'updateLevel'])->name('units.levels.update');
+    Route::put('/materiPembelajaran/{id}/levels/{levelId}/videos', [AdminController::class, 'uploadVideo'])->name('units.levels.videos');
     Route::delete('/materiPembelajaran/{id}', [AdminController::class, 'deleteUnit'])->name('units.delete');
     Route::delete('/materiPembelajaran/{id}/levels/{levelId}', [AdminController::class, 'deleteLevel'])->name('units.levels.delete');
 });

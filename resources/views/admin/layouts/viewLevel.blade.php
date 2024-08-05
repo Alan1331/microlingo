@@ -59,24 +59,26 @@
                                                     </form>
                                                 </div>
                                             </div>
-                                            <a>
-                                                <button type="button" class="upload-button" id="uploadBtn">
-                                                    <img src="{{ asset('upload.png') }}" alt="Delete Button">
-                                                    Upload
-                                                </button>
+                                            <a class="upload-button" unit-id="{{ $unitId }}" level-id="{{ $level['id'] }}">
+                                                <img src="{{ asset('upload.png') }}" alt="Delete Button">
+                                                Upload
                                             </a>
                                             <div id="modalUpload" class="modalUpload">
-                                                 <div class="modal-content2">
+                                                <div class="modal-content2">
                                                 <h1>Upload Video</h1>
-                                                <form action="#" method="POST"
-                                                    enctype="multipart/form-data">
+                                                <form id="uploadForm" method="POST" enctype="multipart/form-data">
                                                     @csrf
+                                                    @method('PUT')
                                                     <div class="mb-3" style="align-items: center;">
-                                                        <label for="video">Choose a video:</label>
-                                                        <input type="file" name="video" id="video" accept="video/*"required class="form-control">
+                                                        <label for="videos">Select videos:</label>
+                                                        <input type="file" name="videos" id="videos" name="videos[]" multiple required class="form-control">
                                                     </div>
                                                     <div>
-                                                        <button type="submit">Upload</button>
+                                                        <button type="submit" class="btn btn-primary" id="uploadButton">Upload</button>
+                                                        <button class="btn btn-primary" type="button" id="loadingButton" disabled style="display: none;">
+                                                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                                            Uploading...
+                                                        </button>
                                                     </div>
                                                 </form>
                                                 </div>
@@ -114,15 +116,23 @@
     </section>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    var uploadBtn = document.getElementById('uploadBtn');
+    var uploadBtn = document.querySelectorAll('.upload-button');
     var modalUpload = document.getElementById('modalUpload');
     var cancelButton = document.getElementById('cancelButton');
     var editBtn = document.querySelectorAll('.edit-button');
     var editModal = document.getElementById('editModal');
 
     // Fungsi untuk menampilkan modal upload
-    uploadBtn.addEventListener('click', function() {
-        modalUpload.style.display = 'block';
+    uploadBtn.forEach(function(button) {
+        button.addEventListener('click', function() {
+            var unitId = this.getAttribute('unit-id');
+            var levelId = this.getAttribute('level-id');
+    
+            // Dynamically set the form action
+            var actionUrl = `/materiPembelajaran/${unitId}/levels/${levelId}/videos`;
+            document.getElementById('uploadForm').action = actionUrl;
+            modalUpload.style.display = 'block';
+        });
     });
 
     // Fungsi untuk menampilkan modal edit
@@ -141,6 +151,50 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Handle form submission
+    uploadForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        // Hide the upload button and show the loading button
+        document.getElementById('uploadButton').style.display = 'none';
+        document.getElementById('loadingButton').style.display = 'inline-block';
+
+        // Create a FormData object from the form
+        var formData = new FormData(uploadForm);
+
+        // Log the form data for debugging
+        for (var pair of formData.entries()) {
+            console.log(pair[0]+ ', ' + pair[1]); 
+        }
+
+        // Send the AJAX request
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', uploadForm.action, true);
+        xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                // Success
+                alert('Videos uploaded successfully!');
+            } else {
+                // Error
+                alert('An error occurred while uploading the videos.');
+            }
+
+            // Reset the form
+            uploadForm.reset();
+
+            // Show the upload button and hide the loading button
+            document.getElementById('uploadButton').style.display = 'inline-block';
+            document.getElementById('loadingButton').style.display = 'none';
+
+            // Close the modal
+            modalUpload.style.display = 'none';
+        };
+
+        xhr.send(formData);
+    });
+
     // Menutup modal ketika klik di luar konten modal
     window.addEventListener('click', function(event) {
         if (event.target == modalUpload) {
@@ -155,6 +209,7 @@ document.addEventListener('DOMContentLoaded', function() {
         editModal.style.display = 'none';
     });
 });
+
 document.getElementById('deleteBtn').addEventListener('click', function(event) {
         event.preventDefault(); // Mencegah aksi default tombol
         if (confirm('Are you sure you want to delete this item?')) {
@@ -162,8 +217,8 @@ document.getElementById('deleteBtn').addEventListener('click', function(event) {
             window.location.href = 'URL_PENGHAPUSAN'; // Ganti dengan URL untuk menghapus item
         }
     });
-        
-    </script>
+
+</script>
 </body>
 <style>
     .delete-button {
