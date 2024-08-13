@@ -12,26 +12,15 @@ use Illuminate\Support\Facades\Http;
 
 class LevelController extends Controller
 {
-    public function showLevels($unitId)
+    public function showLevelById($levelId)
     {
-        // instantiate level model
-        $level = new Level($unitId);
-        $levels = $level->all();
+        $level = Level::find($levelId);
 
-        return response()->json($levels);
-    }
-
-    public function showLevelById($unitId, $levelId)
-    {
-        // instantiate level model
-        $level = new Level($unitId);
-        $levelDocument = $level->find($levelId);
-
-        if (!$levelDocument) {
+        if (!$level) {
             return response()->json(['message' => 'Level not found'], 404);
         }
 
-        return response()->json($levelDocument);
+        return response()->json($level);
     }
 
     public function createLevel($unitId, Request $request)
@@ -148,41 +137,19 @@ class LevelController extends Controller
         return response()->json(['message' => 'Level updated successfully'], 200);
     }
 
-    public function deleteLevel($unitId, $levelId)
-    {
-        // instantiate level model
-        $level = new Level($unitId);
+    public function deleteLevel($id, $levelId) {
+        // Delete all videos inside the level
+        $level = Level::find($levelId);
+        $level->videos()->delete();
 
-        // Find the level document by ID
-        $levelDocument = $level->find($levelId);
-        if (!$levelDocument) {
-            return response()->json(['message' => 'Level not found'], 404);
+        // Delete the level
+        $result = $level->delete();
+
+        // Verify level was found
+        if (!$result) {
+            return redirect()->route('units.levels', $id)->with('failed', 'Failed to delete level!');
         }
 
-        // Check if the videos attribute exists and is not empty
-        if (!isset($levelDocument['videos']) || empty($levelDocument['videos'])) {
-            Log::info('No videos found for this level.');
-        }
-
-        // Delete the associated video files from storage
-        $videoPaths = $levelDocument['videos'];
-        Log::info('Video paths: ' . json_encode($videoPaths));
-        
-        foreach ($videoPaths as $path) {
-            $path = 'public/' . $path;
-            Log::info('Deleting video at: ' . $path);
-            if (Storage::exists($path)) {
-                Storage::delete($path);
-                Log::info('Deleted video at: ' . $path);
-            } else {
-                Log::warning('Video not found at: ' . $path);
-            }
-        }
-
-        // Delete the level document from Firestore
-        $level->delete($levelId);
-
-        // Return a status message
-        return response()->json(['message' => 'Level deleted successfully'], 200);
+        return redirect()->route('units.levels', $id)->with('success', 'Level deleted successfully!');
     }
 }

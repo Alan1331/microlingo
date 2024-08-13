@@ -11,14 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
-            $table->string('phoneNumber')->unique();
-            $table->string('name')->nullable();
-            $table->string('occupation')->nullable();
-            $table->string('menuLocation');
-            $table->string('progress');
-            $table->string('currentQuestion')->nullable();
+        Schema::create('questions', function (Blueprint $table) {
+            $table->id();
+            $table->string('question');
+            $table->string('answer');
+            $table->string('type');
+            $table->unsignedBigInteger('levelId');
             $table->timestamps();
+
+            $table->foreign('levelId')->references('id')->on('levels')->onDelete('cascade');
         });
     }
 
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('questions');
     }
 };

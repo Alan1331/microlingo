@@ -30,13 +30,6 @@
                                         <form id="addUnitForm" method="POST" action="{{ route('units.create') }}">
                                             @csrf
                                             <div class="form-group mb-3">
-                                                <label for="unit" class="font-weight-bold" style="text-align: right;">Unit</label>
-                                                <input type="number"
-                                                    class="form-control @error('unit') is-invalid @enderror" name="id"
-                                                    id="unit">
-                                                @error('unit')
-                                                    <div class="alert alert-danger mt-2">{{ $message }}</div>
-                                                @enderror
                                                 <label for="topik" class="font-weight-bold" style="text-align: right;">Topik</label>
                                                 <textarea class="form-control @error('topik') is-invalid @enderror"
                                                     name="topic" id="topik" rows="5"></textarea>
@@ -53,8 +46,9 @@
                                         </form>
                                     </div>
                                 </div>
-
                             </div>
+
+                            @if($learningUnits->count() != 0)
                             <table id="example2" class="table table-bordered table-hover">
                                 <thead>
                                     <tr>
@@ -69,7 +63,7 @@
                                 <tfoot>
                                     @foreach ($learningUnits as $unit)
                                     <tr>
-                                        <td>{{ $unit['id'] }}</td>
+                                        <td>{{ $unit['sortId'] }}</td>
                                         <td>{{ $unit['topic'] }}</td>
                                         <td colspan="6" style="text-align: center;">
                                             <a href="/materiPembelajaran/{{ $unit['id'] }}" class="view-button">
@@ -92,6 +86,9 @@
                                     @endforeach
                                 </tfoot>
                             </table>
+                            @else
+                            <b>Tidak ada unit yang tersedia</b>
+                            @endif
                         </div>
                         <!-- /.card-body -->
                     </div>

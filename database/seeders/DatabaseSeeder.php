@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Admin;
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\LearningUnit;
+use App\Models\Level;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,11 +15,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        Admin::factory()->create(['mailAddress' => 'sahlan.royale@gmail.com']);
+        Admin::factory()->create(['mailAddress' => 'mariaelqibthi@gmail.com']);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        User::factory()->count(5)->create();
     }
 }

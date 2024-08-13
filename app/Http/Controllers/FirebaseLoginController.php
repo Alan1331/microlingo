@@ -12,12 +12,10 @@ use App\Models\Admin;
 class FirebaseLoginController extends Controller
 {
     protected $auth;
-    protected $admin;
 
-    public function __construct(FirebaseAuth $auth, Admin $admin)
+    public function __construct(FirebaseAuth $auth)
     {
         $this->auth = $auth;
-        $this->admin = $admin;
     }
 
     public function redirectToGoogle()
@@ -46,7 +44,7 @@ class FirebaseLoginController extends Controller
         $googleUser = $oauth->userinfo->get();
         
         // prevent user login for non-admin
-        $adminDocument = $this->admin->find($googleUser->email);
+        $adminDocument = Admin::find($googleUser->email);
         if (!$adminDocument) {
             return view('admin.layouts.unauthorizedAccess');
         }

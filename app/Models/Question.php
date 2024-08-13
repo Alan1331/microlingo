@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class LearningUnit extends Model
+class Question extends Model
 {
     use HasFactory;
 
@@ -16,8 +16,9 @@ class LearningUnit extends Model
      * @var array<int, string>
      */
     protected $fillable = [
-        'topic',
-        'sortId',
+        'question',
+        'answer',
+        'type',
     ];
 
     /**
@@ -26,15 +27,16 @@ class LearningUnit extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'topic' => 'string',
-        'sortId' => 'integer',
+        'question' => 'string',
+        'answer' => 'string',
+        'type' => 'string',
     ];
 
     /**
-     * Get the levels for the unit.
+     * Get the unit that owns the levels.
      */
-    public function levels(): HasMany
+    public function level(): BelongsTo
     {
-        return $this->hasMany(Level::class, 'unitId');
+        return $this->belongsTo(Level::class);
     }
 }
