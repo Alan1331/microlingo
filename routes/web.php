@@ -15,6 +15,7 @@ Route::get('/', function () {
 });
 
 Route::get('/whatsapp/send', 'App\Http\Controllers\WhatsAppController@sendMessage');
+Route::post('/whatsapp/receive/test', 'App\Http\Controllers\WhatsAppController@receiveMessage');
 Route::post('/whatsapp/receive',
     'App\Http\Controllers\WhatsAppController@receiveMessage'
 )->middleware(ReplyUser::class);

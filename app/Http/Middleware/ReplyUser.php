@@ -35,11 +35,10 @@ class ReplyUser
     /**
      * Handle tasks after the response has been sent to the browser.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  \Illuminate\Http\Response  $response
      * @return void
      */
-    public function terminate($request, $response)
+    public function terminate($response)
     {
         // Set the maximum execution time to 300 seconds (5 minutes)
         set_time_limit(300);
@@ -49,46 +48,26 @@ class ReplyUser
         $content = $response->getContent();
         $response = json_decode($content, true);
 
-        $recipient_number = $response['recipient_number'];
+        $recipientNumber = $response['recipient_number'];
         $response = $response['response'];
         $messages = explode('|', $response);
         
         foreach ($messages as $message) {
-            Log::info("Sending message: " . $message);
-            if(str_contains($message, '/storage/videos/')) {
-                $videos = [$message];
-                // send video if contains typical video url
-                $this->sendMessageToUser($recipient_number, 'Sending video', $videos);
-            } else {
-                // send message instead
-                $this->sendMessageToUser($recipient_number, $message);
-            }
+            // send message to user
+            $this->sendMessageToUser($recipientNumber, $message);
         }
 
         \Log::info('Response has been sent to the browser.');
     }
 
-    private function sendMessageToUser($recipient_number, $message, $mediaUrls=null)
+    private function sendMessageToUser($recipientNumber, $message)
     {
-        if($mediaUrls != null) {
-            Log::info("mediaUrls type: ". gettype($mediaUrls));
-            
-            $this->twilioClient->messages->create(
-                $recipient_number,
-                [
-                    'mediaUrl' => $mediaUrls,
-                    'from' => $this->twilioWhatsAppNumber,
-                    'body' => $message,
-                ]
-            );
-        } else {
-            $this->twilioClient->messages->create(
-                $recipient_number,
-                [
-                    'from' => $this->twilioWhatsAppNumber,
-                    'body' => $message,
-                ]
-            );
-        }
+        $this->twilioClient->messages->create(
+            $recipientNumber,
+            [
+                'from' => $this->twilioWhatsAppNumber,
+                'body' => $message,
+            ]
+        );
     }
 }
