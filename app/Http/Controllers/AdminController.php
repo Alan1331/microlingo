@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Admin;
 use App\Models\User;
 use App\Models\LearningUnit;
@@ -69,122 +72,6 @@ class AdminController extends Controller
         return response()->json(['message' => 'Email deleted successfully'], 200);
     }
 
-    public function showUsers()
-    {
-        $users = $this->user->all();
-
-        return view('admin.layouts.kelolaPengguna', ['users' => $users]);
-    }
-
-    public function updateUser(Request $request, $noWhatsapp)
-    {
-        // Get all request data
-        $data = $request->all();
-
-        // Concat unit and level from request into progress variable
-        $data['progress'] = $data['unit'] . "-" . $data['level'];
-        unset($data['unit'], $data['level']);
-
-        // Update the user document in Firestore
-        $result = $this->user->update($noWhatsapp, $data);
-
-        // Verify user was found
-        if (!$result) {
-            return redirect()->route('kelolaPengguna')->with('failed', 'Failed to update user data!');
-        }
-
-        return redirect()->route('kelolaPengguna')->with('success', 'User updated successfully!');
-    }
-
-    public function deleteUser($noWhatsapp)
-    {
-        // Delete the user document in Firestore
-        $result = $this->user->delete($noWhatsapp);
-
-        // Verify user was found
-        if (!$result) {
-            return redirect()->route('kelolaPengguna')->with('failed', 'Failed to delete user data!');
-        }
-
-        return redirect()->route('kelolaPengguna')->with('success', 'User deleted successfully!');
-    }
-
-    public function showLearningUnits()
-    {
-        $learningUnits = $this->learningUnit->all();
-
-        return view('admin.layouts.materiPembelajaran', ['learningUnits' => $learningUnits]);
-    }
-
-    public function showLearningUnitById($id)
-    {
-        // instantiate level model
-        $level = new Level($id);
-        $levels = $level->all();
-
-        return view('admin.layouts.viewLevel', ['levels' => $levels, 'unitId' => $id]);
-    }
-
-    public function createLearningUnit(Request $request)
-    {
-        // Validate the incoming request
-        $request->validate([
-            'id' => 'required|integer',
-            'topic' => 'required|string',
-        ]);
-
-        // Ensure the unique of id
-        $learingUnitDocument = $this->learningUnit->find($request->id);
-        if ($learingUnitDocument) {
-            return redirect()->route('materiPembelajaran')->with('failed', 'Invalid input: id was used!');
-        }
-
-        // Create the learning unit document in Firestore
-        $this->learningUnit->create([
-            'id' => $request->id,
-            'topic' => $request->topic,
-        ]);
-
-        // Return a status message instead of learning unit data
-        return redirect()->route('materiPembelajaran')->with('success', 'Learning unit created successfully');
-    }
-
-    public function deleteUnit($id)
-    {
-        // Delete all levels inside the unit
-        // instantiate level model
-        $level = new Level($id);
-        $levels = $level->all();
-
-        foreach($levels as $level) {
-            try {
-                app()->call([LevelController::class, 'deleteLevel'], ['unitId' => $id, 'levelId' => $level['id']]);
-            } catch(\Exception $e) {
-                Log::info("Failed to delete a level");
-            }
-        }
-
-        // Delete the learning unit document in Firestore
-        $result = $this->learningUnit->delete($id);
-
-        // Verify learning unit was found
-        if (!$result) {
-            return redirect()->route('materiPembelajaran')->with('failed', 'Failed to delete unit data!');
-        }
-
-        return redirect()->route('materiPembelajaran')->with('success', 'Unit deleted successfully!');
-    }
-    
-    public function deleteLevel($id, $levelId) {
-        try {
-            App::call('App\Http\Controllers\LevelController@deleteLevel', ['unitId' => $id, 'levelId' => $levelId]);
-            return redirect()->route('units.levels', $id)->with('success', 'Level deleted successfully!');
-        } catch(\Exception $e) {
-            Log::info("Failed to delete a level");
-            return redirect()->route('units.levels', $id)->with('failed', 'Failed to delete level!');
-        }
-    }
-
     public function updateLevel(Request $request, $id, $levelId)
     {
         // instantiate level model
@@ -205,6 +92,16 @@ class AdminController extends Controller
 
     public function uploadVideo(Request $request, $id, $levelId)
     {
+        // Set the maximum execution time to 300 seconds (5 minutes)
+        set_time_limit(300);
+
+        // Log the incoming request data
+        Log::info('Incoming request data: ', $request->all());
+        Log::info('Request files: ', $request->file());
+
+        // Use dd() to dump and die
+        dd($request->all(), $request->file());
+
         // upload video
         $content = '';
         $filePaths = [];
@@ -248,6 +145,7 @@ class AdminController extends Controller
 
             $message = 'Videos were uploaded!';
             Log::info($message);
+            Log::info($content);
             return redirect()->route('units.levels', $id)->with('success', $message);
             
         } else {
@@ -255,5 +153,22 @@ class AdminController extends Controller
             Log::info($message);
             return redirect()->route('units.levels', $id)->with('failed', $message);
         }
+    }
+
+    public function analyzeVideo($videoNames)
+    {
+        // Set the maximum execution time to 300 seconds (5 minutes)
+        set_time_limit(300);
+        // Call the Flask API
+        $response = Http::timeout(300)->post(env('VIDEO_ANALYZER_ENDPOINT'), [
+            'video_names' => $videoNames,
+        ]);
+
+        if ($response->failed()) {
+            Log::info("Failed analyzing the video");
+            return "Content not available due to analyze video failure";
+        }
+
+        return $response['message'];
     }
 }

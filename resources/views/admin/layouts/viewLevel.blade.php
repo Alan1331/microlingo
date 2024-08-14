@@ -13,12 +13,14 @@
                         </div>
                         <!-- /.card-header -->
                         <div class="card-body">
+                            @if($levels->count() != 0)
                             <table id="example2" class="table table-bordered table-hover">
                                 <thead>
                                     <tr>
                                         <th style="width: 100px;">Level</th>
                                         <th style="width: 380px;">Topik</th>
-                                        <th style="width: 200px;">Aksi</th>
+                                        <th style="width: 50px;">Pertanyaan</th>
+                                        <th style="width: 150px;">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -27,13 +29,13 @@
                                 <tfoot>
                                     @foreach ($levels as $level)
                                     <tr>
-                                        <td>{{ $level['id'] }}</td>
-                                        <td>{{ $level['topic'] }}</td>
+                                        <td>{{ $level->sortId }}</td>
+                                        <td>{{ $level->topic }}</td>
+                                        <td>{{ $level->questions()->count() }}</td>
                                         <td colspan="6" style="text-align: center;">
-                                        <div class="action-buttons">
-                                            <a class="edit-button" unit-id="{{ $unitId }}" level-id="{{ $level['id'] }}">
+                                            <a class="edit-button" level-id="{{ $level->id }}">
                                                 <img src="{{ asset('edit.png') }}" alt="Edit Button">
-                                                Edit/Lihat
+                                                Update
                                             </a>
                                             <div id="editModal" class="modalAction">
                                                 <div class="modal-content3" data-dismiss="modalAction" aria-label="Close">
@@ -52,56 +54,28 @@
                                                             @error('content')
                                                                 <div class="alert alert-danger mt-2">{{ $message }}</div>
                                                             @enderror
+                                                            <label for="editVideo" class="font-weight-bold">Link Video</label>
+                                                            <input type="text" class="form-control @error('videoLink') is-invalid @enderror" name="videoLink" id="editVideo">
+                                                            @error('videoLink')
+                                                                <div class="alert alert-danger mt-2">{{ $message }}</div>
+                                                            @enderror
                                                         </div>
                                                         <div class="col-sm-10 offset-sm-2">
                                                             <button type="submit" class="btn btn-primary">Simpan</button>
-                                                            <button id="cancelButton" class="btn btn-secondary">Batalkan</button>
+                                                            <button type="button" id="cancelButton" class="btn btn-secondary">Batalkan</button>
                                                         </div>
                                                     </form>
                                                 </div>
                                             </div>
-                                            <a>
-                                                <button type="button" class="upload-button" id="uploadBtn">
-                                                    <img src="{{ asset('upload.png') }}" alt="Delete Button">
-                                                    Unggah
-                                                </button>
-                                            </a>
-                                            <div id="modalUpload" class="modalUpload">
-                                                 <div class="modal-content2">
-                                                <h1>Upload Video</h1>
-                                                <form action="#" method="POST"
-                                                    enctype="multipart/form-data">
-                                                    @csrf
-                                                    <div class="mb-3" style="align-items: center;">
-                                                        <label for="video">Choose a video:</label>
-                                                        <input type="file" name="video" id="video" accept="video/*"required class="form-control">
-                                                    </div>
-                                                    <div>
-                                                    <button type="button" class="upload-button" id="uploadBtn">
-                                                    <img src="{{ asset('upload.png') }}" alt="Delete Button">
-                                                    Unggah
-                                                </button>
-                                                    </div>
-                                                </form>
-                                                </div>
-                                            </div>
-                                            <form id="level-delete-form-{{ $level['id'] }}" action="{{ route('units.levels.delete', ['id' => $unitId, 'levelId' => $level['id']]) }}" method="POST" style="display: none;">
-                                                @csrf
-                                                @method('DELETE')
-                                            </form>
-                                            <a onclick="event.preventDefault(); if(confirm('Are you sure you want to delete this level?')) document.getElementById('level-delete-form-{{ $level['id'] }}').submit();">
-                                                @method('DELETE')
-                                                <button type="button" class="delete-button" id="deleteBtn">
-                                                    <img src="{{ asset('delete.png') }}" alt="Delete Button">
-                                                    Hapus
-                                                </button>
-                                            </a>
                                         </td>
-                                        </div>
+
                                     </tr>
                                     @endforeach
                                 </tfoot>
                             </table>
+                            @else
+                            <b>Tidak ada level untuk unit ini</b>
+                            @endif
                         </div>
                         <!-- /.card-body -->
                     </div>
@@ -118,31 +92,83 @@
     </section>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    var uploadBtn = document.getElementById('uploadBtn');
+    var uploadBtn = document.querySelectorAll('.upload-button');
     var modalUpload = document.getElementById('modalUpload');
     var cancelButton = document.getElementById('cancelButton');
     var editBtn = document.querySelectorAll('.edit-button');
     var editModal = document.getElementById('editModal');
 
     // Fungsi untuk menampilkan modal upload
-    uploadBtn.addEventListener('click', function() {
-        modalUpload.style.display = 'block';
+    uploadBtn.forEach(function(button) {
+        button.addEventListener('click', function() {
+            var unitId = this.getAttribute('unit-id');
+            var levelId = this.getAttribute('level-id');
+    
+            // Dynamically set the form action
+            var actionUrl = `/materiPembelajaran/${unitId}/levels/${levelId}/videos`;
+            document.getElementById('uploadForm').action = actionUrl;
+            modalUpload.style.display = 'block';
+        });
     });
 
     // Fungsi untuk menampilkan modal edit
     editBtn.forEach(function(button) {
         button.addEventListener('click', function() {
-            var unitId = this.getAttribute('unit-id');
             var levelId = this.getAttribute('level-id');
-            fetch(`/units/${unitId}/levels/${levelId}`)
+            fetch(`/levels/${levelId}`)
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('editTopik').value = data.topic;
                     document.getElementById('editContent').value = data.content;
-                    document.getElementById('level-update-form').action = `/materiPembelajaran/${unitId}/levels/${levelId}`;
+                    document.getElementById('editVideo').value = data.videoLink;
+                    document.getElementById('level-update-form').action = `/levels/${levelId}`;
                     editModal.style.display = "block";
                 });
         });
+    });
+
+    // Handle form submission
+    uploadForm.addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        // Hide the upload button and show the loading button
+        document.getElementById('uploadButton').style.display = 'none';
+        document.getElementById('loadingButton').style.display = 'inline-block';
+
+        // Create a FormData object from the form
+        var formData = new FormData(uploadForm);
+
+        // Log the form data for debugging
+        for (var pair of formData.entries()) {
+            console.log(pair[0]+ ', ' + pair[1]); 
+        }
+
+        // Send the AJAX request
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', uploadForm.action, true);
+        xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                // Success
+                alert('Videos uploaded successfully!');
+            } else {
+                // Error
+                alert('An error occurred while uploading the videos.');
+            }
+
+            // Reset the form
+            uploadForm.reset();
+
+            // Show the upload button and hide the loading button
+            document.getElementById('uploadButton').style.display = 'inline-block';
+            document.getElementById('loadingButton').style.display = 'none';
+
+            // Close the modal
+            modalUpload.style.display = 'none';
+        };
+
+        xhr.send(formData);
     });
 
     // Menutup modal ketika klik di luar konten modal
@@ -159,6 +185,7 @@ document.addEventListener('DOMContentLoaded', function() {
         editModal.style.display = 'none';
     });
 });
+
 document.getElementById('deleteBtn').addEventListener('click', function(event) {
         event.preventDefault(); // Mencegah aksi default tombol
         if (confirm('Are you sure you want to delete this item?')) {
@@ -166,8 +193,8 @@ document.getElementById('deleteBtn').addEventListener('click', function(event) {
             window.location.href = 'URL_PENGHAPUSAN'; // Ganti dengan URL untuk menghapus item
         }
     });
-        
-    </script>
+
+</script>
 </body>
 <style>
 

@@ -2,24 +2,63 @@
 
 namespace App\Models;
 
-class Level extends FirestoreModel
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+
+class Level extends Model
 {
-    protected $parentCollection = 'LearningUnits';
-    protected $parentId;
-    protected $collection = 'Levels';
+    use HasFactory;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
         'topic',
         'content',
-        'videos',
-    ];
-    protected $casts = [
-        'videos' => 'array',
+        'videoLink',
+        'sortId',
+        'unitId',
     ];
 
-    public function __construct($parentId)
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'topic' => 'string',
+        'content' => 'string',
+        'videoLink' => 'string',
+        'sortId' => 'integer',
+        'unitId' => 'integer',
+    ];
+
+    /**
+     * Get the unit that owns the levels.
+     */
+    public function learningUnit(): BelongsTo
     {
-        parent::__construct();
-        $this->parentId = $parentId;
-        $this->collection = $this->parentCollection . '/' . $parentId . '/' . $this->collection;
+        return $this->belongsTo(LearningUnit::class);
+    }
+
+    /**
+     * Get the questions for the level.
+     */
+    public function questions(): HasMany
+    {
+        return $this->hasMany(Question::class, 'levelId');
+    }
+
+    /**
+     * The users that belong to the level.
+     */
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'user_grade')->as('score');
     }
 }

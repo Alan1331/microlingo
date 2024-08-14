@@ -36,6 +36,7 @@
             <h1>Microlingo</h1>
             <p>chatbot inovatif yang dirancang untuk membantu Anda belajar dan meningkatkan kemampuan bahasa Inggris 
                 melalui percakapan interaktif di WhatsApp. Temukan cara baru untuk belajar bahasa dengan lebih menyenangkan dan efektif.</p>
+            <a href="https://wa.me/17208975721" class="btn btn-light btn-lg">Mulai Belajar sekarang!</a> 
             <a href="https://wa.me/+17208975721" class="btn btn-light btn-lg">Mulai Belajar sekarang!</a> 
         </div>
     </div>

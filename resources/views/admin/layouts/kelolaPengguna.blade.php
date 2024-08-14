@@ -19,7 +19,6 @@
                                     <th style="width: 200px;">Pekerjaan</th>
                                     <th style="width: 100px;">Unit</th>
                                     <th style="width: 100px;">Level</th>
-                                    <th style="width: 120px;">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -29,69 +28,11 @@
                                 @foreach ($users as $user)
                                     <tr>
                                         <?php $progress = explode("-", $user['progress']); ?>
-                                        <td>{{$user['id']}}</td>
-                                        <td>{{$user['nama']}}</td>
-                                        <td>{{$user['pekerjaan']}}</td>
+                                        <td>{{$user['phoneNumber']}}</td>
+                                        <td>{{$user['name']}}</td>
+                                        <td>{{$user['occupation']}}</td>
                                         <td>{{$progress[0]}}</td>
                                         <td>{{$progress[1]}}</td>
-                                        <td colspan="6" style="text-align: right;">
-                                            <a class="edit-button" data-id="{{$user['id']}}">
-                                                <img src="{{ asset('edit.png') }}" alt="Edit Button">
-                                                Edit
-                                            </a>
-                                            <div id="editModal" class="modalAction">
-                                                <div class="modal-content2" data-dismiss="modalAction" aria-label="Close">
-                                                    <h2 class="modal-title">Edit Pengguna</h2>
-                                                    <form id="user-update-form" method="POST">
-                                                        @csrf
-                                                        @method('PUT')
-                                                        <div class="form-group mb-3 text-left">
-                                                            <label for="editNama" class="font-weight-bold">Nama</label>
-                                                            <input type="text" class="form-control @error('nama') is-invalid @enderror" name="nama" id="editNama">
-                                                            @error('nama')
-                                                                <div class="alert alert-danger mt-2">{{ $message }}</div>
-                                                            @enderror
-                                                        </div>
-                                                        <div class="form-group mb-3 text-left">
-                                                            <label for="editPekerjaan" class="font-weight-bold">Pekerjaan</label>
-                                                            <input type="text" class="form-control @error('pekerjaan') is-invalid @enderror" name="pekerjaan" id="editPekerjaan">
-                                                            @error('pekerjaan')
-                                                                <div class="alert alert-danger mt-2">{{ $message }}</div>
-                                                            @enderror
-                                                        </div>
-                                                        <div class="form-group mb-3 text-left">
-                                                            <label for="editUnit" class="font-weight-bold">Unit</label>
-                                                            <input type="text" class="form-control @error('unit') is-invalid @enderror" name="unit" id="editUnit">
-                                                            @error('unit')
-                                                                <div class="alert alert-danger mt-2">{{ $message }}</div>
-                                                            @enderror
-                                                        </div>
-                                                        <div class="form-group mb-3 text-left">
-                                                            <label for="editLevel" class="font-weight-bold">Level</label>
-                                                            <input type="text" class="form-control @error('level') is-invalid @enderror" name="level" id="editLevel">
-                                                            @error('level')
-                                                                <div class="alert alert-danger mt-2">{{ $message }}</div>
-                                                            @enderror
-                                                        </div>
-                                                        <div class="col-sm-10 offset-sm-2">
-                                                            <button type="submit" class="btn btn-primary">Simpan</button>
-                                                            <button id="cancelButton" class="btn btn-secondary">Batalkan</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                            <form id="user-delete-form-{{ $user['id'] }}" method="POST" style="display: none;">
-                                                @csrf
-                                                @method('DELETE')
-                                            </form>
-                                            <a onclick="event.preventDefault(); if(confirm('Are you sure you want to delete this user?')) document.getElementById('user-delete-form-{{ $user['id'] }}').submit();">
-                                                @method('DELETE')
-                                                <button type="button" class="delete-button">
-                                                    <img src="{{ asset('delete.png') }}" alt="Delete Button">
-                                                    Hapus
-                                                </button>
-                                            </a>
-                                        </td>
                                     </tr>
                                 @endforeach
                             </tfoot>

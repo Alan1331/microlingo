@@ -9,54 +9,54 @@ use Illuminate\Support\Facades\Log;
 
 class LearningUnitController extends Controller
 {
-    protected $learningUnit;
     protected $notFoundMessage;
 
-    public function __construct(LearningUnit $learningUnit)
+    public function __construct()
     {
-        $this->learningUnit = $learningUnit;
         $this->notFoundMessage = 'Learning unit not found';
     }
 
     public function showLearningUnits()
     {
-        $learningUnits = $this->learningUnit->all();
+        $learningUnits = LearningUnit::all()->sortBy('sortId');
 
-        return response()->json($learningUnits);
+        return view('admin.layouts.materiPembelajaran', ['learningUnits' => $learningUnits]);
     }
 
     public function showLearningUnitById($id)
     {
-        $learingUnitDocument = $this->learningUnit->find($id);
-        if (!$learingUnitDocument) {
-            return response()->json(['message' => $this->notFoundMessage], 404);
-        }
+        $unit = LearningUnit::find($id);
+        $levels = $unit->levels->sortBy('sortId');
 
-        return response()->json($learingUnitDocument);
+        return view('admin.layouts.viewLevel', ['levels' => $levels, 'unitId' => $id]);
     }
 
     public function createLearningUnit(Request $request)
     {
         // Validate the incoming request
         $request->validate([
-            'id' => 'required|integer',
             'topic' => 'required|string',
         ]);
 
-        // Ensure the unique of id
-        $learingUnitDocument = $this->learningUnit->find($request->id);
-        if ($learingUnitDocument) {
-            return response()->json(['message' => 'Invalid input: id was used'], 403);
-        }
-
-        // Create the learning unit document in Firestore
-        $this->learningUnit->create([
-            'id' => $request->id,
+        // Create the learning unit
+        $unit = LearningUnit::create([
             'topic' => $request->topic,
         ]);
 
+        if ($unit != null) {
+            // Create 5 levels for the learning unit
+            for ($i = 1; $i <= 5; $i++) {
+                Level::create([
+                    'sortId' => $i,
+                    'unitId' => $unit->id,
+                ]);
+            }
+        } else {
+            return redirect()->route('materiPembelajaran')->with('failed', 'Failed to create learning unit');
+        }
+
         // Return a status message instead of learning unit data
-        return response()->json(['message' => 'Learning unit created successfully'], 201);
+        return redirect()->route('materiPembelajaran')->with('success', 'Learning unit created successfully');
     }
 
     public function updateLearningUnit(Request $request, $id)
@@ -73,30 +73,23 @@ class LearningUnitController extends Controller
         return response()->json(['message' => 'Learning unit updated successfully'], 200);
     }
 
-    public function deleteLearningUnit($id)
+    public function deleteUnit($id)
     {
         // Delete all levels inside the unit
-        // instantiate level model
-        $level = new Level($id);
-        $levels = $level->all();
+        $unit = LearningUnit::find($id);
+        $sortId = $unit->sortId;
+        $unit->levels()->delete();
 
-        foreach($levels as $level) {
-            try {
-                app()->call([LevelController::class, 'deleteLevel'], ['unitId' => $id, 'levelId' => $level['id']]);
-            } catch(\Exception $e) {
-                Log::info("Failed to delete a level");
-            }
-        }
-
-        // Delete the learning unit document in Firestore
-        $result = $this->learningUnit->delete($id);
+        // Delete the learning unit
+        $result = $unit->delete();
 
         // Verify learning unit was found
         if (!$result) {
-            return response()->json(['message' => $this->notFoundMessage], 404);
+            return redirect()->route('materiPembelajaran')->with('failed', 'Failed to delete unit data!');
         }
 
-        // Return a status message
-        return response()->json(['message' => 'Learning unit deleted successfully'], 200);
+        LearningUnit::where('sortId', '>', $sortId)->decrement('sortId', 1);
+
+        return redirect()->route('materiPembelajaran')->with('success', 'Unit deleted successfully!');
     }
 }

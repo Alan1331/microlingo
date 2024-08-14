@@ -4,6 +4,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\FirebaseLoginController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\LearningUnitController;
+use App\Http\Controllers\LevelController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\CheckFirebaseRole;
 use App\Http\Middleware\ReplyUser;
@@ -53,16 +55,14 @@ Route::middleware(CheckFirebaseRole::class)->group(function () {
     });
     Route::get('/logoutAdmin', [FirebaseLoginController::class, 'logout'])->name('logoutAdmin');
 
-    Route::get('/kelolaPengguna', [AdminController::class, 'showUsers'])->name('kelolaPengguna');
-    Route::put('/admin-page/users/{noWhatsapp}', [AdminController::class, 'updateUser'])->name('users.update');
-    Route::delete('/admin-page/users/{noWhatsapp}', [AdminController::class, 'deleteUser'])->name('users.delete');
+    Route::get('/kelolaPengguna', [UserController::class, 'showUsers'])->name('kelolaPengguna');
 
-    Route::get('/materiPembelajaran', [AdminController::class, 'showLearningUnits'])->name('materiPembelajaran');
-    Route::post('/materiPembelajaran', [AdminController::class, 'createLearningUnit'])->name('units.create');
-    Route::get('/materiPembelajaran/{id}', [AdminController::class, 'showLearningUnitById'])->name('units.levels');
-    Route::put('/materiPembelajaran/{id}/levels/{levelId}', [AdminController::class, 'updateLevel'])->name('units.levels.update');
-    Route::delete('/materiPembelajaran/{id}', [AdminController::class, 'deleteUnit'])->name('units.delete');
-    Route::delete('/materiPembelajaran/{id}/levels/{levelId}', [AdminController::class, 'deleteLevel'])->name('units.levels.delete');
+    Route::get('/materiPembelajaran', [LearningUnitController::class, 'showLearningUnits'])->name('materiPembelajaran');
+    Route::post('/materiPembelajaran', [LearningUnitController::class, 'createLearningUnit'])->name('units.create');
+    Route::get('/materiPembelajaran/{id}', [LearningUnitController::class, 'showLearningUnitById'])->name('units.levels');
+    Route::delete('/materiPembelajaran/{id}', [LearningUnitController::class, 'deleteUnit'])->name('units.delete');
+    Route::get('/levels/{levelId}', [LevelController::class, 'showLevelById'])->name('units.levels.show');
+    Route::delete('/materiPembelajaran/{id}/levels/{levelId}', [LevelController::class, 'deleteLevel'])->name('units.levels.delete');
 });
 
 Route::get('/unauthorizedAccess', function () {

@@ -2,14 +2,30 @@
 
 namespace App\Models;
 
-class Admin extends FirestoreModel
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Admin extends Model
 {
-    use \Illuminate\Auth\Authenticatable;
+    use HasFactory;
 
-    protected $collection = 'Admins';
+    protected $primaryKey = 'mailAddress';
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
     protected $fillable = [
-        'gid',
-        'name',
+        'mailAddress',
+    ];
+
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'mailAddress' => 'string',
     ];
 }
