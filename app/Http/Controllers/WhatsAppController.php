@@ -71,11 +71,10 @@ class WhatsAppController extends Controller
         );
     }
 
-    private function handleMenuLocation($menuLocation, $inputMessage, $recipientNumber)
+    private function handleMenuLocation($menuLocationWithSubMenu, $inputMessage, $recipientNumber)
     {
-        $menuLocationWithSubMenu = $menuLocation;
-        $menuLocation = explode('-', $menuLocation)[0];
-        # examine lokasi menu without sub-menu
+        $menuLocationWithSubMenu = explode('-', $menuLocationWithSubMenu);
+        $menuLocation = $menuLocationWithSubMenu[0]; # extract menu without submenu
         switch ($menuLocation) {
             case "userProfile":
                 return $this->handleUserProfileMenu($inputMessage, $recipientNumber);
@@ -83,13 +82,17 @@ class WhatsAppController extends Controller
                 return $this->handleUserProfileSetName($inputMessage, $recipientNumber);
             case "userProfileSetJob":
                 return $this->handleUserProfileSetJob($inputMessage, $recipientNumber);
-            case "preLearning":
-                # pass lokasi menu along with the sub menu to indetify current video index
-                return $this->showLearningMenu($recipientNumber, $menuLocationWithSubMenu);
-            case "learning":
-                return $this->giveUserQuestion($inputMessage, $recipientNumber);
-            case "learningQuestion":
-                return $this->handleUserQuestion($inputMessage, $recipientNumber);
+            case "levelPrompt":
+                return $this->showLearningMenu($inputMessage, $recipientNumber);
+            case "questionPrompt":
+                $questionIndex = 0;
+                if(isset($menuLocationWithSubMenu[1])) {
+                    # set questionIndex with submenu if any
+                    $questionIndex = intval($menuLocationWithSubMenu[1]);
+                }
+                return $this->giveUserQuestion($recipientNumber, $questionIndex, $inputMessage);
+            case "questionEval":
+                return $this->handleUserAnswer($inputMessage, $recipientNumber, intval($menuLocationWithSubMenu[1]));
             default:
                 return $this->handleMainMenu($inputMessage, $recipientNumber);
         }
@@ -99,7 +102,7 @@ class WhatsAppController extends Controller
     {
         switch ($inputMessage) {
             case "1":
-                return $this->showLearningMenu($recipientNumber);
+                return $this->showLearningMenu($inputMessage, $recipientNumber);
             case "2":
                 return $this->showProfileMenu($recipientNumber);
             case "3":
@@ -229,78 +232,65 @@ Pilih menu berikut untuk melanjutkan:
         return $message;
     }
 
-    private function showLearningMenu($recipientNumber, $menuLocation = 'preLearning')
+    private function showLearningMenu($inputMessage, $recipientNumber)
     {
+        if(strtolower($inputMessage) == "keluar") { # if user quit learning menu
+            # change menu location to mainMenu
+            return $this->backToMainMenu($recipientNumber);
+        }
+
         $userNumber = $this->formatUserPhoneNumber($recipientNumber);
 
         # get user progress
-        $learning_unit_id = null;
-        $level_id = null;
-        $user_query = App::call('App\Http\Controllers\UserController@showUserById', ['noWhatsapp' => $userNumber]);
-        if ($user_query->getStatusCode() == 200) {
-            // Decode the JSON user_query to get required data
-            $userData = $user_query->getData();
-            if (isset($userData->progress)) {
-                $user_progress = $userData->progress;
-                $user_progress = explode('-', $user_progress);
-                $learning_unit_id = $user_progress[0];
-                $level_id = $user_progress[1];
-            }
+        $userData = User::find($userNumber);
+        $learningUnitId = 0;
+        $levelId = 0;
+
+        if (isset($userData->progress)) {
+            $userProgress = $userData->progress;
+            $userProgress = explode('-', $userProgress);
+            $learningUnitId = (int)$userProgress[0];
+            $levelId = (int)$userProgress[1];
         }
 
         // instantiate level and unit model
-        $learningUnitDocument = $this->learningUnit->find($learning_unit_id);
-        $level = new Level($learning_unit_id);
-        $levelDocument = $level->find($level_id);
+        $learningUnit = LearningUnit::findBy('sortId', $learningUnitId);
+        $level = Level::where('unitId', $learningUnit->id)
+                        ->where('sortId', $levelId)
+                        ->first();
 
         $message = '';
         
-        # generate prompt if user has just entered the learning menu
-        if($menuLocation == "preLearning") {
-            $prompt = $this->generateLevelPrompt($learningUnitDocument, $levelDocument);
-            $message .= $prompt . '|';
-        }
-
-        $nextMenu = 'learning';
+        # generate prompt for the current level
+        $prompt = $this->generateLevelPrompt($learningUnit, $level);
+        $message .= $prompt . '|';
         
-        if(is_array($levelDocument['videos'])) {
-            $videos = $levelDocument['videos'];
+        if($level->videoLink != null) {
             Log::info("Video url is detected");
+            Log::info("Retrieved video url: " . $level->videoLink);
 
-            # indentify current video index based on user location
-            $videoIndex = 0;
-            if($menuLocation != "preLearning") {
-                $videoIndex = (int)(explode('-', $menuLocation)[1]);
-            }
-
-            $videoUrl = env('NGROK_URL') . Storage::url($videos[$videoIndex]);
-            Log::info("Retrieved video url: " . $videoUrl);
-            $message .= $videoUrl;
-            
-            # prompt user to type next if the next video exist
-            if(count($videos) > ($videoIndex+1)) {
-                # change next menu to the next video instead of learning
-                $nextMenu = 'preLearning-' . ($videoIndex+1);
-                $message .= '|Ketik lanjutkan atau apapun untuk menonton video selanjutnya!';
-            } else {
-                $message .= "|Ketik apapun untuk menjawab pertanyaan atau '!exit' untuk kembali ke Main Menu!";
-            }
+            # prompt user to watch the video
+            $message .= "Yuk, tonton video berikut untuk memperdalam pemahamanmu!|";
+            $message .= $level->videoLink . '|';
         } else {
             Log::info("Failed to retrive the video");
         }
 
-        # change menu location to the next menu
-        $data = [
-            'menu$menuLocation' => $nextMenu
-        ];
-        $request = Request::create('/users/$recipientNumber', 'PUT', $data);
-        App::call('App\Http\Controllers\UserController@updateUser', ['request' => $request, 'noWhatsapp' => $userNumber]);
+        $message .= "Jika sudah selesai menyimak materi, ketik apapun untuk menjawab pertanyaan atau 'Keluar' untuk kembali ke Main Menu! Tenang aja, progres belajarmu akan tersimpan kok!";
+
+        # change menu location to questionPrompt
+        $this->changeMenuLocation($userNumber, 'questionPrompt');
+
+        # set the currentGrade of user to store the number of questions of this level
+        $numberOfQuestions = $level->questions()->count();
+        $userData->currentGrade = '0/' . strval($numberOfQuestions);
+        $userData->save();
 
         return $message;
     }
 
-    private function giveUserQuestion($inputMessage, $recipientNumber) {
-        if($inputMessage == "!exit") { # if user quit learning menu
+    private function giveUserQuestion($recipientNumber, $questionIndex, $inputMessage = null) {
+        if(strtolower($inputMessage) == "keluar") { # if user quit learning menu
             # change menu location to mainMenu
             return $this->backToMainMenu($recipientNumber);
         }
@@ -308,46 +298,40 @@ Pilih menu berikut untuk melanjutkan:
         $userNumber = $this->formatUserPhoneNumber($recipientNumber);
 
         # get user progress
-        $learning_unit_id = null;
-        $level_id = null;
-        $user_query = App::call('App\Http\Controllers\UserController@showUserById', ['noWhatsapp' => $userNumber]);
-        if ($user_query->getStatusCode() == 200) {
-            // Decode the JSON user_query to get required data
-            $userData = $user_query->getData();
-            if (isset($userData->progress)) {
-                $user_progress = $userData->progress;
-                $user_progress = explode('-', $user_progress);
-                $learning_unit_id = $user_progress[0];
-                $level_id = $user_progress[1];
-            }
+        $userData = User::find($userNumber);
+        $learningUnitId = 0;
+        $levelId = 0;
+
+        if (isset($userData->progress)) {
+            $userProgress = $userData->progress;
+            $userProgress = explode('-', $userProgress);
+            $learningUnitId = (int)$userProgress[0];
+            $levelId = (int)$userProgress[1];
         }
 
         // instantiate level and unit model
-        $learningUnitDocument = $this->learningUnit->find($learning_unit_id);
-        $level = new Level($learning_unit_id);
-        $levelDocument = $level->find($level_id);
+        $learningUnit = LearningUnit::findBy('sortId', $learningUnitId);
+        $level = Level::where('unitId', $learningUnit->id)
+                        ->where('sortId', $levelId)
+                        ->first();
 
         $message = '';
 
-        if(isset($levelDocument['topic']) && isset($levelDocument['content'])) {
-            $topic = $levelDocument['topic'];
-            $content = $levelDocument['content'];
-            $generatedQuestion = $this->generateQuestion($topic, $content);
-            $message .= "Setelah menonton, jawab pertanyaan berikut:" . $generatedQuestion;
+        $questions = $level->questions()->orderBy('id', 'asc')->get();
+        $question = $questions->get($questionIndex)->question ?? "Question not found"; # get question at requested index
+        if($question != null) {
+            if($questionIndex == 0) {
+                $message .= "Jawab quiz berikut untuk mengevaluasi pemahaman Anda!!|";
+            }
+
+            $message .= "Quiz nomor " . strval($questionIndex+1) . ":\n" . $question;
 
             # update user current question
-            $data = [
-                'currentQuestion' => $generatedQuestion
-            ];
-            $request = Request::create('/users/$recipientNumber', 'PUT', $data);
-            App::call('App\Http\Controllers\UserController@updateUser', ['request' => $request, 'noWhatsapp' => $userNumber]);
+            $userData->currentQuestion = $question;
+            $userData->save();
 
-            # change menu location to learningQuestion
-            $data = [
-                'menu$menuLocation' => 'learningQuestion'
-            ];
-            $request = Request::create('/users/$recipientNumber', 'PUT', $data);
-            App::call('App\Http\Controllers\UserController@updateUser', ['request' => $request, 'noWhatsapp' => $userNumber]);
+            # change menu location to questionEval-{questionIndex}
+            $this->changeMenuLocation($userNumber, 'questionEval-' . strval($questionIndex));
         } else {
             Log::info("Failed to generate the question due to undetected topic or content");
         }
@@ -355,155 +339,116 @@ Pilih menu berikut untuk melanjutkan:
         return $message;
     }
 
-    private function handleUserQuestion($inputMessage, $recipientNumber) {
-        Log::info("Entering handleUserQuestion");
+    private function handleUserAnswer($inputMessage, $recipientNumber, $questionIndex = 0) {
+        Log::info("Entering handleUserAnswer");
         $userNumber = $this->formatUserPhoneNumber($recipientNumber);
 
         # get user progress
-        $learning_unit_id = null;
-        $level_id = null;
-        $user_current_question = null;
-        $user_query = App::call('App\Http\Controllers\UserController@showUserById', ['noWhatsapp' => $userNumber]);
-        if ($user_query->getStatusCode() == 200) {
-            // Decode the JSON user_query to get required data
-            $userData = $user_query->getData();
-            if (isset($userData->progress)) {
-                $user_progress = $userData->progress;
-                $user_progress = explode('-', $user_progress);
-                $learning_unit_id = $user_progress[0];
-                $level_id = $user_progress[1];
-                $user_current_question = $userData->currentQuestion;
-            }
+        $userData = User::find($userNumber);
+        $learningUnitId = 0;
+        $levelId = 0;
+
+        if (isset($userData->progress)) {
+            $userProgress = $userData->progress;
+            $userProgress = explode('-', $userProgress);
+            $learningUnitId = (int)$userProgress[0];
+            $levelId = (int)$userProgress[1];
         }
 
         // instantiate level and unit model
-        $learningUnitDocument = $this->learningUnit->find($learning_unit_id);
-        $level = new Level($learning_unit_id);
-        $levelDocument = $level->find($level_id);
-        try {
-            if(isset($levelDocument['topic']) && isset($levelDocument['content'])) {
-                $topic = $levelDocument['topic'];
-                $content = $levelDocument['content'];
-                $evaluation = $this->evaluateUserAnswer($topic, $content, $user_current_question, $inputMessage);
-    
-                $message = '';
-                $grade = $evaluation['grade'];
-                $gradeInt = (int)$grade;
-                Log::info("The grade in integer: " . $grade);
-                $feedback = $evaluation['feedback'];
-                if($gradeInt >= 50) {
+        $learningUnit = LearningUnit::findBy('sortId', $learningUnitId);
+        $level = Level::where('unitId', $learningUnit->id)
+                        ->where('sortId', $levelId)
+                        ->first();
+
+        $question = $level->questions()->first();
+        $answer = $question->answer;
+        if($answer != null) {
+            $evaluation = false;
+
+            if($question->type == 'Multiple Choice') {
+                # evaluating answer of multiple choice question
+                $answerOption = strtolower(explode('|', $answer)[0]);
+                $answerExact = strtolower(explode('|', $answer)[1]);
+
+                if(strtolower($inputMessage) == $answerOption || strtolower($inputMessage) == $answerExact) {
+                    $evaluation = true;
+                }
+            } else {
+                # evaluating answer of essay question
+                if(strtolower($inputMessage) == strtolower($answer)) {
+                    $evaluation = true;
+                }
+            }
+
+            $message = "";
+
+            $currentGrade = explode('/', $userData->currentGrade);
+
+            if($evaluation) {
+                # increase the correct answer in currentGrade
+                $currentCorrectAnswers = intval($currentGrade[0]);
+                $currentCorrectAnswers++;
+                $userData->currentGrade = strval($currentCorrectAnswers) . '/' . $currentGrade[1];
+                $userData->save();
+
+                $message .= "Selamat, jawaban Anda benar.|";
+            } else {
+                $message .= "Yah, jawaban Anda salah.|";
+            }
+
+            # increase questionIndex after evaluating the answer
+            $questionIndex++;
+
+            $numberOfQuestions = intval($currentGrade[1]);
+            if($questionIndex < $numberOfQuestions) {
+                # send the next question if any
+                $message .= $this->giveUserQuestion($recipientNumber, $questionIndex);
+            } else {
+                # grade all user answers in the current level
+                $currentGrade = explode('/', $userData->currentGrade);
+                $correctAnswers = intval($currentGrade[0]);
+                $score = ($correctAnswers / $numberOfQuestions) * 100; // return (float) score
+                $score = round($score); // round the score to integer
+
+                if($score >= 50) {
                     # increase the level
-                    if($level->find($level_id + 1)) {
-                        # go to the next level if any 
-                        $level_id++;
-                    } else {
-                        # go to the next unit if all levels were completed
-                        $learning_unit_id++;
-                    }
-                    $grade = "Congratulations, your grade is: " . $grade . "%. Thus, you have passed the unit's passing grade(50%)";
+                    $userData->progress = strval($learningUnitId) . '-' . strval(++$levelId);
+                    $userData->save();
+
+                    # store the user score
+                    $userData->levels()->attach($level->id, ['score' => $score]);
+
+                    $message .= "Selamat, Anda telah berhasil menyelesaikan level ini dengan *nilai: " . strval($score) . "*";
+                    $message .= "\n\n*ketik apapun untuk melanjutkan ke level berikutnya atau 'Keluar' untuk kembali ke Main Menu!* Tenang aja, progress kamu tidak akan hilang kok!";
                 } else {
-                    $grade = "Unfortunatelly, your grade is: " . $grade . "%. Thus, you have failed to pass the unit's passing grade(50%)";
+                    $message .= "Maaf, *nilai Anda: " . strval($score) . "*; tidak lolos passing grade(50). Pelajarin lagi materi di level ini yuk! Semangat!";
+                    $message .= "\n\n*ketik apapun untuk mengulang level ini atau 'Keluar' untuk kembali ke Main Menu!* Tenang aja, progress kamu tidak akan hilang kok!";
                 }
 
-                # change menu location to preLearning
-                $data = [
-                    'menu$menuLocation' => 'preLearning',
-                    'progress' => $learning_unit_id . '-' . $level_id,
-                ];
-                $request = Request::create('/users/$userNumber', 'PUT', $data);
-                App::call('App\Http\Controllers\UserController@updateUser', ['request' => $request, 'noWhatsapp' => $userNumber]);
-    
-                $message = $grade . "|" . $feedback . "|Ketik lanjutkan atau apapun untuk melanjutkan!";
-    
-                return $message;
-            } else {
-                return "Internal service error: topic and learning material not found";
+                # change menu location to levelPrompt
+                $this->changeMenuLocation($userNumber, 'levelPrompt');
             }
-        } catch(\Exception $e) {
-            return $e;
+
+            return $message;
+        } else {
+            return "Internal service error: topic and learning material not found";
         }
     }
 
-    private function generateLevelPrompt($learningUnitDocument, $levelDocument)
+    private function generateLevelPrompt($learningUnit, $level)
     {
         // Base prompt for ChatGPT
-        $basePrompt = "Berikut adalah materi pembelajaran untuk topik: {$learningUnitDocument['topic']}. ";
-        $basePrompt .= "Hari ini, kita akan membahas level: {$levelDocument['id']}. {$levelDocument['topic']}.";
-        $basePrompt .= "Silakan tonton video-video berikut ini untuk memperdalam pemahamanmu:\n";
-
-        $isMaxCharsValid = false;
-
-        while (!$isMaxCharsValid) {
-            // Humanize the prompt using ChatGPT
-            $response = $this->openai->completions()->create([
-                'model' => 'gpt-3.5-turbo-instruct',
-                'prompt' => $basePrompt . "\nHumanize the above information into a friendly and engaging conversation as concise as possible with maximum 400 characters in Bahasa Indonesia without changing the meaning.",
-                'max_tokens' => 250,
-                'temperature' => 0.7,
-            ]);
-    
-            $basePrompt = $response['choices'][0]['text'];
-
-            if (strlen($basePrompt) <= 400) {
-                $isMaxCharsValid = true;
-            }
+        $basePrompt = "Selamat datang di unit: {$learningUnit->sortId} - {$learningUnit->topic}\n";
+        $basePrompt .= "Saat ini, Anda berada pada level: {$level->sortId} - {$level->topic}\n\n";
+        $basePrompt .= "Simak ringkasan materi berikut:\n";
+        if ($level->content != null) {
+            $basePrompt .= $level->content;
+        } else {
+            $basePrompt .= "Mohon maaf, materi untuk level ini belum dirilis";
         }
 
         return $basePrompt;
-    }
-
-    private function generateQuestion($topic, $content)
-    {
-        $response = $this->openai->completions()->create([
-            'model' => 'gpt-3.5-turbo-instruct',
-            'prompt' => "Analyze the following learning materials, then generate a question about " . $topic . " for user in english:" . "\n" . $content,
-            'max_tokens' => 150,
-            'temperature' => 0.7,
-        ]);
-
-        return $response['choices'][0]['text'];
-    }
-
-    private function evaluateUserAnswer($topic, $content, $question, $answer)
-    {
-        $prompt = "Analyze the following learning material: " . "\n" . $content . "\n";
-        $prompt .= "From the given material, user has answered the following question about " . $topic . ":\n";
-        $prompt .= $question . "\nAnd, the user answer:\n";
-        $prompt .= $answer . "\nEvaluate the answer and return grade only in number format with range from 0 to 100 and feedback in Bahasa Indonesia!";
-        $prompt .= "The grade and feedback are seperated by '|' character to ease me to parse the return message in my program before shown to user.";
-        $response = $this->openai->completions()->create([
-            'model' => 'gpt-3.5-turbo-instruct',
-            'prompt' => $prompt,
-            'max_tokens' => 150,
-            'temperature' => 0.7,
-        ]);
-
-        $evaluation = $response['choices'][0]['text'];
-
-        $grade = explode('|', $evaluation)[0];
-        $feedback = explode('|', $evaluation)[1];
-
-        if(!ctype_digit($grade)) {
-            $grade = $this->extractNumbers($grade);
-            $grade = (string)$grade[0];
-        }
-
-        $result = array(
-            "grade" => $grade,
-            "feedback" => $feedback
-        );
-
-        return $result;
-    }
-
-    private function extractNumbers($string) {
-        // This pattern matches sequences of digits
-        $pattern = '/\d+/';
-        // Find all sequences of digits in the string
-        preg_match_all($pattern, $string, $matches);
-        // Convert the matched sequences to integers
-        $numbers = array_map('intval', $matches[0]);
-        return $numbers;
     }
 
     private function checkUser($recipientNumber)

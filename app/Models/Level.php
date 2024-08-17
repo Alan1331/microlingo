@@ -61,4 +61,9 @@ class Level extends Model
     {
         return $this->belongsToMany(User::class, 'user_grade')->as('score');
     }
+
+    public static function findBy($attribute, $value)
+    {
+        return static::where($attribute, $value)->first();
+    }
 }
