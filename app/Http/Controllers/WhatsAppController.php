@@ -361,78 +361,87 @@ Pilih menu berikut untuk melanjutkan:
                         ->where('sortId', $levelId)
                         ->first();
 
-        $question = $level->questions()->first();
-        $answer = $question->answer;
-        if($answer != null) {
-            $evaluation = false;
+        $questions = $level->questions()->orderBy('id', 'asc')->get();
+        $question = $questions->get($questionIndex) ?? null; # get question at requested index
+        
+        if($question != null) {
 
-            if($question->type == 'Multiple Choice') {
-                # evaluating answer of multiple choice question
-                $answerOption = strtolower(explode('|', $answer)[0]);
-                $answerExact = strtolower(explode('|', $answer)[1]);
+            $answer = $question->answer;
+            if($answer != null) {
+                $evaluation = false;
 
-                if(strtolower($inputMessage) == $answerOption || strtolower($inputMessage) == $answerExact) {
-                    $evaluation = true;
+                if($question->type == 'Multiple Choice') {
+                    # evaluating answer of multiple choice question
+                    $answerOption = strtolower(explode('|', $answer)[0]);
+                    $answerExact = strtolower(explode('|', $answer)[1]);
+                    Log::info("Jawaban user: " . strtolower($inputMessage));
+                    Log::info("Jawaban benar: " . $answerExact);
+
+                    if(strtolower($inputMessage) == $answerOption || strtolower($inputMessage) == $answerExact) {
+                        $evaluation = true;
+                    }
+                } else {
+                    # evaluating answer of essay question
+                    if(strtolower($inputMessage) == strtolower($answer)) {
+                        $evaluation = true;
+                    }
                 }
-            } else {
-                # evaluating answer of essay question
-                if(strtolower($inputMessage) == strtolower($answer)) {
-                    $evaluation = true;
-                }
-            }
 
-            $message = "";
+                $message = "";
 
-            $currentGrade = explode('/', $userData->currentGrade);
-
-            if($evaluation) {
-                # increase the correct answer in currentGrade
-                $currentCorrectAnswers = intval($currentGrade[0]);
-                $currentCorrectAnswers++;
-                $userData->currentGrade = strval($currentCorrectAnswers) . '/' . $currentGrade[1];
-                $userData->save();
-
-                $message .= "Selamat, jawaban Anda benar.|";
-            } else {
-                $message .= "Yah, jawaban Anda salah.|";
-            }
-
-            # increase questionIndex after evaluating the answer
-            $questionIndex++;
-
-            $numberOfQuestions = intval($currentGrade[1]);
-            if($questionIndex < $numberOfQuestions) {
-                # send the next question if any
-                $message .= $this->giveUserQuestion($recipientNumber, $questionIndex);
-            } else {
-                # grade all user answers in the current level
                 $currentGrade = explode('/', $userData->currentGrade);
-                $correctAnswers = intval($currentGrade[0]);
-                $score = ($correctAnswers / $numberOfQuestions) * 100; // return (float) score
-                $score = round($score); // round the score to integer
 
-                if($score >= 50) {
-                    # increase the level
-                    $userData->progress = strval($learningUnitId) . '-' . strval(++$levelId);
+                if($evaluation) {
+                    # increase the correct answer in currentGrade
+                    $currentCorrectAnswers = intval($currentGrade[0]);
+                    $currentCorrectAnswers++;
+                    $userData->currentGrade = strval($currentCorrectAnswers) . '/' . $currentGrade[1];
                     $userData->save();
 
-                    # store the user score
-                    $userData->levels()->attach($level->id, ['score' => $score]);
-
-                    $message .= "Selamat, Anda telah berhasil menyelesaikan level ini dengan *nilai: " . strval($score) . "*";
-                    $message .= "\n\n*ketik apapun untuk melanjutkan ke level berikutnya atau 'Keluar' untuk kembali ke Main Menu!* Tenang aja, progress kamu tidak akan hilang kok!";
+                    $message .= "Selamat, jawaban Anda benar.|";
                 } else {
-                    $message .= "Maaf, *nilai Anda: " . strval($score) . "*; tidak lolos passing grade(50). Pelajarin lagi materi di level ini yuk! Semangat!";
-                    $message .= "\n\n*ketik apapun untuk mengulang level ini atau 'Keluar' untuk kembali ke Main Menu!* Tenang aja, progress kamu tidak akan hilang kok!";
+                    $message .= "Yah, jawaban Anda salah.|";
                 }
 
-                # change menu location to levelPrompt
-                $this->changeMenuLocation($userNumber, 'levelPrompt');
-            }
+                # increase questionIndex after evaluating the answer
+                $questionIndex++;
 
-            return $message;
+                $numberOfQuestions = intval($currentGrade[1]);
+                if($questionIndex < $numberOfQuestions) {
+                    # send the next question if any
+                    $message .= $this->giveUserQuestion($recipientNumber, $questionIndex);
+                } else {
+                    # grade all user answers in the current level
+                    $currentGrade = explode('/', $userData->currentGrade);
+                    $correctAnswers = intval($currentGrade[0]);
+                    $score = ($correctAnswers / $numberOfQuestions) * 100; // return (float) score
+                    $score = round($score); // round the score to integer
+
+                    if($score >= 50) {
+                        # increase the level
+                        $userData->progress = strval($learningUnitId) . '-' . strval(++$levelId);
+                        $userData->save();
+
+                        # store the user score
+                        $userData->levels()->attach($level->id, ['score' => $score]);
+
+                        $message .= "Selamat, Anda telah berhasil menyelesaikan level ini dengan *nilai: " . strval($score) . "*";
+                        $message .= "\n\n*ketik apapun untuk melanjutkan ke level berikutnya atau 'Keluar' untuk kembali ke Main Menu!* Tenang aja, progress kamu tidak akan hilang kok!";
+                    } else {
+                        $message .= "Maaf, *nilai Anda: " . strval($score) . "*; tidak lolos passing grade(50). Pelajarin lagi materi di level ini yuk! Semangat!";
+                        $message .= "\n\n*ketik apapun untuk mengulang level ini atau 'Keluar' untuk kembali ke Main Menu!* Tenang aja, progress kamu tidak akan hilang kok!";
+                    }
+
+                    # change menu location to levelPrompt
+                    $this->changeMenuLocation($userNumber, 'levelPrompt');
+                }
+
+                return $message;
+            } else {
+                return "Internal service error: topic and learning material not found";
+            }
         } else {
-            return "Internal service error: topic and learning material not found";
+            return "Internal service error: question not found in the database";
         }
     }
 
