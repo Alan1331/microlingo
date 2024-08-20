@@ -20,7 +20,7 @@ class LevelController extends Controller
             return response()->json(['message' => 'Level not found'], 404);
         }
 
-        return response()->json($level);
+        return view('admin.layouts.updateLevel', ['level' => $level]);
     }
 
     public function createLevel($unitId, Request $request)

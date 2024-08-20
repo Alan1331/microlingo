@@ -49,6 +49,7 @@ Route::get('/loginAdmin', function () {
     return view('loginAdmin');
 })->name('loginAdmin');
 
+
 Route::middleware(CheckFirebaseRole::class)->group(function () {
     Route::get('admin-page', function(){
         return view('admin.index');
@@ -56,18 +57,21 @@ Route::middleware(CheckFirebaseRole::class)->group(function () {
     Route::get('/logoutAdmin', [FirebaseLoginController::class, 'logout'])->name('logoutAdmin');
 
     Route::get('/kelolaPengguna', [UserController::class, 'showUsers'])->name('kelolaPengguna');
+    Route::get('/updateLevel/{levelId}', [LevelController::class, 'showLevelById'])->name('units.levels.show');
+    
 
     Route::get('/materiPembelajaran', [LearningUnitController::class, 'showLearningUnits'])->name('materiPembelajaran');
     Route::post('/materiPembelajaran', [LearningUnitController::class, 'createLearningUnit'])->name('units.create');
     Route::get('/materiPembelajaran/{id}', [LearningUnitController::class, 'showLearningUnitById'])->name('units.levels');
     Route::delete('/materiPembelajaran/{id}', [LearningUnitController::class, 'deleteUnit'])->name('units.delete');
-    Route::get('/levels/{levelId}', [LevelController::class, 'showLevelById'])->name('units.levels.show');
     Route::delete('/materiPembelajaran/{id}/levels/{levelId}', [LevelController::class, 'deleteLevel'])->name('units.levels.delete');
 });
 
 Route::get('/unauthorizedAccess', function () {
     return view('admin.layouts.unauthorizedAccess');
 });
+
+
 
 
 require __DIR__.'/auth.php';

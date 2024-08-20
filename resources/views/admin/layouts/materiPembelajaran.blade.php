@@ -74,7 +74,7 @@
                                                 @csrf
                                                 @method('DELETE')
                                             </form>
-                                            <a onclick="event.preventDefault(); if(confirm('Are you sure you want to delete this unit?')) document.getElementById('unit-delete-form-{{ $unit['id'] }}').submit();">
+                                            <a onclick="event.preventDefault(); if(confirm('Apakah admin yakin akan menghapus unit ini?\nKarena unit sebelumnya akan dipindahkan ke atas')) document.getElementById('unit-delete-form-{{ $unit['id'] }}').submit();">
                                                 @method('DELETE')
                                                 <button type="button" class="delete-button">
                                                     <img src="{{ asset('delete.png') }}" alt="Delete Button">

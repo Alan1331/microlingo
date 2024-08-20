@@ -104,7 +104,7 @@
             <a href="/kelolaPengguna" class="nav-link">
                 <img src="{{ asset('managedata.png') }}" class="nav-icon" alt="kelola Icon" style="width: 25px; height: 25px;">
                 <p class="brand-text font-poppins-regular" style="color: black;">
-                    Kelola Pengguna
+                    Data Pengguna
                 </p>
             </a>
         </li>
