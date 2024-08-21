@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use Twilio\Rest\Client;
 use App\Http\Controllers\UserController;
 use Illuminate\Http\JsonResponse;
@@ -76,6 +77,10 @@ class WhatsAppController extends Controller
         $menuLocationWithSubMenu = explode('-', $menuLocationWithSubMenu);
         $menuLocation = $menuLocationWithSubMenu[0]; # extract menu without submenu
         switch ($menuLocation) {
+            case "pitchingMenuAskName":
+                return $this->pitchingMenuAskName($inputMessage, $recipientNumber);
+            case "pitchingSession":
+                return $this->pitchingSession($inputMessage, $recipientNumber);
             case "userProfile":
                 return $this->handleUserProfileMenu($inputMessage, $recipientNumber);
             case "userProfileSetName":
@@ -104,8 +109,10 @@ class WhatsAppController extends Controller
             case "1":
                 return $this->showLearningMenu($inputMessage, $recipientNumber);
             case "2":
-                return $this->showProfileMenu($recipientNumber);
+                return $this->showPitchingMenu($recipientNumber);
             case "3":
+                return $this->showProfileMenu($recipientNumber);
+            case "4":
                 return $this->showAboutUs();
             default:
                 return $this->showMainMenu();
@@ -121,6 +128,87 @@ class WhatsAppController extends Controller
                 return $this->backToMainMenu($recipientNumber);
             default:
                 return $this->showProfileMenu($recipientNumber);
+        }
+    }
+
+    private function showPitchingMenu($recipientNumber)
+    {
+        $userNumber = $this->formatUserPhoneNumber($recipientNumber);
+
+        $userName = User::find($userNumber)->name;
+
+        if(isset($userName)) {
+            return $this->enterPitchingSession($recipientNumber, $userName);
+        } else {
+            $this->changeMenuLocation($userNumber, 'pitchingMenuAskName');
+            return "Siapa nama Anda?";
+        }
+    }
+
+    private function pitchingMenuAskName($inputMessage, $recipientNumber) {
+        $userNumber = $this->formatUserPhoneNumber($recipientNumber);
+
+        $userName = $inputMessage;
+        $user = User::find($userNumber);
+        $user->name = $userName;
+        $user->save();
+
+        return $this->enterPitchingSession($recipientNumber, $userName);
+    }
+
+    private function enterPitchingSession($recipientNumber, $userName)
+    {
+        $userNumber = $this->formatUserPhoneNumber($recipientNumber);
+
+        $this->changeMenuLocation($userNumber, 'pitchingSession');
+        $message = "Bayangkan Anda sedang bertemu dengan calon partner bisnis Anda dari luar negeri.";
+        $message .= "Tugas Anda adalah untuk meyakinkan calon partner bisnis Anda untuk bergabung dalam bisnis Anda!";
+        $message .= "Manfaatkan semua ilmu yang sudah Anda pelajari pada MicroLingo untuk deal dengan partner Anda!";
+        $message .= "Good luck!!|";
+
+        $helloMessage = "Hello, I am " . $userName;
+        $message .= $this->pitchingSession($helloMessage, $recipientNumber);
+
+        return $message;
+    }
+
+    private function pitchingSession($inputMessage, $recipientNumber)
+    {
+        $userNumber = $this->formatUserPhoneNumber($recipientNumber);
+
+        // Data for the API request
+        $data = [
+            'session_id' => $userNumber,
+            'input' => $inputMessage,
+        ];
+
+        // Send a POST request using Laravel's Http client
+        $response = Http::post(env('PITCHING_SERVICE_ENDPOINT'), $data);
+
+        // Check for errors and return the response
+        if ($response->successful()) {
+            $responseData = $response->json();
+            $message = $responseData['message'];
+            $missionStatus = $responseData['mission_status'];
+
+            if($missionStatus != "ongoing") {
+                # return back to main menu if conversation ends
+                $this->backToMainMenu($recipientNumber);
+            }
+
+            if($missionStatus == "success") {
+                $message .= "|Congratulations, you have *successfully* finished the mission.";
+                $message .= "Ketik 'Yes' untuk kembali ke Main Menu.";
+            }
+
+            if($missionStatus == "failed") {
+                $message .= "|Unfortunatelly, you have *failed* the mission. Don't worry, try again next!!";
+                $message .= "Ketik 'Semangat' untuk kembali ke Main Menu.";
+            }
+
+            return $message;
+        } else {
+            return 'Failed to communicate with the pitching API.';
         }
     }
 

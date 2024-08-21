@@ -1,0 +1,1 @@
+storage = {} # Session storage
