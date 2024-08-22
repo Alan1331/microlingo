@@ -22,7 +22,7 @@
                                 <a class="add-button" id="topikBtn"
                                     style="display: flex; align-items: center; margin-bottom: 10px;">
                                     <img src="{{ asset('add.png') }}" alt="add Button" style="margin-right: 8px;">
-                                    Topik Baru
+                                    Tambah Unit
                                 </a>
                                 <div id="editModal" class="modalAction">
                                     <div class="modal-content4" data-dismiss="modalAction" aria-label="Close">
@@ -54,7 +54,7 @@
                                     <tr>
                                         <th style="width: 100px;">Unit</th>
                                         <th style="width: 500px;">Topik</th>
-                                        <th style="width: 200px;">Aksi</th>
+                                        <th style="width: 300px;">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody id="dataTableBody">
@@ -81,6 +81,10 @@
                                                     Hapus
                                                 </button>
                                             </a>
+                                            <a href="/updateLevel" class="edit-button">
+                                                        <img src="{{ asset('edit.png') }}" alt="Edit Button">
+                                                        Update
+                                                    </a>
                                         </td>
                                     </tr>
                                     @endforeach
@@ -165,6 +169,36 @@
     }
 
     .view-button:hover {
+        background-color: #03346E;
+        /* Warna merah gelap saat hover */
+        color: #ffffff;
+    }
+
+    .edit-button {
+        display: inline-block;
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: bold;
+        color: white;
+        background-color: blue;
+        /* Warna merah untuk tombol delete */
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s, color 0.3s;
+        text-align: center;
+    }
+
+    .edit-button img {
+        width: 20px;
+        /* Sesuaikan ukuran gambar */
+        height: 20px;
+        /* Sesuaikan ukuran gambar */
+        margin-right: 5px;
+        /* Jarak antara gambar dan teks */
+    }
+
+    .edit-button:hover {
         background-color: #03346E;
         /* Warna merah gelap saat hover */
         color: #ffffff;
