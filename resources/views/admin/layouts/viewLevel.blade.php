@@ -9,10 +9,14 @@
                 <div class="col-12">
                     <div class="card" style="margin-top: 25px;">
                         <div class="card-header">
-                            <h3 class="card-title">Level</h3>
+                            <h1 class="card-title">Daftar Level di Unit {{$unitNumber}}</h1>
                         </div>
                         <!-- /.card-header -->
                         <div class="card-body">
+                            <a href="{{route('materiPembelajaran')}}" class="back-button">
+                                <img src="{{ asset('edit.png') }}" alt="Back Button">
+                                Back
+                            </a>
                             @if($levels->count() != 0)
                                 <table id="example2" class="table table-bordered table-hover">
                                     <thead>
@@ -163,6 +167,36 @@ document.getElementById('deleteBtn').addEventListener('click', function (event) 
     </script>
 </body>
 <style>
+    .back-button {
+        display: inline-block;
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: bold;
+        color: white;
+        background-color: blue;
+        /* Warna merah untuk tombol delete */
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s, color 0.3s;
+        text-align: center;
+    }
+    
+    .back-button img {
+        width: 20px;
+        /* Sesuaikan ukuran gambar */
+        height: 20px;
+        /* Sesuaikan ukuran gambar */
+        margin-right: 5px;
+        /* Jarak antara gambar dan teks */
+    }
+
+    .back-button:hover {
+        background-color: #03346E;
+        /* Warna merah gelap saat hover */
+        color: #ffffff;
+    }
+
     .action-buttons {
         display: flex;
         justify-content: center;

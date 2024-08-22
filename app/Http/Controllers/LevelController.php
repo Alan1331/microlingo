@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use App\Models\LearningUnit;
 use App\Models\Level;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Validator;
 
 class LevelController extends Controller
 {
@@ -20,7 +22,7 @@ class LevelController extends Controller
             return response()->json(['message' => 'Level not found'], 404);
         }
 
-        return view('admin.layouts.updateLevel', ['level' => $level]);
+        return view('admin.layouts.updateLevel', ['level' => $level, 'questions' => $level->questions]);
     }
 
     public function createLevel($unitId, Request $request)
@@ -120,21 +122,27 @@ class LevelController extends Controller
         return $response['message'];
     }
 
-    public function updateLevel(Request $request, $unitId, $levelId)
+    public function updateLevel(Request $request, $levelId)
     {
-        // instantiate level model
-        $level = new Level($unitId);
+        $level = Level::find($levelId);
 
-        // Update the level document in Firestore
-        $result = $level->update($levelId, $request->all());
+        $validator = Validator::make($request->all(), [
+            'topic' => 'required|max:255|string',
+            'content' => 'required|string',
+            'videoLink' => 'required|url',
+        ]);
 
-        // Verify learning unit was found
-        if (!$result) {
-            return response()->json(['message' => 'Level not found'], 404);
+        if ($validator->fails()) {
+            return redirect(view('admin.layouts.updateLevel', ['level' => $level, 'questions' => $level->questions]))
+                        ->withErrors($validator)
+                        ->withInput();
         }
 
-        // Return a status message
-        return response()->json(['message' => 'Level updated successfully'], 200);
+        // Retrieve the validated input and save it
+        $validated = $validator->validated();
+        $level->update($validated);
+
+        return view('admin.layouts.updateLevel', ['level' => $level]);
     }
 
     public function deleteLevel($id, $levelId) {
