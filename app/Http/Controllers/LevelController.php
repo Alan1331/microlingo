@@ -142,7 +142,7 @@ class LevelController extends Controller
         $validated = $validator->validated();
         $level->update($validated);
 
-        return view('admin.layouts.updateLevel', ['level' => $level]);
+        return view('admin.layouts.updateLevel', ['level' => $level, 'questions' => $level->questions]);
     }
 
     public function deleteLevel($id, $levelId) {
