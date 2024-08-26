@@ -58,11 +58,14 @@ class WhatsAppController extends Controller
 
         $recipientNumber = $request->input('From'); // Change to the recipient's number
         $inputMessage = $request->input('Body'); // Message from user
+        $userNumber = $this->formatUserPhoneNumber($recipientNumber);
+
+        Log::info("[" . $userNumber . "] Message received: " . $inputMessage);
 
         # Ensure that the user was registered
-        $menuLocation = $this->checkUser($recipientNumber);
+        $menuLocation = $this->checkUser($userNumber);
 
-        $response = $this->handleMenuLocation($menuLocation, $inputMessage, $recipientNumber);
+        $response = $this->handleMenuLocation($menuLocation, $inputMessage, $userNumber);
 
         return response()->json(
             [
@@ -72,94 +75,92 @@ class WhatsAppController extends Controller
         );
     }
 
-    private function handleMenuLocation($menuLocationWithSubMenu, $inputMessage, $recipientNumber)
+    private function handleMenuLocation($menuLocationWithSubMenu, $inputMessage, $userNumber)
     {
         $menuLocationWithSubMenu = explode('-', $menuLocationWithSubMenu);
         $menuLocation = $menuLocationWithSubMenu[0]; # extract menu without submenu
         switch ($menuLocation) {
             case "pitchingMenuAskName":
-                return $this->pitchingMenuAskName($inputMessage, $recipientNumber);
+                return $this->pitchingMenuAskName($inputMessage, $userNumber);
             case "pitchingSession":
-                return $this->pitchingSession($inputMessage, $recipientNumber);
+                return $this->pitchingSession($inputMessage, $userNumber);
             case "userProfile":
-                return $this->handleUserProfileMenu($inputMessage, $recipientNumber);
+                return $this->handleUserProfileMenu($inputMessage, $userNumber);
             case "userProfileSetName":
-                return $this->handleUserProfileSetName($inputMessage, $recipientNumber);
+                return $this->handleUserProfileSetName($inputMessage, $userNumber);
             case "userProfileSetJob":
-                return $this->handleUserProfileSetJob($inputMessage, $recipientNumber);
+                return $this->handleUserProfileSetJob($inputMessage, $userNumber);
             case "levelPrompt":
-                return $this->showLearningMenu($inputMessage, $recipientNumber);
+                return $this->showLearningMenu($inputMessage, $userNumber);
             case "questionPrompt":
                 $questionIndex = 0;
                 if(isset($menuLocationWithSubMenu[1])) {
                     # set questionIndex with submenu if any
                     $questionIndex = intval($menuLocationWithSubMenu[1]);
                 }
-                return $this->giveUserQuestion($recipientNumber, $questionIndex, $inputMessage);
+                return $this->giveUserQuestion($userNumber, $questionIndex, $inputMessage);
             case "questionEval":
-                return $this->handleUserAnswer($inputMessage, $recipientNumber, intval($menuLocationWithSubMenu[1]));
+                return $this->handleUserAnswer($inputMessage, $userNumber, intval($menuLocationWithSubMenu[1]));
             default:
-                return $this->handleMainMenu($inputMessage, $recipientNumber);
+                return $this->handleMainMenu($inputMessage, $userNumber);
         }
     }
 
-    private function handleMainMenu($inputMessage, $recipientNumber)
+    private function handleMainMenu($inputMessage, $userNumber)
     {
         switch ($inputMessage) {
             case "1":
-                return $this->showLearningMenu($inputMessage, $recipientNumber);
+                return $this->showLearningMenu($inputMessage, $userNumber);
             case "2":
-                return $this->showPitchingMenu($recipientNumber);
+                return $this->showPitchingMenu($userNumber);
             case "3":
-                return $this->showProfileMenu($recipientNumber);
+                return $this->showProfileMenu($userNumber);
             case "4":
+                Log::info("[" . $userNumber . "] Display About Us");
                 return $this->showAboutUs();
             default:
+                Log::info("[" . $userNumber . "] Display Main Menu");
                 return $this->showMainMenu();
         }
     }
 
-    private function handleUserProfileMenu($inputMessage, $recipientNumber)
+    private function handleUserProfileMenu($inputMessage, $userNumber)
     {
         switch ($inputMessage) {
             case "1":
-                return $this->setProfile($recipientNumber);
+                return $this->setProfile($userNumber);
             case "2":
-                return $this->backToMainMenu($recipientNumber);
+                return $this->backToMainMenu($userNumber);
             default:
-                return $this->showProfileMenu($recipientNumber);
+                return $this->showProfileMenu($userNumber);
         }
     }
 
-    private function showPitchingMenu($recipientNumber)
+    private function showPitchingMenu($userNumber)
     {
-        $userNumber = $this->formatUserPhoneNumber($recipientNumber);
-
         $userName = User::find($userNumber)->name;
 
         if(isset($userName)) {
-            return $this->enterPitchingSession($recipientNumber, $userName);
+            return $this->enterPitchingSession($userNumber, $userName);
         } else {
+            Log::info("[" . $userNumber . "] Asking user name before entering pitching session");
             $this->changeMenuLocation($userNumber, 'pitchingMenuAskName');
             return "Siapa nama Anda?";
         }
     }
 
-    private function pitchingMenuAskName($inputMessage, $recipientNumber) {
-        $userNumber = $this->formatUserPhoneNumber($recipientNumber);
-
+    private function pitchingMenuAskName($inputMessage, $userNumber) {
         $userName = $inputMessage;
         $user = User::find($userNumber);
         $user->name = $userName;
         $user->save();
 
-        return $this->enterPitchingSession($recipientNumber, $userName);
+        return $this->enterPitchingSession($userNumber, $userName);
     }
 
-    private function enterPitchingSession($recipientNumber, $userName)
+    private function enterPitchingSession($userNumber, $userName)
     {
-        $userNumber = $this->formatUserPhoneNumber($recipientNumber);
-
+        Log::info("[" . $userNumber . "] Enter pitching session");
         $this->changeMenuLocation($userNumber, 'pitchingSession');
         $message = "Bayangkan Anda sedang bertemu dengan calon partner bisnis Anda dari luar negeri.";
         $message .= "Tugas Anda adalah untuk meyakinkan calon partner bisnis Anda untuk bergabung dalam bisnis Anda!";
@@ -167,33 +168,33 @@ class WhatsAppController extends Controller
         $message .= "Good luck!!|";
 
         $helloMessage = "Hello, I am " . $userName;
-        $message .= $this->pitchingSession($helloMessage, $recipientNumber);
+        $message .= $this->pitchingSession($helloMessage, $userNumber);
 
         return $message;
     }
 
-    private function pitchingSession($inputMessage, $recipientNumber)
+    private function pitchingSession($inputMessage, $userNumber)
     {
-        $userNumber = $this->formatUserPhoneNumber($recipientNumber);
-
         // Data for the API request
         $data = [
             'session_id' => $userNumber,
             'input' => $inputMessage,
         ];
 
+        Log::info("[" . $userNumber . "] Send received user message to pitching API");
         // Send a POST request using Laravel's Http client
         $response = Http::post(env('PITCHING_SERVICE_ENDPOINT'), $data);
 
         // Check for errors and return the response
         if ($response->successful()) {
+            Log::info("[" . $userNumber . "] Response from pitching API was retrieved");
             $responseData = $response->json();
             $message = $responseData['message'];
             $missionStatus = $responseData['mission_status'];
 
             if($missionStatus != "ongoing") {
                 # return back to main menu if conversation ends
-                $this->backToMainMenu($recipientNumber);
+                $this->backToMainMenu($userNumber);
             }
 
             if($missionStatus == "success") {
@@ -206,46 +207,47 @@ class WhatsAppController extends Controller
                 $message .= "Ketik 'Semangat' untuk kembali ke Main Menu.";
             }
 
+            Log::info("[" . $userNumber . "] Sending response from pitching API to user: " . $message);
             return $message;
         } else {
+            Log::info("[" . $userNumber . "] Failed to retrieve response from pitching API");
             return 'Failed to communicate with the pitching API.';
         }
     }
 
-    private function setProfile($recipientNumber)
+    private function setProfile($userNumber)
     {
-        $userNumber = $this->formatUserPhoneNumber($recipientNumber);
-
         # change menu location to userProfileSetName to ask user their name
         $this->changeMenuLocation($userNumber, 'userProfileSetName');
 
+        Log::info("[" . $userNumber . "] Ask user name");
         return "Masukkan nama Anda:";
     }
 
-    private function handleUserProfileSetName($inputMessage, $recipientNumber)
+    private function handleUserProfileSetName($inputMessage, $userNumber)
     {
-        $userNumber = $this->formatUserPhoneNumber($recipientNumber);
-
         # set user name and change menu location to userProfileSetJob to ask user their job
         $user = User::find($userNumber);
         $user->name = $inputMessage;
         $user->menuLocation = 'userProfileSetJob';
         $user->save();
 
+        Log::info("[" . $userNumber . "] Ask user occupation");
         return "Hallo, $inputMessage!! Apa pekerjaan Anda:";
     }
 
-    private function handleUserProfileSetJob($inputMessage, $recipientNumber)
+    private function handleUserProfileSetJob($inputMessage, $userNumber)
     {
-        $userNumber = $this->formatUserPhoneNumber($recipientNumber);
-
+        Log::info("[" . $userNumber . "] Updating user profile");
         # set user job and change menu location back to userProfile
         $user = User::find($userNumber);
         $user->occupation = $inputMessage;
         $user->menuLocation = 'userProfile';
         $user->save();
 
-        return "Profil Anda berhasil diatur, ketik dan kirim apapun untuk melihat profil Anda!";
+        Log::info("[" . $userNumber . "] User profile was updated");
+
+        return "Profil berhasil diperbaharui.|" . $this->showProfileMenu($userNumber);
     }
 
     private function comingSoon()
@@ -273,16 +275,14 @@ class WhatsAppController extends Controller
         return env('MAIN_MENU_PROMPT');
     }
 
-    private function backToMainMenu($recipientNumber)
+    private function backToMainMenu($userNumber)
     {
-        $userNumber = $this->formatUserPhoneNumber($recipientNumber);
-
         # change menu location to mainMenu
         $result = $this->changeMenuLocation($userNumber, 'mainMenu');
 
         # check whether the user successfully back or not
         if($result) {
-            Log::info("User successfully back to mainMenu");
+            Log::info("[" . $userNumber . "] Back to Main Menu");
             return $this->showMainMenu();
         } else {
             Log::info("User failed to back to mainMenu");
@@ -290,14 +290,14 @@ class WhatsAppController extends Controller
         }
     }
 
-    private function showProfileMenu($recipientNumber)
+    private function showProfileMenu($userNumber)
     {
-        $userNumber = $this->formatUserPhoneNumber($recipientNumber);
-
         # change menu location to userProfile
+        Log::info("[" . $userNumber . "] Enter profile menu");
         $this->changeMenuLocation($userNumber, 'userProfile');
 
         # get user data
+        Log::info("[" . $userNumber . "] Query user profile");
         $userName = "belum diatur";
         $userOccupation = "belum diatur";
         $userData = User::find($userNumber);
@@ -317,19 +317,20 @@ Pilih menu berikut untuk melanjutkan:
         1. Ubah profil
         2. Kembali ke Main Menu";
 
+        Log::info("[" . $userNumber . "] Display user profile");
         return $message;
     }
 
-    private function showLearningMenu($inputMessage, $recipientNumber)
+    private function showLearningMenu($inputMessage, $userNumber)
     {
+        Log::info("[" . $userNumber . "] Enter Learning Menu");
         if(strtolower($inputMessage) == "keluar") { # if user quit learning menu
             # change menu location to mainMenu
-            return $this->backToMainMenu($recipientNumber);
+            return $this->backToMainMenu($userNumber);
         }
 
-        $userNumber = $this->formatUserPhoneNumber($recipientNumber);
-
         # get user progress
+        Log::info("[" . $userNumber . "] Query level based on user progress");
         $userData = User::find($userNumber);
         $learningUnitId = 0;
         $levelId = 0;
@@ -346,6 +347,8 @@ Pilih menu berikut untuk melanjutkan:
         $level = Level::where('unitId', $learningUnit->id)
                         ->where('sortId', $levelId)
                         ->first();
+
+        Log::info("[" . $userNumber . "] Level retrieved");
 
         $message = '';
         
@@ -374,18 +377,19 @@ Pilih menu berikut untuk melanjutkan:
         $userData->currentGrade = '0/' . strval($numberOfQuestions);
         $userData->save();
 
+        Log::info("[" . $userNumber . "] Send level materials");
+
         return $message;
     }
 
-    private function giveUserQuestion($recipientNumber, $questionIndex, $inputMessage = null) {
+    private function giveUserQuestion($userNumber, $questionIndex, $inputMessage = null) {
         if(strtolower($inputMessage) == "keluar") { # if user quit learning menu
             # change menu location to mainMenu
-            return $this->backToMainMenu($recipientNumber);
+            return $this->backToMainMenu($userNumber);
         }
-        
-        $userNumber = $this->formatUserPhoneNumber($recipientNumber);
 
         # get user progress
+        Log::info("[" . $userNumber . "] Query level based on user progress");
         $userData = User::find($userNumber);
         $learningUnitId = 0;
         $levelId = 0;
@@ -403,35 +407,45 @@ Pilih menu berikut untuk melanjutkan:
                         ->where('sortId', $levelId)
                         ->first();
 
+        Log::info("[" . $userNumber . "] Level retrieved");
+
         $message = '';
 
+        Log::info("[" . $userNumber . "] Query question " . strval($questionIndex+1));
         $questions = $level->questions()->orderBy('id', 'asc')->get();
-        $question = $questions->get($questionIndex)->question ?? "Question not found"; # get question at requested index
+        $question = $questions->get($questionIndex) ?? null; # get question at requested index
         if($question != null) {
+            Log::info("[" . $userNumber . "] Question " . strval($questionIndex+1) . " was retrieved");
             if($questionIndex == 0) {
                 $message .= "Jawab quiz berikut untuk mengevaluasi pemahaman Anda!!|";
             }
 
-            $message .= "Quiz nomor " . strval($questionIndex+1) . ":\n" . $question;
+            # form a question message
+            $question_msg = "Quiz nomor " . strval($questionIndex+1) . ":\n" . $question->question;
+            # add options to question message if the type multiple choice
+            if($question->type == 'Multiple Choice') {
+                $question_msg .= "\nA. " . $question->optionA;
+                $question_msg .= "\nB. " . $question->optionB;
+                $question_msg .= "\nC. " . $question->optionC;
+            }
 
-            # update user current question
-            $userData->currentQuestion = $question;
-            $userData->save();
+            # attach question to the message and log
+            $message .= $question_msg;
+            Log::info("[" . $userNumber . "] Send question to user: \n" . $question_msg);
 
             # change menu location to questionEval-{questionIndex}
             $this->changeMenuLocation($userNumber, 'questionEval-' . strval($questionIndex));
         } else {
-            Log::info("Failed to generate the question due to undetected topic or content");
+            Log::info("[" . $userNumber . "] Failed to retrived the question from DB");
         }
 
         return $message;
     }
 
-    private function handleUserAnswer($inputMessage, $recipientNumber, $questionIndex = 0) {
-        Log::info("Entering handleUserAnswer");
-        $userNumber = $this->formatUserPhoneNumber($recipientNumber);
+    private function handleUserAnswer($inputMessage, $userNumber, $questionIndex = 0) {
 
         # get user progress
+        Log::info("[" . $userNumber . "] Query level based on user progress");
         $userData = User::find($userNumber);
         $learningUnitId = 0;
         $levelId = 0;
@@ -448,29 +462,51 @@ Pilih menu berikut untuk melanjutkan:
         $level = Level::where('unitId', $learningUnit->id)
                         ->where('sortId', $levelId)
                         ->first();
+        
+        Log::info("[" . $userNumber . "] Level retrieved");
 
+        Log::info("[" . $userNumber . "] Query answer of question " . strval($questionIndex+1));
         $questions = $level->questions()->orderBy('id', 'asc')->get();
         $question = $questions->get($questionIndex) ?? null; # get question at requested index
         
         if($question != null) {
 
+            Log::info("[" . $userNumber . "] Answer of question " . strval($questionIndex+1) . " was retrieved");
+
             $answer = $question->answer;
             if($answer != null) {
+                $answer = strtolower($answer);
                 $evaluation = false;
+                $userAnswer = strtolower($inputMessage);
 
                 if($question->type == 'Multiple Choice') {
                     # evaluating answer of multiple choice question
-                    $answerOption = strtolower(explode('|', $answer)[0]);
-                    $answerExact = strtolower(explode('|', $answer)[1]);
-                    Log::info("Jawaban user: " . strtolower($inputMessage));
-                    Log::info("Jawaban benar: " . $answerExact);
+                    $answerOption = $answer;
+                    $answerExact = '';
 
-                    if(strtolower($inputMessage) == $answerOption || strtolower($inputMessage) == $answerExact) {
+                    switch($answerOption) {
+                        case "a":
+                            $answerExact = $question->optionA;
+                            break;
+                        case "b":
+                            $answerExact = $question->optionB;
+                            break;
+                        case "c":
+                            $answerExact = $question->optionC;
+                            break;
+                        default:
+                            $answerExact = '';
+                    }
+
+                    Log::info("[" . $userNumber . "] User's answer: " . $userAnswer);
+                    Log::info("[" . $userNumber . "] Correct answer: " . $answerOption . ". " . $answerExact);
+
+                    if($userAnswer == $answerOption || $userAnswer == strtolower($answerExact)) {
                         $evaluation = true;
                     }
                 } else {
                     # evaluating answer of essay question
-                    if(strtolower($inputMessage) == strtolower($answer)) {
+                    if($userAnswer == $answer) {
                         $evaluation = true;
                     }
                 }
@@ -479,6 +515,7 @@ Pilih menu berikut untuk melanjutkan:
 
                 $currentGrade = explode('/', $userData->currentGrade);
 
+                $evaluation_msg = '';
                 if($evaluation) {
                     # increase the correct answer in currentGrade
                     $currentCorrectAnswers = intval($currentGrade[0]);
@@ -486,10 +523,13 @@ Pilih menu berikut untuk melanjutkan:
                     $userData->currentGrade = strval($currentCorrectAnswers) . '/' . $currentGrade[1];
                     $userData->save();
 
-                    $message .= "Selamat, jawaban Anda benar.|";
+                    $evaluation_msg = "Selamat, jawaban Anda benar.";
                 } else {
-                    $message .= "Yah, jawaban Anda salah.|";
+                    $evaluation_msg = "Yah, jawaban Anda salah.";
                 }
+
+                Log::info("[" . $userNumber . "] Sending evaluation message: \n" . $evaluation_msg);
+                $message .= $evaluation_msg . "|";
 
                 # increase questionIndex after evaluating the answer
                 $questionIndex++;
@@ -497,9 +537,11 @@ Pilih menu berikut untuk melanjutkan:
                 $numberOfQuestions = intval($currentGrade[1]);
                 if($questionIndex < $numberOfQuestions) {
                     # send the next question if any
-                    $message .= $this->giveUserQuestion($recipientNumber, $questionIndex);
+                    Log::info("[" . $userNumber . "] Proceed to the next question");
+                    $message .= $this->giveUserQuestion($userNumber, $questionIndex);
                 } else {
                     # grade all user answers in the current level
+                    Log::info("[" . $userNumber . "] Grade user answers for unit " . strval($learningUnitId) . " - level " . strval($levelId));
                     $currentGrade = explode('/', $userData->currentGrade);
                     $correctAnswers = intval($currentGrade[0]);
                     $score = ($correctAnswers / $numberOfQuestions) * 100; // return (float) score
@@ -507,6 +549,7 @@ Pilih menu berikut untuk melanjutkan:
 
                     if($score >= 50) {
                         # increase the level
+                        Log::info("[" . $userNumber . "] User has passed the level");
                         $userData->progress = strval($learningUnitId) . '-' . strval(++$levelId);
                         $userData->save();
 
@@ -516,9 +559,12 @@ Pilih menu berikut untuk melanjutkan:
                         $message .= "Selamat, Anda telah berhasil menyelesaikan level ini dengan *nilai: " . strval($score) . "*";
                         $message .= "\n\n*ketik apapun untuk melanjutkan ke level berikutnya atau 'Keluar' untuk kembali ke Main Menu!* Tenang aja, progress kamu tidak akan hilang kok!";
                     } else {
+                        Log::info("[" . $userNumber . "] User failed to pass the level");
                         $message .= "Maaf, *nilai Anda: " . strval($score) . "*; tidak lolos passing grade(50). Pelajarin lagi materi di level ini yuk! Semangat!";
                         $message .= "\n\n*ketik apapun untuk mengulang level ini atau 'Keluar' untuk kembali ke Main Menu!* Tenang aja, progress kamu tidak akan hilang kok!";
                     }
+
+                    Log::info("[" . $userNumber . "] Sending user grade");
 
                     # change menu location to levelPrompt
                     $this->changeMenuLocation($userNumber, 'levelPrompt');
@@ -526,19 +572,23 @@ Pilih menu berikut untuk melanjutkan:
 
                 return $message;
             } else {
-                return "Internal service error: topic and learning material not found";
+                $message = "Internal service error: topic and learning material not found";
+                Log::info("[" . $userNumber . "] " . $message);
+                return $message;
             }
         } else {
-            return "Internal service error: question not found in the database";
+            $message = "Internal service error: question not found in the database";
+            Log::info("[" . $userNumber . "] " . $message);
+            return $message;
         }
     }
 
     private function generateLevelPrompt($learningUnit, $level)
     {
         // Base prompt for ChatGPT
-        $basePrompt = "Selamat datang di unit: {$learningUnit->sortId} - {$learningUnit->topic}\n";
-        $basePrompt .= "Saat ini, Anda berada pada level: {$level->sortId} - {$level->topic}\n\n";
-        $basePrompt .= "Simak ringkasan materi berikut:\n";
+        $basePrompt = "Selamat datang di *unit: {$learningUnit->sortId} - {$learningUnit->topic}*\n";
+        $basePrompt .= "Saat ini, Anda berada pada *level: {$level->sortId} - {$level->topic}*\n\n";
+        $basePrompt .= "Simak ringkasan materi berikut:|";
         if ($level->content != null) {
             $basePrompt .= $level->content;
         } else {
@@ -548,16 +598,14 @@ Pilih menu berikut untuk melanjutkan:
         return $basePrompt;
     }
 
-    private function checkUser($recipientNumber)
+    private function checkUser($userNumber)
     {
-        $userNumber = $this->formatUserPhoneNumber($recipientNumber);
-
         $userData = User::find($userNumber);
         $menuLocation = 'mainMenu';
 
         // Register new user if does not exist
         if ($userData == null) {
-            Log::info("Creating new user with phone number: " . $userNumber);
+            Log::info("[" . $userNumber . "] Register new user");
             User::create([
                 'phoneNumber' => $userNumber,
                 'menuLocation' => $menuLocation,
