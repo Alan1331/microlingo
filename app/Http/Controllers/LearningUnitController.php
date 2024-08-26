@@ -29,6 +29,11 @@ class LearningUnitController extends Controller
         $levels = $unit->levels->sortBy('sortId');
         $unitNumber = $unit->sortId;
 
+        // Calculate average grade for each level
+        foreach ($levels as $level) {
+            $level->averageGrade = round($level->users()->avg('score'));
+        }
+
         return view('admin.layouts.viewLevel', ['levels' => $levels, 'unitId' => $id, 'unitNumber' => $unitNumber]);
     }
 

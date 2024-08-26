@@ -24,7 +24,7 @@
                                             <th style="width: 100px;">Level</th>
                                             <th style="width: 300px;">Topik</th>
                                             <th style="width: 100px;">Pertanyaan</th>
-                                            <th style="width: 100px;">Nilai</th>
+                                            <th style="width: 100px;">Avg. Nilai</th>
                                             <th style="width: 100px;">Aksi</th>
                                         </tr>
                                     </thead>
@@ -37,7 +37,7 @@
                                                 <td>{{ $level->sortId }}</td>
                                                 <td>{{ $level->topic }}</td>
                                                 <td>{{ $level->questions()->count() }}</td>
-                                                <td></td>
+                                                <td>{{ $level->averageGrade }}%</td>
                                                 <td colspan="6" style="text-align: center;">
                                                     <a href="/updateLevel/{{ $level->id }}" class="edit-button">
                                                         <img src="{{ asset('edit.png') }}" alt="Edit Button">
