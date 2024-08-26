@@ -19,6 +19,10 @@ class Question extends Model
         'question',
         'answer',
         'type',
+        'levelId',
+        'optionA',
+        'optionB',
+        'optionC',
     ];
 
     /**
@@ -30,6 +34,10 @@ class Question extends Model
         'question' => 'string',
         'answer' => 'string',
         'type' => 'string',
+        'levelId' => 'integer',
+        'optionA' => 'string',
+        'optionB' => 'string',
+        'optionC' => 'string',
     ];
 
     /**
