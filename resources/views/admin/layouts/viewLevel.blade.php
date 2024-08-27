@@ -14,7 +14,7 @@
                         <!-- /.card-header -->
                         <div class="card-body">
                             <a href="{{route('materiPembelajaran')}}" class="back-button">
-                                <img src="{{ asset('edit.png') }}" alt="Back Button">
+                                <img src="{{ asset('backk.png') }}" alt="Back Button">
                                 Back
                             </a>
                             @if($levels->count() != 0)
@@ -169,32 +169,20 @@ document.getElementById('deleteBtn').addEventListener('click', function (event) 
 <style>
     .back-button {
         display: inline-block;
-        padding: 10px 20px;
+        margin-bottom: 1%;
         font-size: 14px;
         font-weight: bold;
-        color: white;
-        background-color: blue;
-        /* Warna merah untuk tombol delete */
+        color: black;
         border: none;
         border-radius: 5px;
         cursor: pointer;
         transition: background-color 0.3s, color 0.3s;
-        text-align: center;
+        margin-left: 0px;
     }
     
     .back-button img {
         width: 20px;
-        /* Sesuaikan ukuran gambar */
         height: 20px;
-        /* Sesuaikan ukuran gambar */
-        margin-right: 5px;
-        /* Jarak antara gambar dan teks */
-    }
-
-    .back-button:hover {
-        background-color: #03346E;
-        /* Warna merah gelap saat hover */
-        color: #ffffff;
     }
 
     .action-buttons {

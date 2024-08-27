@@ -5,252 +5,143 @@
 <body>
     <section class="content">
         <div class="modal-content3" data-dismiss="modalAction" aria-label="Close">
+            <a href="{{route('materiPembelajaran')}}" class="back-button">
+                <img src="{{ asset('backk.png') }}" alt="Back Button">
+                Back
+            </a>
             <h2 class="modal-title">Update Unit {{$level->learningUnit->sortId}} Level {{$level->sortId}}</h2>
-            <form id="level-update-form" action="{{ route('units.levels.update', ['levelId' => $level->id]) }}" method="POST">
+            <form id="level-update-form" action="{{ route('units.levels.update', ['levelId' => $level->id]) }}"
+                method="POST">
                 @csrf
                 @method('PUT')
                 <div class="form-group mb-3">
-                    <a href="{{route('units.levels', ['id' => $level->learningUnit->id])}}" class="save-button">
-                        <img src="{{ asset('edit.png') }}" alt="Back Button">
-                        Back
-                    </a>
-                    <button type="submit" class="save-button">
-                        <img src="{{ asset('edit.png') }}" alt="Save Button">
-                        Simpan
-                    </button>
-                    <br>
                     <label for="editTopik" class="font-weight-bold">Topik</label>
-                    <input required type="text" class="form-control" name="topic" id="editTopik" value="{{ old('topic', $level->topic) }}">
+                    <input required type="text" class="form-control" name="topic" id="editTopik" value="{{ old('content', $level->topic) }}">
                     <label for="editContent" class="font-weight-bold">Konten Pembelajaran</label>
-                    <textarea required type="text" class="form-control" name="content"
-                        id="editContent" rows="10" style="min-height: 200px;">{{ old('content', $level->content) }}</textarea>
+                    <textarea required type="text" class="form-control" name="content" id="editContent" rows="10"
+                        style="min-height: 200px;">{{ old('content', $level->content) }}</textarea>
                     <label for="editVideo" class="font-weight-bold">Link Video</label>
-                    <input required type="text" class="form-control" name="videoLink" id="editVideo" value="{{ old('videoLink', $level->videoLink) }}">
+                    <input required type="text" class="form-control" name="videoLink" id="editVideo" value="{{ old('content', $level->videoLink) }}">
 
                     <div class="essay">
-                        <label for="category1" class="font-weight-bold">Pertanyaan 1 (wajib diisi):</label>
-                        @if(isset($questions[0]))
-                            <input type="hidden" name="questionId1" value="{{$questions[0]->id}}"/>
-                            <select class="form-control" required name="category1" id="category1" onchange="toggleForm()">
-                                <option value="" disabled selected hidden>Pilih Kategori Pertanyaan</option>
-                                <option value="Essay" {{old('type', $questions[0]->type) == 'Essay' ? 'selected':''}}>Essay</option>
-                                <option value="Multiple Choice" {{old('type', $questions[0]->type) == 'Multiple Choice' ? 'selected':''}}>Pilihan Ganda</option>
-                            </select>
-                        @else
-                            <input type="hidden" name="questionId1" value="-1"/>
-                            <select class="form-control" required name="category1" id="category1" onchange="toggleForm()">
-                                <option value="" disabled selected hidden>Pilih Kategori Pertanyaan</option>
-                                <option value="Essay">Essay</option>
-                                <option value="Multiple Choice">Pilihan Ganda</option>
-                            </select>
-                        @endif
+                        <label for="category" class="font-weight-bold">Pilih Kategori Pertanyaan:</label>
+                        <select class="form-control" name="category" id="category" onchange="toggleForm()">
+                            <option value="" disabled selected>Pilih Kategori Pertanyaan</option>
+                            <option value="essay" {{old('type', $questions[0]->type) == 'Essay' ? 'selected':''}}>Essay</option>
+                            <option value="pilihanGanda" {{old('type', $questions[0]->type) == 'Multiple Choice' ? 'selected':''}}>Pilihan Ganda</option>
+                        </select>
 
                     <!-- Essay Form (hidden by default) -->
                     <div id="essayForm" style="display: none;">
-                        @if(isset($questions[0]) && $questions[0]->type == "Essay")
-                            <label for="editableQuestionEssay1" class="font-weight-bold">Pertanyaan (Essay)</label>
-                            <input type="text" class="form-control" value="{{$questions[0]->question}}" name="editableQuestionEssay1" id="editableQuestionEssay1">
-                            <label for="editableAnswer1" class="font-weight-bold">Jawaban</label>
-                            <input type="text" class="form-control" value="{{$questions[0]->answer}}" name="editableAnswer1" id="editableAnswer1">
-                        @else
-                            <label for="editableQuestionEssay1" class="font-weight-bold">Pertanyaan (Essay)</label>
-                            <input type="text" class="form-control" name="editableQuestionEssay1" id="editableQuestionEssay1">
-                            <label for="editableAnswer1" class="font-weight-bold">Jawaban</label>
-                            <input type="text" class="form-control" name="editableAnswer1" id="editableAnswer1">
-                        @endif
+                        <label for="editPertanyaan" class="font-weight-bold">Pertanyaan (Essay)</label>
+                        <input type="text" class="form-control" name="pertanyaan" id="editPertanyaan">
+                        <label for="editJawaban" class="font-weight-bold">Jawaban</label>
+                        <input type="text" class="form-control" name="jawaban" id="editJawaban">
                     </div>
 
                     <!-- Pilihan Ganda Form (hidden by default) -->
                     <div id="pilihanGandaForm" style="display: none;">
-                        @if(isset($questions[0]) && $questions[0]->type == "Multiple Choice")
-                            <label for="editableQuestionMp1">Pertanyaan (Pilihan Ganda):</label><br>
-                            <input type="text" id="editableQuestionMp1" name="editableQuestionMp1"
-                                value="{{$questions[0]->question}}" placeholder="Isi Pertanyaan di sini"/><br>
-                            <fieldset>
-                                <input type="radio" id="customOption1-1" {{old('answer', $questions[0]->answer) == 'a' ? 'checked':''}} name="choice1" value="a">
-                                <label for="customOptionInput1-1">
-                                    <input type="text" id="customOptionInput1-1" value="{{$questions[0]->optionA}}" name="customOptionInput1-1" placeholder="Isi Jawaban A" />
-                                </label><br>
-                                <input type="radio" id="customOption1-2" {{old('answer', $questions[0]->answer) == 'b' ? 'checked':''}} name="choice1" value="b">
-                                <label for="customOptionInput1-2">
-                                    <input type="text" id="customOptionInput1-2" value="{{$questions[0]->optionB}}" name="customOptionInput1-2" placeholder="Isi Jawaban B" />
-                                </label><br>
-                                <input type="radio" id="customOption1-3" {{old('answer', $questions[0]->answer) == 'c' ? 'checked':''}} name="choice1" value="c">
-                                <label for="customOptionInput1-3">
-                                    <input type="text" id="customOptionInput1-3" value="{{$questions[0]->optionC}}" name="customOptionInput1-3" placeholder="Isi Jawaban C" />
-                                </label><br>
-                            </fieldset>
-                        @else
-                            <label for="editableQuestionMp1">Pertanyaan (Pilihan Ganda):</label><br>
-                            <input type="text" id="editableQuestionMp1" name="editableQuestionMp1"
-                                placeholder="Isi Pertanyaan di sini"/><br>
-                            <fieldset>
-                                <input type="radio" id="customOption1-1" name="choice1" value="a">
-                                <label for="customOptionInput1-1">
-                                    <input type="text" id="customOptionInput1-1" name="customOptionInput1-1" placeholder="Isi Jawaban A" />
-                                </label><br>
-                                <input type="radio" id="customOption1-2" name="choice1" value="b">
-                                <label for="customOptionInput1-2">
-                                    <input type="text" id="customOptionInput1-2" name="customOptionInput1-2" placeholder="Isi Jawaban B" />
-                                </label><br>
-                                <input type="radio" id="customOption1-3" name="choice1" value="c">
-                                <label for="customOptionInput1-3">
-                                    <input type="text" id="customOptionInput1-3" name="customOptionInput1-3" placeholder="Isi Jawaban C" />
-                                </label><br>
-                            </fieldset>
-                        @endif
+                        <label for="question">Pertanyaan (Pilihan Ganda):</label><br>
+                        <input type="text" id="editableQuestion" name="editableQuestion" style="border: none; background: transparent; outline: none; font-size: 16px; margin-bottom: 20px;"
+                            value="Isi Pertanyaan di sini"/><br>
+                        <input type="radio" id="customOption1" name="choice" value="custom1">
+                        <label for="customOption1">
+                            <input type="text" id="customOption1" name="customText1" placeholder="Isi Jawaban 1" />
+                        </label><br>
+                        <input type="radio" id="customOption2" name="choice" value="custom2">
+                        <label for="customOption2">
+                            <input type="text" id="customOption2" name="customText2" placeholder="Isi Jawaban 2" />
+                        </label><br>
+                        <input type="radio" id="customOption3" name="choice" value="custom3">
+                        <label for="customOption3">
+                            <input type="text" id="customOption3" name="customText3" placeholder="Isi Jawaban 3" />
+                        </label><br>
                     </div>
                     </div>
                     <div class="essay2">
-                    <label for="category2" class="font-weight-bold">Pertanyaan 2:</label>
-                    @if(isset($questions[1]))
-                        <input type="hidden" name="questionId2" value="{{$questions[1]->id}}"/>
-                        <select class="form-control" name="category2" id="category2" onchange="toggleForm()">
-                            <option value="" disabled selected>Pilih Kategori Pertanyaan</option>
-                            <option value="Delete">Hapus Pertanyaan</option>
-                            <option value="Essay" {{old('type', $questions[1]->type) == 'Essay' ? 'selected':''}}>Essay</option>
-                            <option value="Multiple Choice" {{old('type', $questions[1]->type) == 'Multiple Choice' ? 'selected':''}}>Pilihan Ganda</option>
-                        </select>
-                    @else
-                        <input type="hidden" name="questionId2" value="-1"/>
-                        <select class="form-control" name="category2" id="category2" onchange="toggleForm()">
-                            <option value="" disabled selected>Pilih Kategori Pertanyaan</option>
-                            <option value="Delete">Hapus Pertanyaan</option>
-                            <option value="Essay">Essay</option>
-                            <option value="Multiple Choice">Pilihan Ganda</option>
-                        </select>
-                    @endif
+                    <label for="category2" class="font-weight-bold">Pilih Kategori Pertanyaan:</label>
+                    <select class="form-control" name="category2" id="category2" onchange="toggleForm()">
+                        <option value="" disabled selected>Pilih Kategori Pertanyaan</option>
+                        <option value="essay2" {{old('type', $questions[1]->type) == 'Essay' ? 'selected':''}}>Essay</option>
+                        <option value="pilihanGanda2" {{old('type', $questions[1]->type) == 'Multiple Choice' ? 'selected':''}}>Pilihan Ganda</option>
+                    </select>
 
                     <!-- Essay Form (hidden by default) -->
                     <div id="essayForm2" style="display: none;">
-                        @if(isset($questions[1]) && $questions[1]->type == "Essay")
-                            <label for="editableQuestionEssay2" class="font-weight-bold">Pertanyaan (Essay)</label>
-                            <input type="text" class="form-control" value="{{$questions[1]->question}}" name="editableQuestionEssay2" id="editableQuestionEssay2">
-                            <label for="editableAnswer2" class="font-weight-bold">Jawaban</label>
-                            <input type="text" class="form-control" value="{{$questions[1]->answer}}" name="editableAnswer2" id="editableAnswer2">
-                        @else
-                            <label for="editableQuestionEssay2" class="font-weight-bold">Pertanyaan (Essay)</label>
-                            <input type="text" class="form-control" name="editableQuestionEssay2" id="editableQuestionEssay2">
-                            <label for="editableAnswer2" class="font-weight-bold">Jawaban</label>
-                            <input type="text" class="form-control" name="editableAnswer2" id="editableAnswer2">
-                        @endif
+                        <label for="editPertanyaan" class="font-weight-bold">Pertanyaan (Essay)</label>
+                        <input type="text" class="form-control @error('pertanyaan') is-invalid @enderror" name="pertanyaan" id="editPertanyaan">
+                        @error('pertanyaan')
+                            <div class="alert alert-danger mt-2">{{ $message }}</div>
+                        @enderror
+                        <label for="editJawaban" class="font-weight-bold">Jawaban</label>
+                        <input type="text" class="form-control @error('jawaban') is-invalid @enderror" name="jawaban" id="editJawaban">
+                        @error('jawaban')
+                            <div class="alert alert-danger mt-2">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <!-- Pilihan Ganda Form (hidden by default) -->
                     <div id="pilihanGandaForm2" style="display: none;">
-                        @if(isset($questions[1]) && $questions[1]->type == "Multiple Choice")
-                            <label for="editableQuestionMp2">Pertanyaan (Pilihan Ganda):</label><br>
-                            <input type="text" id="editableQuestionMp2" name="editableQuestionMp2"
-                                value="{{$questions[1]->question}}" placeholder="Isi Pertanyaan di sini"/><br>
-                            <fieldset>
-                                <input type="radio" id="customOption2-1" {{old('answer', $questions[1]->answer) == 'a' ? 'checked':''}} name="choice2" value="a">
-                                <label for="customOptionInput2-1">
-                                    <input type="text" id="customOptionInput2-1" value="{{$questions[1]->optionA}}" name="customOptionInput2-1" placeholder="Isi Jawaban A" />
-                                </label><br>
-                                <input type="radio" id="customOption2-2" {{old('answer', $questions[1]->answer) == 'b' ? 'checked':''}} name="choice2" value="b">
-                                <label for="customOptionInput2-2">
-                                    <input type="text" id="customOptionInput2-2" value="{{$questions[1]->optionB}}" name="customOptionInput2-2" placeholder="Isi Jawaban B" />
-                                </label><br>
-                                <input type="radio" id="customOption2-3" {{old('answer', $questions[1]->answer) == 'c' ? 'checked':''}} name="choice2" value="c">
-                                <label for="customOptionInput2-3">
-                                    <input type="text" id="customOptionInput2-3" value="{{$questions[1]->optionC}}" name="customOptionInput2-3" placeholder="Isi Jawaban C" />
-                                </label><br>
-                            </fieldset>
-                        @else
-                            <label for="editableQuestionMp2">Pertanyaan (Pilihan Ganda):</label><br>
-                            <input type="text" id="editableQuestionMp2" name="editableQuestionMp2"
-                                placeholder="Isi Pertanyaan di sini"/><br>
-                            <fieldset>
-                                <input type="radio" id="customOption2-1" name="choice2" value="a">
-                                <label for="customOptionInput2-1">
-                                    <input type="text" id="customOptionInput2-1" name="customOptionInput2-1" placeholder="Isi Jawaban A" />
-                                </label><br>
-                                <input type="radio" id="customOption2-2" name="choice2" value="b">
-                                <label for="customOptionInput2-2">
-                                    <input type="text" id="customOptionInput2-2" name="customOptionInput2-2" placeholder="Isi Jawaban B" />
-                                </label><br>
-                                <input type="radio" id="customOption2-3" name="choice2" value="c">
-                                <label for="customOptionInput2-3">
-                                    <input type="text" id="customOptionInput2-3" name="customOptionInput2-3" placeholder="Isi Jawaban C" />
-                                </label><br>
-                            </fieldset>
-                        @endif
+                        <form action="/submit" method="POST">
+                            <label for="question">Pertanyaan (Pilihan Ganda):</label><br>
+                            <input type="text" id="editableQuestion" name="editableQuestion" style="border: none; background: transparent; outline: none; font-size: 16px; margin-bottom: 20px;"
+                                value="Isi Pertanyaan di sini"/><br>
+                            <input type="radio" id="customOption1" name="choice" value="custom1">
+                            <label for="customOption1">
+                                <input type="text" id="customOption1" name="customText1" placeholder="Isi Jawaban 1" />
+                            </label><br>
+                            <input type="radio" id="customOption2" name="choice" value="custom2">
+                            <label for="customOption2">
+                                <input type="text" id="customOption2" name="customText2" placeholder="Isi Jawaban 2" />
+                            </label><br>
+                            <input type="radio" id="customOption3" name="choice" value="custom3">
+                            <label for="customOption3">
+                                <input type="text" id="customOption3" name="customText3" placeholder="Isi Jawaban 3" />
+                            </label><br>
+                        </form>
                     </div>
                     </div>
                     <div class="essay3">
-                    <label for="category3" class="font-weight-bold">Pertanyaan 3:</label>
-                    @if(isset($questions[2]))
-                        <input type="hidden" name="questionId3" value="{{$questions[2]->id}}"/>
-                        <select class="form-control" name="category3" id="category3" onchange="toggleForm()">
-                            <option value="" disabled selected>Pilih Kategori Pertanyaan</option>
-                            <option value="Delete">Hapus Pertanyaan</option>
-                            <option value="Essay" {{old('type', $questions[2]->type) == 'Essay' ? 'selected':''}}>Essay</option>
-                            <option value="Multiple Choice" {{old('type', $questions[2]->type) == 'Multiple Choice' ? 'selected':''}}>Pilihan Ganda</option>
-                        </select>
-                    @else
-                        <input type="hidden" name="questionId3" value="-1"/>
-                        <select class="form-control" name="category3" id="category3" onchange="toggleForm()">
-                            <option value="" disabled selected>Pilih Kategori Pertanyaan</option>
-                            <option value="Delete">Hapus Pertanyaan</option>
-                            <option value="Essay">Essay</option>
-                            <option value="Multiple Choice">Pilihan Ganda</option>
-                        </select>
-                    @endif
+                    <label for="category3" class="font-weight-bold">Pilih Kategori Pertanyaan:</label>
+                    <select class="form-control" name="category3" id="category3" onchange="toggleForm()">
+                        <option value="" disabled selected>Pilih Kategori Pertanyaan</option>
+                        <option value="essay3" {{old('type', $questions[2]->type) == 'Essay' ? 'selected':''}}>Essay</option>
+                        <option value="pilihanGanda3" {{old('type', $questions[2]->type) == 'Multiple Choice' ? 'selected':''}}>Pilihan Ganda</option>
+                    </select>
 
                     <!-- Essay Form (hidden by default) -->
                     <div id="essayForm3" style="display: none;">
-                        @if(isset($questions[2]) && $questions[2]->type == "Essay")
-                            <label for="editableQuestionEssay3" class="font-weight-bold">Pertanyaan (Essay)</label>
-                            <input type="text" class="form-control" value="{{$questions[2]->question}}" name="editableQuestionEssay3" id="editableQuestionEssay3">
-                            <label for="editableAnswer3" class="font-weight-bold">Jawaban</label>
-                            <input type="text" class="form-control" value="{{$questions[2]->answer}}" name="editableAnswer3" id="editableAnswer3">
-                        @else
-                            <label for="editableQuestionEssay3" class="font-weight-bold">Pertanyaan (Essay)</label>
-                            <input type="text" class="form-control" name="editableQuestionEssay3" id="editableQuestionEssay3">
-                            <label for="editableAnswer3" class="font-weight-bold">Jawaban</label>
-                            <input type="text" class="form-control" name="editableAnswer3" id="editableAnswer3">
-                        @endif
+                        <label for="editPertanyaan" class="font-weight-bold">Pertanyaan (Essay)</label>
+                        <input type="text" class="form-control @error('pertanyaan') is-invalid @enderror" name="pertanyaan" id="editPertanyaan">
+                        @error('pertanyaan')
+                            <div class="alert alert-danger mt-2">{{ $message }}</div>
+                        @enderror
+                        <label for="editJawaban" class="font-weight-bold">Jawaban</label>
+                        <input type="text" class="form-control @error('jawaban') is-invalid @enderror" name="jawaban" id="editJawaban">
+                        @error('jawaban')
+                            <div class="alert alert-danger mt-2">{{ $message }}</div>
+                        @enderror
                     </div>
 
                     <!-- Pilihan Ganda Form (hidden by default) -->
                     <div id="pilihanGandaForm3" style="display: none;">
-                        @if(isset($questions[2]) && $questions[2]->type == "Multiple Choice")
-                            <label for="editableQuestionMp3">Pertanyaan (Pilihan Ganda):</label><br>
-                            <input type="text" id="editableQuestionMp3" name="editableQuestionMp3"
-                                value="{{$questions[2]->question}}" placeholder="Isi Pertanyaan di sini"/><br>
-                            <fieldset>
-                                <input type="radio" id="customOption3-1" {{old('answer', $questions[2]->answer) == 'a' ? 'checked':''}} name="choice3" value="a">
-                                <label for="customOptionInput3-1">
-                                    <input type="text" id="customOptionInput3-1" value="{{$questions[2]->optionA}}" name="customOptionInput3-1" placeholder="Isi Jawaban A" />
-                                </label><br>
-                                <input type="radio" id="customOption3-2" {{old('answer', $questions[2]->answer) == 'b' ? 'checked':''}} name="choice3" value="b">
-                                <label for="customOptionInput3-2">
-                                    <input type="text" id="customOptionInput3-2" value="{{$questions[2]->optionB}}" name="customOptionInput3-2" placeholder="Isi Jawaban B" />
-                                </label><br>
-                                <input type="radio" id="customOption3-3" {{old('answer', $questions[2]->answer) == 'c' ? 'checked':''}} name="choice3" value="c">
-                                <label for="customOptionInput3-3">
-                                    <input type="text" id="customOptionInput3-3" value="{{$questions[2]->optionC}}" name="customOptionInput3-3" placeholder="Isi Jawaban C" />
-                                </label><br>
-                            </fieldset>
-                        @else
-                            <label for="editableQuestionMp3">Pertanyaan (Pilihan Ganda):</label><br>
-                            <input type="text" id="editableQuestionMp3" name="editableQuestionMp3"
-                                placeholder="Isi Pertanyaan di sini"/><br>
-                            <fieldset>
-                                <input type="radio" id="customOption3-1" name="choice3" value="a">
-                                <label for="customOptionInput3-1">
-                                    <input type="text" id="customOptionInput3-1" name="customOptionInput3-1" placeholder="Isi Jawaban A" />
-                                </label><br>
-                                <input type="radio" id="customOption3-2" name="choice3" value="b">
-                                <label for="customOptionInput3-2">
-                                    <input type="text" id="customOptionInput3-2" name="customOptionInput3-2" placeholder="Isi Jawaban B" />
-                                </label><br>
-                                <input type="radio" id="customOption3-3" name="choice3" value="c">
-                                <label for="customOptionInput3-3">
-                                    <input type="text" id="customOptionInput3-3" name="customOptionInput3-3" placeholder="Isi Jawaban C" />
-                                </label><br>
-                            </fieldset>
-                        @endif
+                        <form action="/submit" method="POST">
+                            <label for="question">Pertanyaan (Pilihan Ganda):</label><br>
+                            <input type="text" id="editableQuestion" name="editableQuestion" style="border: none; background: transparent; outline: none; font-size: 16px; margin-bottom: 20px;"
+                                value="Isi Pertanyaan di sini"/><br>
+                            <input type="radio" id="customOption1" name="choice" value="custom1">
+                            <label for="customOption1">
+                                <input type="text" name="customText1" placeholder="Isi Jawaban 1" />
+                            </label><br>
+                            <input type="radio" id="customOption2" name="choice" value="custom2">
+                            <label for="customOption2">
+                                <input type="text" name="customText2" placeholder="Isi Jawaban 2" />
+                            </label><br>
+                            <input type="radio" id="customOption3" name="choice" value="custom3">
+                            <label for="customOption3">
+                                <input type="text" name="customText3" placeholder="Isi Jawaban 3" />
+                            </label><br>
+                        </form>
                     </div>
                 </div>
             </form>
@@ -258,7 +149,7 @@
 </body>
 <script>
     // to load the question type after loading the page
-    window.onload = function() {
+    window.onload = function () {
         toggleForm();
     };
 
@@ -305,30 +196,8 @@
         pilihanGandaForm2.style.display = "none";
         essayForm3.style.display = "none";
         pilihanGandaForm3.style.display = "none";
-        category.required = true;
-        editableQuestionEssay.required = false;
-        editableQuestionEssay2.required = false;
-        editableQuestionEssay3.required = false;
-        editableAnswer.required = false;
-        editableAnswer2.required = false;
-        editableAnswer3.required = false;
-        editableQuestionMp.required = false;
-        editableQuestionMp2.required = false;
-        editableQuestionMp3.required = false;
-        customOption1.required = false;
-        customOption2.required = false;
-        customOption3.required = false;
-        customOptionInput1_1.required = false;
-        customOptionInput1_2.required = false;
-        customOptionInput1_3.required = false;
-        customOptionInput2_1.required = false;
-        customOptionInput2_2.required = false;
-        customOptionInput2_3.required = false;
-        customOptionInput3_1.required = false;
-        customOptionInput3_2.required = false;
-        customOptionInput3_3.required = false;
         
-        if (category === "Essay") {
+        if (category === "essay") {
             essayForm.style.display = "block";
 
             // set elements in essay to required
@@ -382,6 +251,24 @@
     }
 </script>
 <style>
+    .back-button {
+        display: inline-block;
+        margin-bottom: 1%;
+        font-size: 14px;
+        font-weight: bold;
+        color: black;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s, color 0.3s;
+        margin-left: 0px;
+    }
+    
+    .back-button img {
+        width: 20px;
+        height: 20px;
+    }
+
     .save-button {
         display: inline-block;
         padding: 10px 20px;
@@ -396,7 +283,7 @@
         transition: background-color 0.3s, color 0.3s;
         text-align: center;
     }
-    
+
     .save-button img {
         width: 20px;
         /* Sesuaikan ukuran gambar */
@@ -429,6 +316,7 @@
         width: 100%;
         margin: 1% auto;
     }
+
     .essay2 {
         background-color: #fff;
         padding: 20px;
@@ -437,6 +325,7 @@
         width: 100%;
         margin: 1% auto;
     }
+
     .essay3 {
         background-color: #fff;
         padding: 20px;
@@ -454,6 +343,7 @@
         width: 100%;
         margin: 5% auto;
     }
+
     .pilihanGandaForm2 {
         background-color: #fff;
         padding: 20px;
@@ -462,6 +352,7 @@
         width: 100%;
         margin: 5% auto;
     }
+
     .pilihanGandaForm3 {
         background-color: #fff;
         padding: 20px;
