@@ -182,8 +182,8 @@ class WhatsAppController extends Controller
         ];
 
         Log::info("[" . $userNumber . "] Send received user message to pitching API");
-        // Send a POST request using Laravel's Http client
-        $response = Http::post(env('PITCHING_SERVICE_ENDPOINT'), $data);
+        // Send a POST request using Laravel's Http client with 7 attempt and 3s delay between retry
+        $response = Http::retry(7,3000)->post(env('PITCHING_SERVICE_ENDPOINT'), $data);
 
         // Check for errors and return the response
         if ($response->successful()) {
