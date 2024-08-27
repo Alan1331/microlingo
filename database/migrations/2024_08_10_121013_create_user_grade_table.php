@@ -13,17 +13,17 @@ return new class extends Migration
     {
         Schema::create('user_grade', function (Blueprint $table) {
             // Defining the composite primary key
-            $table->string('userId');
-            $table->unsignedBigInteger('levelId');
+            $table->string('user_phoneNumber');
+            $table->unsignedBigInteger('level_id');
             $table->integer('score');
             $table->timestamps();
 
             // Setting the composite primary key
-            $table->primary(['userId', 'levelId']);
+            $table->primary(['user_phoneNumber', 'level_id']);
 
             // Foreign keys
-            $table->foreign('userId')->references('phoneNumber')->on('users')->onDelete('cascade');
-            $table->foreign('levelId')->references('id')->on('levels')->onDelete('cascade');
+            $table->foreign('user_phoneNumber')->references('phoneNumber')->on('users')->onDelete('cascade');
+            $table->foreign('level_id')->references('id')->on('levels')->onDelete('cascade');
         });
     }
 

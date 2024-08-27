@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('menuLocation');
             $table->string('progress');
             $table->string('currentQuestion')->nullable();
+            $table->string('currentGrade')->nullable();
             $table->timestamps();
         });
     }

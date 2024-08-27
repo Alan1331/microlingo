@@ -37,4 +37,9 @@ class LearningUnit extends Model
     {
         return $this->hasMany(Level::class, 'unitId');
     }
+
+    public static function findBy($attribute, $value)
+    {
+        return static::where($attribute, $value)->first();
+    }
 }

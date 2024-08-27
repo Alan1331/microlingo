@@ -35,7 +35,7 @@ class ReplyUser
     /**
      * Handle tasks after the response has been sent to the browser.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\Request  $request (important)
      * @param  \Illuminate\Http\Response  $response
      * @return void
      */
@@ -49,46 +49,89 @@ class ReplyUser
         $content = $response->getContent();
         $response = json_decode($content, true);
 
-        $recipient_number = $response['recipient_number'];
+        $recipientNumber = $response['recipient_number'];
         $response = $response['response'];
         $messages = explode('|', $response);
         
         foreach ($messages as $message) {
-            Log::info("Sending message: " . $message);
-            if(str_contains($message, '/storage/videos/')) {
-                $videos = [$message];
-                // send video if contains typical video url
-                $this->sendMessageToUser($recipient_number, 'Sending video', $videos);
+            if(strlen($message) <= 1600) {
+                // send message to user
+                $this->sendMessageToUser($recipientNumber, $message);
             } else {
-                // send message instead
-                $this->sendMessageToUser($recipient_number, $message);
+                $splittedMsg = $this->splitMessage($message);
+                foreach($splittedMsg as $msg) {
+                    // send message to user in chunks
+                    $this->sendMessageToUser($recipientNumber, $msg);
+                }
             }
         }
 
         \Log::info('Response has been sent to the browser.');
     }
 
-    private function sendMessageToUser($recipient_number, $message, $mediaUrls=null)
+    private function sendMessageToUser($recipientNumber, $message)
     {
-        if($mediaUrls != null) {
-            Log::info("mediaUrls type: ". gettype($mediaUrls));
-            
-            $this->twilioClient->messages->create(
-                $recipient_number,
-                [
-                    'mediaUrl' => $mediaUrls,
-                    'from' => $this->twilioWhatsAppNumber,
-                    'body' => $message,
-                ]
-            );
-        } else {
-            $this->twilioClient->messages->create(
-                $recipient_number,
-                [
-                    'from' => $this->twilioWhatsAppNumber,
-                    'body' => $message,
-                ]
-            );
+        $this->twilioClient->messages->create(
+            $recipientNumber,
+            [
+                'from' => $this->twilioWhatsAppNumber,
+                'body' => $message,
+            ]
+        );
+    }
+
+    private function splitMessage($message, $maxLength = 1600)
+    {
+        // Explode the message by newline characters
+        $lines = explode("\n", $message);
+        $messages = [];
+        $currentMessage = '';
+    
+        foreach ($lines as $line) {
+            // Check if the current line can fit into the current message
+            if (strlen($currentMessage) + strlen($line) + 1 <= $maxLength) {
+                // Add line to current message (including the newline character)
+                $currentMessage .= $line . "\n";
+            } else {
+                // If current message is not empty, push it to the array
+                if (!empty(trim($currentMessage))) {
+                    $messages[] = trim($currentMessage);
+                }
+                // Start a new message with the current line
+                $currentMessage = $line . "\n";
+    
+                // If the current line is longer than maxLength, split it further by words
+                if (strlen($currentMessage) > $maxLength) {
+                    $words = explode(' ', $currentMessage);
+                    $currentMessage = '';
+    
+                    foreach ($words as $word) {
+                        // Check if the word fits into the current message
+                        if (strlen($currentMessage) + strlen($word) + 1 <= $maxLength) {
+                            // Add word to current message
+                            $currentMessage .= $word . ' ';
+                        } else {
+                            // Push the current message to the array and start a new message
+                            $messages[] = trim($currentMessage);
+                            $currentMessage = $word . ' ';
+                        }
+                    }
+    
+                    // Push any remaining content of current message to the array
+                    if (!empty(trim($currentMessage))) {
+                        $messages[] = trim($currentMessage);
+                    }
+    
+                    $currentMessage = '';
+                }
+            }
         }
+    
+        // Push the final message
+        if (!empty(trim($currentMessage))) {
+            $messages[] = trim($currentMessage);
+        }
+    
+        return $messages;
     }
 }

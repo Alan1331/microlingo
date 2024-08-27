@@ -24,6 +24,7 @@ class User extends Model
         'menuLocation',
         'progress',
         'currentQuestion',
+        'currentGrade',
     ];
 
     /**
@@ -38,6 +39,7 @@ class User extends Model
         'menuLocation' => 'string',
         'progress' => 'string',
         'currentQuestion' => 'string',
+        'currentGrade' => 'string',
     ];
 
     /**
