@@ -7,7 +7,7 @@
             <div class="col-12">
                 <div class="card" style="margin-top: 25px;">
                     <div class="card-header">
-                        <h3 class="card-title">Kelola Pengguna</h3>
+                        <h3 class="card-title">Data Pengguna</h3>
                     </div>
                     <!-- /.card-header -->
                     <div class="card-body">
@@ -43,7 +43,7 @@
         </div>
     </div>
 </section>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.ckeditor.com/4.13.1/standard/ckeditor.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"></script>
 <style>

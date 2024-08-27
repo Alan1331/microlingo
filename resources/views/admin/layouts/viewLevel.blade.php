@@ -9,71 +9,49 @@
                 <div class="col-12">
                     <div class="card" style="margin-top: 25px;">
                         <div class="card-header">
-                            <h3 class="card-title">Level</h3>
+                            <h1 class="card-title">Daftar Level di Unit {{$unitNumber}}</h1>
                         </div>
                         <!-- /.card-header -->
                         <div class="card-body">
+                            <a href="{{route('materiPembelajaran')}}" class="back-button">
+                                <img src="{{ asset('backk.png') }}" alt="Back Button">
+                                Back
+                            </a>
                             @if($levels->count() != 0)
-                            <table id="example2" class="table table-bordered table-hover">
-                                <thead>
-                                    <tr>
-                                        <th style="width: 100px;">Level</th>
-                                        <th style="width: 380px;">Topik</th>
-                                        <th style="width: 50px;">Pertanyaan</th>
-                                        <th style="width: 150px;">Aksi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- Your table rows here -->
-                                </tbody>
-                                <tfoot>
-                                    @foreach ($levels as $level)
-                                    <tr>
-                                        <td>{{ $level->sortId }}</td>
-                                        <td>{{ $level->topic }}</td>
-                                        <td>{{ $level->questions()->count() }}</td>
-                                        <td colspan="6" style="text-align: center;">
-                                            <a class="edit-button" level-id="{{ $level->id }}">
-                                                <img src="{{ asset('edit.png') }}" alt="Edit Button">
-                                                Update
-                                            </a>
-                                            <div id="editModal" class="modalAction">
-                                                <div class="modal-content3" data-dismiss="modalAction" aria-label="Close">
-                                                    <h2 class="modal-title">Edit Level</h2>
-                                                    <form id="level-update-form" method="POST">
-                                                        @csrf
-                                                        @method('PUT')
-                                                        <div class="form-group mb-3">
-                                                            <label for="editTopik" class="font-weight-bold">Topik</label>
-                                                            <input type="text" class="form-control @error('topic') is-invalid @enderror" name="topic" id="editTopik">
-                                                            @error('topic')
-                                                                <div class="alert alert-danger mt-2">{{ $message }}</div>
-                                                            @enderror
-                                                            <label for="editContent" class="font-weight-bold">Konten Pembelajaran</label>
-                                                            <textarea type="text" class="form-control @error('content') is-invalid @enderror" name="content" id="editContent"></textarea>
-                                                            @error('content')
-                                                                <div class="alert alert-danger mt-2">{{ $message }}</div>
-                                                            @enderror
-                                                            <label for="editVideo" class="font-weight-bold">Link Video</label>
-                                                            <input type="text" class="form-control @error('videoLink') is-invalid @enderror" name="videoLink" id="editVideo">
-                                                            @error('videoLink')
-                                                                <div class="alert alert-danger mt-2">{{ $message }}</div>
-                                                            @enderror
-                                                        </div>
-                                                        <div class="col-sm-10 offset-sm-2">
-                                                            <button type="submit" class="btn btn-primary">Simpan</button>
-                                                            <button type="button" id="cancelButton" class="btn btn-secondary">Batalkan</button>
-                                                        </div>
-                                                    </form>
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tfoot>
-                            </table>
+                                <table id="example2" class="table table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 100px;">Level</th>
+                                            <th style="width: 300px;">Topik</th>
+                                            <th style="width: 100px;">Pertanyaan</th>
+                                            <th style="width: 100px;">Avg. Nilai</th>
+                                            <th style="width: 100px;">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Your table rows here -->
+                                    </tbody>
+                                    <tfoot>
+                                        @foreach ($levels as $level)
+                                            <tr>
+                                                <td>{{ $level->sortId }}</td>
+                                                <td>{{ $level->topic }}</td>
+                                                <td>{{ $level->questions()->count() }}</td>
+                                                <td>{{ $level->averageGrade }}%</td>
+                                                <td colspan="6" style="text-align: center;">
+                                                    <a href="/updateLevel/{{ $level->id }}" class="edit-button">
+                                                        <img src="{{ asset('edit.png') }}" alt="Edit Button">
+                                                        Update
+                                                    </a>
+                                                
+                                                </td>
+
+                                            </tr>
+                                        @endforeach
+                                    </tfoot>
+                                </table>
                             @else
-                            <b>Tidak ada level untuk unit ini</b>
+                                <b>Tidak ada level untuk unit ini</b>
                             @endif
                         </div>
                         <!-- /.card-body -->
@@ -89,20 +67,23 @@
         </div>
         <!-- /.container-fluid -->
     </section>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
     var uploadBtn = document.querySelectorAll('.upload-button');
     var modalUpload = document.getElementById('modalUpload');
     var cancelButton = document.getElementById('cancelButton');
     var editBtn = document.querySelectorAll('.edit-button');
     var editModal = document.getElementById('editModal');
+   
 
     // Fungsi untuk menampilkan modal upload
-    uploadBtn.forEach(function(button) {
-        button.addEventListener('click', function() {
+    uploadBtn.forEach(function (button) {
+        button.addEventListener('click', function () {
             var unitId = this.getAttribute('unit-id');
             var levelId = this.getAttribute('level-id');
-    
+
             // Dynamically set the form action
             var actionUrl = `/materiPembelajaran/${unitId}/levels/${levelId}/videos`;
             document.getElementById('uploadForm').action = actionUrl;
@@ -110,9 +91,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Fungsi untuk menampilkan modal edit
-    editBtn.forEach(function(button) {
-        button.addEventListener('click', function() {
+    // Fungsi untuk menampilkan modal edit di bawah tabel example2
+    editBtn.forEach(function (button) {
+        button.addEventListener('click', function () {
             var levelId = this.getAttribute('level-id');
             fetch(`/levels/${levelId}`)
                 .then(response => response.json())
@@ -121,57 +102,47 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('editContent').value = data.content;
                     document.getElementById('editVideo').value = data.videoLink;
                     document.getElementById('level-update-form').action = `/levels/${levelId}`;
+                    
+                    // Pindahkan modal ke bawah tabel example2 dan tampilkan
+                    exampleTable.insertAdjacentElement('afterend', editModal);
                     editModal.style.display = "block";
                 });
         });
     });
 
-    // Handle form submission
-    uploadForm.addEventListener('submit', function (event) {
-        event.preventDefault();
+    // Menangani pengiriman form edit untuk memperbarui data di halaman yang sama tanpa reload
+    document.getElementById('level-update-form').addEventListener('submit', function (event) {
+        event.preventDefault(); // Mencegah form melakukan submit secara default
 
-        // Hide the upload button and show the loading button
-        document.getElementById('uploadButton').style.display = 'none';
-        document.getElementById('loadingButton').style.display = 'inline-block';
+        var formData = new FormData(this);
+        var actionUrl = this.action;
 
-        // Create a FormData object from the form
-        var formData = new FormData(uploadForm);
-
-        // Log the form data for debugging
-        for (var pair of formData.entries()) {
-            console.log(pair[0]+ ', ' + pair[1]); 
-        }
-
-        // Send the AJAX request
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', uploadForm.action, true);
-        xhr.setRequestHeader('X-CSRF-TOKEN', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-
-        xhr.onload = function () {
-            if (xhr.status === 200) {
-                // Success
-                alert('Videos uploaded successfully!');
+        fetch(actionUrl, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update the page content or specific element(s) with the updated data
+                alert('Level updated successfully!');
+                // Here you can update the UI dynamically without refreshing the page
+                editModal.style.display = 'none'; // Close the modal
             } else {
-                // Error
-                alert('An error occurred while uploading the videos.');
+                alert('An error occurred while updating the level.');
             }
-
-            // Reset the form
-            uploadForm.reset();
-
-            // Show the upload button and hide the loading button
-            document.getElementById('uploadButton').style.display = 'inline-block';
-            document.getElementById('loadingButton').style.display = 'none';
-
-            // Close the modal
-            modalUpload.style.display = 'none';
-        };
-
-        xhr.send(formData);
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An unexpected error occurred.');
+        });
     });
 
     // Menutup modal ketika klik di luar konten modal
-    window.addEventListener('click', function(event) {
+    window.addEventListener('click', function (event) {
         if (event.target == modalUpload) {
             modalUpload.style.display = 'none';
         } else if (event.target == editModal) {
@@ -185,17 +156,42 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
-document.getElementById('deleteBtn').addEventListener('click', function(event) {
-        event.preventDefault(); // Mencegah aksi default tombol
-        if (confirm('Are you sure you want to delete this item?')) {
-            // Lakukan aksi penghapusan di sini, misalnya mengarahkan ke URL penghapusan
-            window.location.href = 'URL_PENGHAPUSAN'; // Ganti dengan URL untuk menghapus item
-        }
-    });
+document.getElementById('deleteBtn').addEventListener('click', function (event) {
+    event.preventDefault(); // Mencegah aksi default tombol
+    if (confirm('Are you sure you want to delete this item?')) {
+        // Lakukan aksi penghapusan di sini, misalnya mengarahkan ke URL penghapusan
+        window.location.href = 'URL_PENGHAPUSAN'; // Ganti dengan URL untuk menghapus item
+    }
+});
 
-</script>
+    </script>
 </body>
 <style>
+    .back-button {
+        display: inline-block;
+        margin-bottom: 1%;
+        font-size: 14px;
+        font-weight: bold;
+        color: black;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s, color 0.3s;
+        margin-left: 0px;
+    }
+    
+    .back-button img {
+        width: 20px;
+        height: 20px;
+    }
+
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        /* Jarak antara tombol */
+    }
+
     .delete-button {
         display: inline-block;
         padding: 10px 20px;
@@ -261,48 +257,6 @@ document.getElementById('deleteBtn').addEventListener('click', function(event) {
         color: #ffffff;
     }
 
-    .upload-button {
-        display: inline-block;
-        padding: 10px 20px;
-        font-size: 14px;
-        font-weight: bold;
-        color: white;
-        background-color: #FFB200;
-        /* Warna merah untuk tombol delete */
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background-color 0.3s, color 0.3s;
-        text-align: center;
-    }
-
-    .upload-button img {
-        width: 20px;
-        /* Sesuaikan ukuran gambar */
-        height: 20px;
-        /* Sesuaikan ukuran gambar */
-        margin-right: 5px;
-        /* Jarak antara gambar dan teks */
-    }
-
-    .upload-button:hover {
-        background-color: #EB5B00;
-        /* Warna merah gelap saat hover */
-        color: #ffffff;
-    }
-
-    .modalUpload {
-        display: none;
-        position: fixed;
-        z-index: 1;
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        overflow: auto;
-        background-color: rgb(0, 0, 0);
-        background-color: rgba(0, 0, 0, 0.4);
-    }
 
     .modal-content2 {
         position: relative;

@@ -22,7 +22,7 @@
                                 <a class="add-button" id="topikBtn"
                                     style="display: flex; align-items: center; margin-bottom: 10px;">
                                     <img src="{{ asset('add.png') }}" alt="add Button" style="margin-right: 8px;">
-                                    Topik Baru
+                                    Tambah Unit
                                 </a>
                                 <div id="editModal" class="modalAction">
                                     <div class="modal-content4" data-dismiss="modalAction" aria-label="Close">
@@ -38,7 +38,7 @@
                                                 @enderror
                                             </div>
                                             <div class="form-group row">
-                                                <div class="col-sm-10 offset-sm-2">
+                                                <div class="col-sm-10 offset-sm-2" style="display: flex; justify-content: center; gap: 10px;">
                                                     <button type="submit" class="btn btn-primary">Submit</button>
                                                     <button type="button" id="cancelBtn" class="btn btn-secondary">Batalkan</button>
                                                 </div>
@@ -54,7 +54,7 @@
                                     <tr>
                                         <th style="width: 100px;">Unit</th>
                                         <th style="width: 500px;">Topik</th>
-                                        <th style="width: 200px;">Aksi</th>
+                                        <th style="width: 300px;">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody id="dataTableBody">
@@ -68,19 +68,23 @@
                                         <td colspan="6" style="text-align: center;">
                                             <a href="/materiPembelajaran/{{ $unit['id'] }}" class="view-button">
                                                 <img src="{{ asset('view.png') }}" alt="View Button">
-                                                View Level
+                                                Lihat Level
                                             </a>
                                             <form id="unit-delete-form-{{ $unit['id'] }}" action="{{ route('units.delete', $unit['id']) }}" method="POST" style="display: none;">
                                                 @csrf
                                                 @method('DELETE')
                                             </form>
-                                            <a onclick="event.preventDefault(); if(confirm('Are you sure you want to delete this unit?')) document.getElementById('unit-delete-form-{{ $unit['id'] }}').submit();">
+                                            <a onclick="event.preventDefault(); if(confirm('Apakah admin yakin akan menghapus unit ini?\nKarena unit sebelumnya akan dipindahkan ke atas')) document.getElementById('unit-delete-form-{{ $unit['id'] }}').submit();">
                                                 @method('DELETE')
                                                 <button type="button" class="delete-button">
                                                     <img src="{{ asset('delete.png') }}" alt="Delete Button">
-                                                    Delete
+                                                    Hapus
                                                 </button>
                                             </a>
+                                            <a href="/updateLevel" class="edit-button">
+                                                        <img src="{{ asset('edit.png') }}" alt="Edit Button">
+                                                        Update
+                                                    </a>
                                         </td>
                                     </tr>
                                     @endforeach
@@ -165,6 +169,36 @@
     }
 
     .view-button:hover {
+        background-color: #03346E;
+        /* Warna merah gelap saat hover */
+        color: #ffffff;
+    }
+
+    .edit-button {
+        display: inline-block;
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: bold;
+        color: white;
+        background-color: blue;
+        /* Warna merah untuk tombol delete */
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s, color 0.3s;
+        text-align: center;
+    }
+
+    .edit-button img {
+        width: 20px;
+        /* Sesuaikan ukuran gambar */
+        height: 20px;
+        /* Sesuaikan ukuran gambar */
+        margin-right: 5px;
+        /* Jarak antara gambar dan teks */
+    }
+
+    .edit-button:hover {
         background-color: #03346E;
         /* Warna merah gelap saat hover */
         color: #ffffff;

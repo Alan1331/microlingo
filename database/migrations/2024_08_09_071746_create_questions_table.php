@@ -13,9 +13,12 @@ return new class extends Migration
     {
         Schema::create('questions', function (Blueprint $table) {
             $table->id();
-            $table->string('question');
-            $table->string('answer');
+            $table->string('question')->nullable();
+            $table->string('answer')->nullable();
             $table->string('type');
+            $table->string('optionA')->nullable();
+            $table->string('optionB')->nullable();
+            $table->string('optionC')->nullable();
             $table->unsignedBigInteger('levelId');
             $table->timestamps();
 

@@ -43,7 +43,7 @@ class Level extends Model
      */
     public function learningUnit(): BelongsTo
     {
-        return $this->belongsTo(LearningUnit::class);
+        return $this->belongsTo(LearningUnit::class, 'unitId');
     }
 
     /**
