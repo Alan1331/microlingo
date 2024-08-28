@@ -14,10 +14,7 @@
                         <img src="{{ asset('backk.png') }}" alt="Back Button">
                         Back
                     </a>
-                    <button type="submit" class="save-button">
-                        <img src="{{ asset('edit.png') }}" alt="Save Button">
-                        Simpan
-                    </button>
+                    
                     <br>
                     <label for="editTopik" class="font-weight-bold">Topik</label>
                     <input required type="text" class="form-control" name="topic" id="editTopik" value="{{ old('topic', $level->topic) }}">
@@ -253,6 +250,9 @@
                         @endif
                     </div>
                 </div>
+                <button type="submit" class="save-button">
+                        Simpan
+                    </button>
             </form>
     </section>
 </body>

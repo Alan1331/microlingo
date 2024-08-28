@@ -81,10 +81,32 @@
                                                     Hapus
                                                 </button>
                                             </a>
-                                            <a href="/updateLevel" class="edit-button">
+                                            <a class="edit-button" id="updateBtn">
                                                         <img src="{{ asset('edit.png') }}" alt="Edit Button">
                                                         Update
                                                     </a>
+                                                    <div id="updateModal" class="modalAction2">
+                                    <div class="modal-content4" data-dismiss="modalAction2" aria-label="Close">
+                                        <h2 class="modal-title">Update Topik</h2>
+                                        <form id="addUnitForm2" method="POST" >
+                                            @csrf
+                                            <div class="form-group mb-3">
+                                                <label for="topik" class="font-weight-bold" style="text-align: right;">Update Topik</label>
+                                                <textarea class="form-control @error('topik') is-invalid @enderror"
+                                                    name="topic" id="topik" rows="5"></textarea>
+                                                @error('topik')
+                                                    <div class="alert alert-danger mt-2">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                            <div class="form-group row">
+                                                <div class="col-sm-10 offset-sm-2" style="display: flex; justify-content: center; gap: 10px;">
+                                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                                    <button type="button" id="cancelBtn2" class="btn btn-secondary">Batalkan</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
                                         </td>
                                     </tr>
                                     @endforeach
@@ -247,7 +269,33 @@
         background-color: rgba(0, 0, 0, 0.4);
     }
 
+    .updateModal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0, 0, 0);
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+
     .modalAction {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0, 0, 0);
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .modalAction2 {
         display: none;
         position: fixed;
         z-index: 1;
@@ -273,9 +321,12 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
     var topikBtn = document.getElementById('topikBtn');
+    var updateBtn = document.getElementById('updateBtn');
     var editModal = document.getElementById('editModal');
+    var updateModal = document.getElementById('updateModal');
     var dataTableBody = document.getElementById('dataTableBody');
     var cancelBtn = document.getElementById('cancelBtn');
+    var cancelBtn2 = document.getElementById('cancelBtn2');
     var editUnit = document.getElementById('editUnit');
     var editTopik = document.getElementById('editTopik');
 
@@ -284,16 +335,27 @@
         editModal.style.display = 'block';
     });
 
+    updateBtn.addEventListener('click', function () {
+        updateModal.style.display = 'block';
+    });
+
     // Menutup modal ketika klik di luar konten modal
     window.addEventListener('click', function (event) {
         if (event.target == editModal) {
             editModal.style.display = 'none';
+        }
+        if (event.target == updateModal) {
+            updateModal.style.display = 'none';
         }
     });
 
     // Menutup modal ketika klik batalkan
     cancelBtn.addEventListener('click', function () {
         editModal.style.display = 'none';
+    });
+
+    cancelBtn2.addEventListener('click', function () {
+        updateModal.style.display = 'none';
     });
 });
 </script>
