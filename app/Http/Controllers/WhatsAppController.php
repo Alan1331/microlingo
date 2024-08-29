@@ -162,7 +162,8 @@ class WhatsAppController extends Controller
     {
         Log::info("[" . $userNumber . "] Enter pitching session");
         $this->changeMenuLocation($userNumber, 'pitchingSession');
-        $message = "Bayangkan Anda sedang bertemu dengan calon partner bisnis Anda dari luar negeri. ";
+        $message = "Anda telah masuk ke sesi pitching, ketik *Keluar* kapanpun pada sesi ini untuk kembali ke Main Menu!|";
+        $message .= "Bayangkan Anda sedang bertemu dengan calon partner bisnis Anda dari luar negeri. ";
         $message .= "Tugas Anda adalah untuk meyakinkan calon partner bisnis Anda untuk bergabung dalam bisnis Anda! ";
         $message .= "Manfaatkan semua ilmu yang sudah Anda pelajari pada MicroLingo untuk deal dengan partner Anda! ";
         $message .= "Good luck!!|";
@@ -205,6 +206,10 @@ class WhatsAppController extends Controller
             if($missionStatus == "failed") {
                 $message .= "|Unfortunatelly, you have *failed* the mission. Don't worry, try again next!! ";
                 $message .= "Ketik *Semangat* untuk kembali ke Main Menu.";
+            }
+
+            if($missionStatus == "quit") {
+                $message .= "|" . $this->showMainMenu();
             }
 
             Log::info("[" . $userNumber . "] Sending response from pitching API to user: " . $message);
@@ -266,7 +271,7 @@ class WhatsAppController extends Controller
     private function showAboutUs()
     {
         $message = env('ABOUT_US_PROMPT');
-        $message .= '|Ketik *Balik* untuk kembali ke main menu';
+        $message .= '|Ketik *Kembali* untuk kembali ke main menu';
         return $message;
     }
 
