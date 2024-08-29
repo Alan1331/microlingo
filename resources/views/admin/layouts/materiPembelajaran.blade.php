@@ -31,8 +31,8 @@
                                             @csrf
                                             <div class="form-group mb-3">
                                                 <label for="topik" class="font-weight-bold" style="text-align: right;">Topik</label>
-                                                <textarea class="form-control @error('topik') is-invalid @enderror"
-                                                    name="topic" id="topik" rows="5"></textarea>
+                                                <input type="text" class="form-control @error('topik') is-invalid @enderror"
+                                                    name="topic" id="topik"></input>
                                                 @error('topik')
                                                     <div class="alert alert-danger mt-2">{{ $message }}</div>
                                                 @enderror
@@ -81,22 +81,18 @@
                                                     Hapus
                                                 </button>
                                             </a>
-                                            <a class="edit-button" id="updateBtn">
+                                            <a class="edit-button" unit-id="{{ $unit['id'] }}">
                                                         <img src="{{ asset('edit.png') }}" alt="Edit Button">
                                                         Update
                                                     </a>
-                                                    <div id="updateModal" class="modalAction2">
+                                    <div id="updateModal-{{ $unit->id }}" class="modalAction2 update-modal">
                                     <div class="modal-content4" data-dismiss="modalAction2" aria-label="Close">
-                                        <h2 class="modal-title">Update Topik</h2>
-                                        <form id="addUnitForm2" method="POST" >
+                                        <h2 class="update-modal-title" id="updateModalTitle">Update Topik Unit {{ $unit->sortId }}</h2>
+                                        <form id="unit-update-form" method="POST" action="{{ route('units.update', ['id' => $unit->id]) }}">
                                             @csrf
+                                            @method('PUT')
                                             <div class="form-group mb-3">
-                                                <label for="topik" class="font-weight-bold" style="text-align: right;">Update Topik</label>
-                                                <textarea class="form-control @error('topik') is-invalid @enderror"
-                                                    name="topic" id="topik" rows="5"></textarea>
-                                                @error('topik')
-                                                    <div class="alert alert-danger mt-2">{{ $message }}</div>
-                                                @enderror
+                                                <input type="text" class="form-control" name="topic" id="editTopik" value="{{ $unit->topic }}">
                                             </div>
                                             <div class="form-group row">
                                                 <div class="col-sm-10 offset-sm-2" style="display: flex; justify-content: center; gap: 10px;">
@@ -321,22 +317,25 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
     var topikBtn = document.getElementById('topikBtn');
-    var updateBtn = document.getElementById('updateBtn');
+    var updateBtn = document.querySelectorAll('.edit-button');
+    var updateModal = document.querySelectorAll('.update-modal');
     var editModal = document.getElementById('editModal');
-    var updateModal = document.getElementById('updateModal');
     var dataTableBody = document.getElementById('dataTableBody');
     var cancelBtn = document.getElementById('cancelBtn');
-    var cancelBtn2 = document.getElementById('cancelBtn2');
     var editUnit = document.getElementById('editUnit');
-    var editTopik = document.getElementById('editTopik');
 
     // Fungsi untuk menampilkan modal
     topikBtn.addEventListener('click', function () {
         editModal.style.display = 'block';
     });
 
-    updateBtn.addEventListener('click', function () {
-        updateModal.style.display = 'block';
+
+    // Fungsi untuk menampilkan modal update topik
+    updateBtn.forEach(function(button) {
+        button.addEventListener('click', function() {
+            var unitId = this.getAttribute('unit-id');
+            document.getElementById("updateModal-" + unitId).style.display = "block";
+        });
     });
 
     // Menutup modal ketika klik di luar konten modal
@@ -344,19 +343,35 @@
         if (event.target == editModal) {
             editModal.style.display = 'none';
         }
-        if (event.target == updateModal) {
-            updateModal.style.display = 'none';
-        }
     });
-
+    
     // Menutup modal ketika klik batalkan
     cancelBtn.addEventListener('click', function () {
         editModal.style.display = 'none';
     });
 
-    cancelBtn2.addEventListener('click', function () {
-        updateModal.style.display = 'none';
+    updateModal.forEach(function(modal) {
+        // Add click event listener to the entire modal
+        modal.addEventListener('click', function(event) {
+            // Menutup modal update ketika klik di luar konten modal
+            if (event.target === modal) {
+                // Close the modal by removing the 'open' class or setting display to 'none'
+                modal.style.display = 'none';
+            }
+        });
+
+        // Retrieve the cancel button inside the modal by its ID
+        var cancelButton = modal.querySelector('#cancelBtn2');
+
+        // Add a click event listener to the cancel button
+        if (cancelButton) {  // Check if the cancel button exists
+            cancelButton.addEventListener('click', function() {
+                // Set the modal's display style to 'none' to hide it
+                modal.style.display = 'none';
+            });
+        }
     });
+
 });
 </script>
 @endsection
