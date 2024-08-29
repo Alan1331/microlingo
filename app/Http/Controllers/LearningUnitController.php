@@ -67,16 +67,17 @@ class LearningUnitController extends Controller
 
     public function updateLearningUnit(Request $request, $id)
     {
-        // Update the learning unit document in Firestore
-        $result = $this->learningUnit->update($id, $request->all());
+        // Update the learning unit
+        $unit = LearningUnit::find($id);
+        $result = $unit->update($request->all());
 
         // Verify learning unit was found
         if (!$result) {
-            return response()->json(['message' => $this->notFoundMessage], 404);
+            return redirect()->route('materiPembelajaran')->with('failed', 'Failed to update the topic');
         }
 
         // Return a status message
-        return response()->json(['message' => 'Learning unit updated successfully'], 200);
+        return redirect()->route('materiPembelajaran')->with('success', 'The topic was successfully updated');
     }
 
     public function deleteUnit($id)

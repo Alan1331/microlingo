@@ -28,7 +28,6 @@ Route::put('/users/{noWhatsapp}', 'App\Http\Controllers\UserController@updateUse
 Route::delete('/users/{noWhatsapp}', 'App\Http\Controllers\UserController@deleteUser');
 
 Route::get('/units', 'App\Http\Controllers\LearningUnitController@showLearningUnits');
-Route::get('/units/{id}', 'App\Http\Controllers\LearningUnitController@showLearningUnitById');
 Route::post('/units', 'App\Http\Controllers\LearningUnitController@createLearningUnit');
 Route::put('/units/{id}', 'App\Http\Controllers\LearningUnitController@updateLearningUnit');
 Route::delete('/units/{id}', 'App\Http\Controllers\LearningUnitController@deleteLearningUnit');
@@ -64,6 +63,7 @@ Route::middleware(CheckFirebaseRole::class)->group(function () {
     Route::get('/materiPembelajaran', [LearningUnitController::class, 'showLearningUnits'])->name('materiPembelajaran');
     Route::post('/materiPembelajaran', [LearningUnitController::class, 'createLearningUnit'])->name('units.create');
     Route::get('/materiPembelajaran/{id}', [LearningUnitController::class, 'showLearningUnitById'])->name('units.levels');
+    Route::put('/materiPembelajaran/{id}', [LearningUnitController::class, 'updateLearningUnit'])->name('units.update');
     Route::delete('/materiPembelajaran/{id}', [LearningUnitController::class, 'deleteUnit'])->name('units.delete');
     Route::delete('/materiPembelajaran/{id}/levels/{levelId}', [LevelController::class, 'deleteLevel'])->name('units.levels.delete');
 });
