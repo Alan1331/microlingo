@@ -31,8 +31,8 @@
                                             @csrf
                                             <div class="form-group mb-3">
                                                 <label for="topik" class="font-weight-bold" style="text-align: right;">Topik</label>
-                                                <textarea class="form-control @error('topik') is-invalid @enderror"
-                                                    name="topic" id="topik" rows="5"></textarea>
+                                                <input type="text" class="form-control @error('topik') is-invalid @enderror"
+                                                    name="topic" id="topik"></input>
                                                 @error('topik')
                                                     <div class="alert alert-danger mt-2">{{ $message }}</div>
                                                 @enderror
@@ -81,10 +81,28 @@
                                                     Hapus
                                                 </button>
                                             </a>
-                                            <a href="/updateLevel" class="edit-button">
+                                            <a class="edit-button" unit-id="{{ $unit['id'] }}">
                                                         <img src="{{ asset('edit.png') }}" alt="Edit Button">
                                                         Update
                                                     </a>
+                                    <div id="updateModal-{{ $unit->id }}" class="modalAction2 update-modal">
+                                    <div class="modal-content4" data-dismiss="modalAction2" aria-label="Close">
+                                        <h2 class="update-modal-title" id="updateModalTitle">Update Topik Unit {{ $unit->sortId }}</h2>
+                                        <form id="unit-update-form" method="POST" action="{{ route('units.update', ['id' => $unit->id]) }}">
+                                            @csrf
+                                            @method('PUT')
+                                            <div class="form-group mb-3">
+                                                <input type="text" class="form-control" name="topic" id="editTopik" value="{{ $unit->topic }}">
+                                            </div>
+                                            <div class="form-group row">
+                                                <div class="col-sm-10 offset-sm-2" style="display: flex; justify-content: center; gap: 10px;">
+                                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                                    <button type="button" id="cancelBtn2" class="btn btn-secondary">Batalkan</button>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
                                         </td>
                                     </tr>
                                     @endforeach
@@ -247,7 +265,33 @@
         background-color: rgba(0, 0, 0, 0.4);
     }
 
+    .updateModal {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0, 0, 0);
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+
     .modalAction {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgb(0, 0, 0);
+        background-color: rgba(0, 0, 0, 0.4);
+    }
+
+    .modalAction2 {
         display: none;
         position: fixed;
         z-index: 1;
@@ -273,15 +317,25 @@
 <script>
     document.addEventListener('DOMContentLoaded', function () {
     var topikBtn = document.getElementById('topikBtn');
+    var updateBtn = document.querySelectorAll('.edit-button');
+    var updateModal = document.querySelectorAll('.update-modal');
     var editModal = document.getElementById('editModal');
     var dataTableBody = document.getElementById('dataTableBody');
     var cancelBtn = document.getElementById('cancelBtn');
     var editUnit = document.getElementById('editUnit');
-    var editTopik = document.getElementById('editTopik');
 
     // Fungsi untuk menampilkan modal
     topikBtn.addEventListener('click', function () {
         editModal.style.display = 'block';
+    });
+
+
+    // Fungsi untuk menampilkan modal update topik
+    updateBtn.forEach(function(button) {
+        button.addEventListener('click', function() {
+            var unitId = this.getAttribute('unit-id');
+            document.getElementById("updateModal-" + unitId).style.display = "block";
+        });
     });
 
     // Menutup modal ketika klik di luar konten modal
@@ -290,11 +344,34 @@
             editModal.style.display = 'none';
         }
     });
-
+    
     // Menutup modal ketika klik batalkan
     cancelBtn.addEventListener('click', function () {
         editModal.style.display = 'none';
     });
+
+    updateModal.forEach(function(modal) {
+        // Add click event listener to the entire modal
+        modal.addEventListener('click', function(event) {
+            // Menutup modal update ketika klik di luar konten modal
+            if (event.target === modal) {
+                // Close the modal by removing the 'open' class or setting display to 'none'
+                modal.style.display = 'none';
+            }
+        });
+
+        // Retrieve the cancel button inside the modal by its ID
+        var cancelButton = modal.querySelector('#cancelBtn2');
+
+        // Add a click event listener to the cancel button
+        if (cancelButton) {  // Check if the cancel button exists
+            cancelButton.addEventListener('click', function() {
+                // Set the modal's display style to 'none' to hide it
+                modal.style.display = 'none';
+            });
+        }
+    });
+
 });
 </script>
 @endsection
