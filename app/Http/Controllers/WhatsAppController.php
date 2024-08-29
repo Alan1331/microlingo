@@ -162,9 +162,9 @@ class WhatsAppController extends Controller
     {
         Log::info("[" . $userNumber . "] Enter pitching session");
         $this->changeMenuLocation($userNumber, 'pitchingSession');
-        $message = "Bayangkan Anda sedang bertemu dengan calon partner bisnis Anda dari luar negeri.";
-        $message .= "Tugas Anda adalah untuk meyakinkan calon partner bisnis Anda untuk bergabung dalam bisnis Anda!";
-        $message .= "Manfaatkan semua ilmu yang sudah Anda pelajari pada MicroLingo untuk deal dengan partner Anda!";
+        $message = "Bayangkan Anda sedang bertemu dengan calon partner bisnis Anda dari luar negeri. ";
+        $message .= "Tugas Anda adalah untuk meyakinkan calon partner bisnis Anda untuk bergabung dalam bisnis Anda! ";
+        $message .= "Manfaatkan semua ilmu yang sudah Anda pelajari pada MicroLingo untuk deal dengan partner Anda! ";
         $message .= "Good luck!!|";
 
         $helloMessage = "Hello, I am " . $userName;
@@ -182,8 +182,8 @@ class WhatsAppController extends Controller
         ];
 
         Log::info("[" . $userNumber . "] Send received user message to pitching API");
-        // Send a POST request using Laravel's Http client
-        $response = Http::post(env('PITCHING_SERVICE_ENDPOINT'), $data);
+        // Send a POST request using Laravel's Http client with 7 attempt and 3s delay between retry
+        $response = Http::retry(7,3000)->post(env('PITCHING_SERVICE_ENDPOINT'), $data);
 
         // Check for errors and return the response
         if ($response->successful()) {
@@ -198,20 +198,20 @@ class WhatsAppController extends Controller
             }
 
             if($missionStatus == "success") {
-                $message .= "|Congratulations, you have *successfully* finished the mission.";
-                $message .= "Ketik 'Yes' untuk kembali ke Main Menu.";
+                $message .= "|Congratulations, you have *successfully* finished the mission. ";
+                $message .= "Ketik *Yes* untuk kembali ke Main Menu.";
             }
 
             if($missionStatus == "failed") {
-                $message .= "|Unfortunatelly, you have *failed* the mission. Don't worry, try again next!!";
-                $message .= "Ketik 'Semangat' untuk kembali ke Main Menu.";
+                $message .= "|Unfortunatelly, you have *failed* the mission. Don't worry, try again next!! ";
+                $message .= "Ketik *Semangat* untuk kembali ke Main Menu.";
             }
 
             Log::info("[" . $userNumber . "] Sending response from pitching API to user: " . $message);
             return $message;
         } else {
             Log::info("[" . $userNumber . "] Failed to retrieve response from pitching API");
-            return 'Failed to communicate with the pitching API.';
+            return 'Error internal chatbot: gagal memulai sesi pitching.';
         }
     }
 
@@ -266,7 +266,7 @@ class WhatsAppController extends Controller
     private function showAboutUs()
     {
         $message = env('ABOUT_US_PROMPT');
-        $message .= '|Ketik apapun untuk kembali ke main menu';
+        $message .= '|Ketik *Balik* untuk kembali ke main menu';
         return $message;
     }
 
@@ -367,7 +367,7 @@ Pilih menu berikut untuk melanjutkan:
             Log::info("Failed to retrive the video");
         }
 
-        $message .= "Jika sudah selesai menyimak materi, ketik apapun untuk menjawab pertanyaan atau 'Keluar' untuk kembali ke Main Menu! Tenang aja, progres belajarmu akan tersimpan kok!";
+        $message .= "Jika sudah selesai menyimak materi, ketik *Lanjut* untuk menjawab pertanyaan atau *Keluar* untuk kembali ke Main Menu! Tenang aja, progres belajarmu akan tersimpan kok!";
 
         # change menu location to questionPrompt
         $this->changeMenuLocation($userNumber, 'questionPrompt');
@@ -523,9 +523,9 @@ Pilih menu berikut untuk melanjutkan:
                     $userData->currentGrade = strval($currentCorrectAnswers) . '/' . $currentGrade[1];
                     $userData->save();
 
-                    $evaluation_msg = "Selamat, jawaban Anda benar.";
+                    $evaluation_msg = "Selamat, jawaban Anda *benar*.";
                 } else {
-                    $evaluation_msg = "Yah, jawaban Anda salah.";
+                    $evaluation_msg = "Yah, jawaban Anda *salah*.";
                 }
 
                 Log::info("[" . $userNumber . "] Sending evaluation message: \n" . $evaluation_msg);
@@ -557,11 +557,11 @@ Pilih menu berikut untuk melanjutkan:
                         $userData->levels()->attach($level->id, ['score' => $score]);
 
                         $message .= "Selamat, Anda telah berhasil menyelesaikan level ini dengan *nilai: " . strval($score) . "*";
-                        $message .= "\n\n*ketik apapun untuk melanjutkan ke level berikutnya atau 'Keluar' untuk kembali ke Main Menu!* Tenang aja, progress kamu tidak akan hilang kok!";
+                        $message .= "\n\nketik *Lanjut* untuk melanjutkan ke level berikutnya atau *Keluar* untuk kembali ke Main Menu! Tenang aja, progress kamu tidak akan hilang kok!";
                     } else {
                         Log::info("[" . $userNumber . "] User failed to pass the level");
-                        $message .= "Maaf, *nilai Anda: " . strval($score) . "*; tidak lolos passing grade(50). Pelajarin lagi materi di level ini yuk! Semangat!";
-                        $message .= "\n\n*ketik apapun untuk mengulang level ini atau 'Keluar' untuk kembali ke Main Menu!* Tenang aja, progress kamu tidak akan hilang kok!";
+                        $message .= "Maaf, *nilai Anda: " . strval($score) . "*; tidak lolos passing grade(*50*). Pelajarin lagi materi di level ini yuk! Semangat!";
+                        $message .= "\n\nketik *Semangat* untuk mengulang level ini atau *Keluar* untuk kembali ke Main Menu! Tenang aja, progress kamu tidak akan hilang kok!";
                     }
 
                     Log::info("[" . $userNumber . "] Sending user grade");
@@ -572,12 +572,12 @@ Pilih menu berikut untuk melanjutkan:
 
                 return $message;
             } else {
-                $message = "Internal service error: topic and learning material not found";
+                $message = "Error layanan internal chatbot: topik dan materi tidak ditemukan";
                 Log::info("[" . $userNumber . "] " . $message);
                 return $message;
             }
         } else {
-            $message = "Internal service error: question not found in the database";
+            $message = "Error layanan internal chatbot: pertanyaan tidak tersedia";
             Log::info("[" . $userNumber . "] " . $message);
             return $message;
         }
