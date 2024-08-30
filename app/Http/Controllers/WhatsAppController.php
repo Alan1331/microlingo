@@ -60,12 +60,17 @@ class WhatsAppController extends Controller
         $inputMessage = $request->input('Body'); // Message from user
         $userNumber = $this->formatUserPhoneNumber($recipientNumber);
 
-        Log::info("[" . $userNumber . "] Message received: " . $inputMessage);
-
         # Ensure that the user was registered
         $menuLocation = $this->checkUser($userNumber);
 
-        $response = $this->handleMenuLocation($menuLocation, $inputMessage, $userNumber);
+        # Handle edge case when user sent sticker or unknown object that lead to null input message
+        $response = 'Maaf, chatbot tidak mengenali input dari Anda';
+        if($inputMessage != null) {
+            Log::info("[" . $userNumber . "] Message received: " . $inputMessage);
+            $response = $this->handleMenuLocation($menuLocation, $inputMessage, $userNumber);
+        } else {
+            Log::info("[" . $userNumber . "] Message received: user sent unknown object like sticker");
+        }
 
         return response()->json(
             [
