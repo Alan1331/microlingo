@@ -196,6 +196,10 @@ class WhatsAppController extends Controller
             Log::info("[" . $userNumber . "] Response from pitching API was retrieved");
             $responseData = $response->json();
             $message = $responseData['message'];
+            $messageWithoutTranslations = ["terjemahkan", "bedah kosakata", "keluar"];
+            if(!(in_array(strtolower($inputMessage), $messageWithoutTranslations))) {
+                $message = "*pitching-session##" . $message;
+            }
             $missionStatus = $responseData['mission_status'];
 
             if($missionStatus != "ongoing") {

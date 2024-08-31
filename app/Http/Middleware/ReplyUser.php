@@ -54,6 +54,16 @@ class ReplyUser
         $messages = explode('|', $response);
         
         foreach ($messages as $message) {
+            # extract pitching session messages
+            if(str_contains($message, '*pitching-session##')) {
+                $pitchingMessage = explode('##', $message);
+                if(isset($pitchingMessage[1])) {
+                    $clearPitchingMessage = '*' . $pitchingMessage[1] . '* ---';
+                    $this->sendPitchingMessage($recipientNumber, $clearPitchingMessage);
+                    continue;
+                }
+            }
+
             if(strlen($message) <= 1600) {
                 // send message to user
                 $this->sendMessageToUser($recipientNumber, $message);
@@ -76,6 +86,20 @@ class ReplyUser
             [
                 'from' => $this->twilioWhatsAppNumber,
                 'body' => $message,
+            ]
+        );
+    }
+
+    private function sendPitchingMessage($recipientNumber, $message)
+    {
+        $this->twilioClient->messages->create(
+            $recipientNumber,
+            [
+                'contentSid' => env('PITCHING_TEMPLATE_SID'),
+                'from' => $this->twilioWhatsAppNumber,
+                "contentVariables" => json_encode([
+                    "1" => $message,
+                ]),
             ]
         );
     }
