@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('levels', function (Blueprint $table) {
             $table->id();
             $table->string('topic')->nullable();
-            $table->string('content')->nullable();
+            $table->text('content')->nullable();
             $table->integer('sortId');
             $table->string('videoLink')->nullable();
             $table->boolean('isActive')->default(false);
