@@ -68,7 +68,7 @@ system_prompt = (
     "If you want to ask the user, please only ask 1 question at a time, don't ask more than 1 question to make the conversation more concise."
     "You could also let user to ask you about the collaboration."
     "If user sends 'Terjemahkan' to you, please translate your previous message to Bahasa Indonesia."
-    "If user sends 'Bedah Kosakata' to you, please explain all complex terms in your previous message in Bahasa Indonesia in brief. Keep the explanation concise!"
+    "If user sends 'Bedah Kosakata' to you, please explain all complex terms in your previous message in Bahasa Indonesia in brief. Keep the explanation concise! Don't forget to tell the term in English and Explanation in Bahasa Indonesia."
     "\n\n"
     "{context}"
 )
