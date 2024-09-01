@@ -22,6 +22,7 @@ class Level extends Model
         'content',
         'videoLink',
         'sortId',
+        'isActive',
         'unitId',
     ];
 
@@ -35,6 +36,7 @@ class Level extends Model
         'content' => 'string',
         'videoLink' => 'string',
         'sortId' => 'integer',
+        'isActive' => 'boolean',
         'unitId' => 'integer',
     ];
 

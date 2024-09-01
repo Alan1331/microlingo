@@ -187,6 +187,7 @@ class LevelController extends Controller
             'topic' => $validated['topic'],
             'content' => $validated['content'],
             'videoLink' => $validated['videoLink'],
+            'isActive' => true, # activate level
         ]);
 
         for($i = 1; $i <= 3; $i++) {

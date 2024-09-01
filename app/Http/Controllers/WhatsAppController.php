@@ -14,6 +14,7 @@ use App\Models\Level;
 use App\Models\User;
 use OpenAI;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class WhatsAppController extends Controller
 {
@@ -106,6 +107,8 @@ class WhatsAppController extends Controller
                 return $this->giveUserQuestion($userNumber, $questionIndex, $inputMessage);
             case "questionEval":
                 return $this->handleUserAnswer($inputMessage, $userNumber, intval($menuLocationWithSubMenu[1]));
+            case "promptResetProgress":
+                return $this->promptResetProgress($inputMessage, $userNumber);
             default:
                 return $this->handleMainMenu($inputMessage, $userNumber);
         }
@@ -331,6 +334,19 @@ Pilih menu berikut untuk melanjutkan:
         return $message;
     }
 
+    private function promptResetProgress($inputMessage, $userNumber) {
+        if(strval($inputMessage) == 1) {
+            $user = User::find($userNumber);
+            $user->progress = '1-1';
+            $user->menuLocation = 'levelPrompt';
+            $user->save();
+        } elseif(strval($inputMessage) == 2) {
+            return $this->backToMainMenu($userNumber);
+        }
+
+        return $this->showLearningMenu('lanjut', $userNumber);
+    }
+
     private function showLearningMenu($inputMessage, $userNumber)
     {
         Log::info("[" . $userNumber . "] Enter Learning Menu");
@@ -347,9 +363,24 @@ Pilih menu berikut untuk melanjutkan:
 
         if (isset($userData->progress)) {
             $userProgress = $userData->progress;
+
+            # send user to main menu or prompt for reset progress if they have completed all levels
+            if(strtolower($userProgress) == 'completed') {
+                $this->changeMenuLocation($userNumber, 'promptResetProgress');
+                Log::info("[" . $userNumber . "] User has completed all levels");
+                $message = "Anda telah menyelesaikan semua materi pembelajaran.|";
+                $message .= "Pilih opsi berikut untuk melanjutkan:\n";
+                $message .= "1. Ulang materi dari awal (unit 1 - level 1)\n";
+                $message .= "2. Kembali ke Main Menu";
+                return $message;
+            }
+
             $userProgress = explode('-', $userProgress);
             $learningUnitId = (int)$userProgress[0];
             $levelId = (int)$userProgress[1];
+        } else {
+            Log::info("[" . $userNumber . "] Failed to retrieve user progress");
+            return "Error internal chatbot, gagal mendapatkan data pengguna dari database";
         }
 
         // instantiate level and unit model
@@ -560,11 +591,19 @@ Pilih menu berikut untuk melanjutkan:
                     if($score >= 50) {
                         # increase the level
                         Log::info("[" . $userNumber . "] User has passed the level");
-                        $userData->progress = strval($learningUnitId) . '-' . strval(++$levelId);
+                        $userData->progress = $this->findNextActiveLevel($learningUnitId, $levelId);
                         $userData->save();
 
-                        # store the user score
-                        $userData->levels()->attach($level->id, ['score' => $score]);
+                        # upsert the user score
+                        DB::table('user_grade')->upsert(
+                            [
+                                'user_phoneNumber' => $userData->phoneNumber,
+                                'level_id' => $level->id,
+                                'score' => $score,
+                            ],
+                            ['user_phoneNumber', 'level_id'],  // Composite unique key
+                            ['score']  // Columns to update if a record with the unique keys already exists
+                        );
 
                         $message .= "Selamat, Anda telah berhasil menyelesaikan level ini dengan *nilai: " . strval($score) . "*";
                         $message .= "\n\nketik *Lanjut* untuk melanjutkan ke level berikutnya atau *Keluar* untuk kembali ke Main Menu! Tenang aja, progress kamu tidak akan hilang kok!";
@@ -591,6 +630,26 @@ Pilih menu berikut untuk melanjutkan:
             Log::info("[" . $userNumber . "] " . $message);
             return $message;
         }
+    }
+
+    private function findNextActiveLevel($currentUnitNumber, $currentLevelNumber)
+    {
+        $nextLevels = DB::table('levels')
+                        ->join('learning_units', 'levels.unitId', '=', 'learning_units.id')
+                        ->where('learning_units.sortId', '>=', $currentUnitNumber)
+                        ->select('levels.*', 'levels.sortId as levelNumber', 'learning_units.sortId as unitNumber')
+                        ->orderBy('unitNumber')->orderBy('levelNumber')
+                        ->get();
+
+        # find next level
+        foreach ($nextLevels as $level) {
+            if($level->isActive && ($level->levelNumber > $currentLevelNumber || $level->unitNumber > $currentUnitNumber)) {
+                return $level->unitNumber . '-' . $level->levelNumber;
+            }
+        }
+
+        # if next level was not found
+        return 'completed';
     }
 
     private function generateLevelPrompt($learningUnit, $level)

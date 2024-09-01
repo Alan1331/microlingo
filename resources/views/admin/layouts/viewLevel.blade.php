@@ -25,6 +25,7 @@
                                             <th style="width: 300px;">Topik</th>
                                             <th style="width: 100px;">Pertanyaan</th>
                                             <th style="width: 100px;">Avg. Nilai</th>
+                                            <th style="width: 100px;">Status</th>
                                             <th style="width: 100px;">Aksi</th>
                                         </tr>
                                     </thead>
@@ -38,12 +39,16 @@
                                                 <td>{{ $level->topic }}</td>
                                                 <td>{{ $level->questions()->count() }}</td>
                                                 <td>{{ $level->averageGrade }}%</td>
+                                                @if($level->isActive)
+                                                    <td>Aktif</td>
+                                                @else
+                                                    <td>Tidak Aktif</td>
+                                                @endif
                                                 <td colspan="6" style="text-align: center;">
                                                     <a href="/updateLevel/{{ $level->id }}" class="edit-button">
                                                         <img src="{{ asset('edit.png') }}" alt="Edit Button">
                                                         Update
                                                     </a>
-                                                
                                                 </td>
 
                                             </tr>

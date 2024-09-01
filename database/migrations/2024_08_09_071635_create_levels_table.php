@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('content')->nullable();
             $table->integer('sortId');
             $table->string('videoLink')->nullable();
+            $table->boolean('isActive')->default(false);
             $table->unsignedBigInteger('unitId');
             $table->timestamps();
 
