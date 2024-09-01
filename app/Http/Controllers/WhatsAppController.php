@@ -170,8 +170,11 @@ class WhatsAppController extends Controller
     {
         Log::info("[" . $userNumber . "] Enter pitching session");
         $this->changeMenuLocation($userNumber, 'pitchingSession');
-        $message = "Anda telah masuk ke sesi pitching, ketik *Keluar* kapanpun pada sesi ini untuk kembali ke Main Menu!|";
-        $message .= "Bayangkan Anda sedang bertemu dengan calon partner bisnis Anda dari luar negeri. ";
+        $message = "Anda telah masuk ke sesi pitching. Pada sesi ini, Anda dapat mengetik dan mengirim kata kunci berikut:\n";
+        $message .= "- *keluar*: untuk keluar dari sesi pitching dan kembali ke Main Menu\n";
+        $message .= "- *terjemahkan*: untuk menerjemahkan pesan sebelumnya jika Anda belum mengerti\n";
+        $message .= "- *bedah kosakata*: untuk melihat penjelasan dari kosakata sulit pada pesan sebelumnya";
+        $message .= "|Bayangkan Anda sedang bertemu dengan calon partner bisnis Anda dari luar negeri. ";
         $message .= "Tugas Anda adalah untuk meyakinkan calon partner bisnis Anda untuk bergabung dalam bisnis Anda! ";
         $message .= "Manfaatkan semua ilmu yang sudah Anda pelajari pada MicroLingo untuk deal dengan partner Anda! ";
         $message .= "Good luck!!|";
