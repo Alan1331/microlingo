@@ -368,14 +368,9 @@ Pilih menu berikut untuk melanjutkan:
             $userProgress = $userData->progress;
 
             # send user to main menu or prompt for reset progress if they have completed all levels
-            if(strtolower($userProgress) == 'completed') {
-                $this->changeMenuLocation($userNumber, 'promptResetProgress');
-                Log::info("[" . $userNumber . "] User has completed all levels");
-                $message = "Anda telah menyelesaikan semua materi pembelajaran.|";
-                $message .= "Pilih opsi berikut untuk melanjutkan:\n";
-                $message .= "1. Ulang materi dari awal (unit 1 - level 1)\n";
-                $message .= "2. Kembali ke Main Menu";
-                return $message;
+            $isCompleted = $this->isProgressCompleted($userProgress, $userNumber);
+            if($isCompleted) {
+                return $isCompleted;
             }
 
             $userProgress = explode('-', $userProgress);
@@ -440,6 +435,12 @@ Pilih menu berikut untuk melanjutkan:
 
         if (isset($userData->progress)) {
             $userProgress = $userData->progress;
+
+            $isCompleted = $this->isProgressCompleted($userProgress, $userNumber);
+            if($isCompleted) {
+                return $isCompleted;
+            }
+
             $userProgress = explode('-', $userProgress);
             $learningUnitId = (int)$userProgress[0];
             $levelId = (int)$userProgress[1];
@@ -496,6 +497,12 @@ Pilih menu berikut untuk melanjutkan:
 
         if (isset($userData->progress)) {
             $userProgress = $userData->progress;
+
+            $isCompleted = $this->isProgressCompleted($userProgress, $userNumber);
+            if($isCompleted) {
+                return $isCompleted;
+            }
+
             $userProgress = explode('-', $userProgress);
             $learningUnitId = (int)$userProgress[0];
             $levelId = (int)$userProgress[1];
@@ -692,14 +699,24 @@ Pilih menu berikut untuk melanjutkan:
         return $menuLocation;
     }
 
+    private function isProgressCompleted($userProgress, $userNumber)
+    {
+        if(strtolower($userProgress) == 'completed') {
+            $this->changeMenuLocation($userNumber, 'promptResetProgress');
+            Log::info("[" . $userNumber . "] User has completed all levels");
+            $message = "Anda telah menyelesaikan semua materi pembelajaran.|";
+            $message .= "Pilih opsi berikut untuk melanjutkan:\n";
+            $message .= "1. Ulang materi dari awal (unit 1 - level 1)\n";
+            $message .= "2. Kembali ke Main Menu";
+            return $message;
+        } else {
+            return false;
+        }
+    }
+
     private function formatUserPhoneNumber($recipientNumber)
     {
         // only include the phone number without 'whatsapp:' text behind it
         return explode(":", $recipientNumber)[1];
-    }
-
-    public function statusCallback()
-    {
-        return $this->twilioClient->$queues;
     }
 }
