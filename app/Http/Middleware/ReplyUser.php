@@ -16,7 +16,7 @@ class ReplyUser
     {
         $this->twilioClient = $twilioClient;
         $this->twilioClient->setLogLevel('debug');
-        $this->twilioWhatsAppNumber = env('TWILIO_WHATSAPP_NUMBER');
+        $this->twilioWhatsAppNumber = config('services.twilio.whatsapp_number');
     }
 
     /**

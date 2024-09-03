@@ -156,7 +156,7 @@ class WhatsAppController extends Controller
 
         Log::info("[" . $userNumber . "] Send received user message to pitching API");
         // Send a POST request using Laravel's Http client with 7 attempt and 3s delay between retry
-        $response = Http::retry(7,3000)->post(env('PITCHING_SERVICE_ENDPOINT'), $data);
+        $response = Http::retry(7,3000)->post(config('endpoints.pitching_service'), $data);
 
         // Check for errors and return the response
         if ($response->successful()) {
@@ -242,14 +242,14 @@ class WhatsAppController extends Controller
 
     private function showAboutUs()
     {
-        $message = env('ABOUT_US_PROMPT');
+        $message = config('prompts.about_us');
         $message .= '|Ketik *Kembali* untuk kembali ke main menu';
         return $message;
     }
 
     private function showMainMenu()
     {
-        return env('MAIN_MENU_PROMPT');
+        return config('prompts.main_menu');
     }
 
     private function backToMainMenu($userNumber)
