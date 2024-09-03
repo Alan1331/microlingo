@@ -5,53 +5,14 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Twilio\Rest\Client;
-use App\Http\Controllers\UserController;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\App;
 use App\Models\LearningUnit;
 use App\Models\Level;
 use App\Models\User;
-use OpenAI;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 
 class WhatsAppController extends Controller
 {
-    protected $twilioClient;
-    protected $twilioWhatsAppNumber;
-    protected $learningUnit;
-    protected $openai;
-
-    public function __construct(Client $twilioClient, LearningUnit $learningUnit)
-    {
-        $this->twilioClient = $twilioClient;
-        $this->twilioClient->setLogLevel('debug');
-        $this->twilioWhatsAppNumber = env('TWILIO_WHATSAPP_NUMBER');
-        $this->learningUnit = $learningUnit;
-        $this->openai = OpenAI::client(env('OPENAI_API_KEY'));
-    }
-
-    public function sendMessage()
-    {
-        $sid = env('TWILIO_ACCOUNT_SID');
-        $token = env('TWILIO_AUTH_TOKEN');
-        $twilioWhatsAppNumber = env('TWILIO_WHATSAPP_NUMBER');
-        $recipientNumber = env('RECIPIENT_WHATSAPP_NUMBER'); // Change to the recipient's number
-
-        $client = new Client($sid, $token);
-
-        $message = $client->messages->create(
-            $recipientNumber,
-            [
-                'from' => $twilioWhatsAppNumber,
-                'body' => "Here's an audio file for you!"
-            ]
-        );
-
-        return response()->json(['message' => 'Audio message sent!', 'sid' => $message->sid, 'status' => $message->status]);
-    }
-
     public function receiveMessage(Request $request)
     {
         // Set the maximum execution time to 300 seconds (5 minutes)
@@ -472,6 +433,9 @@ Pilih menu berikut untuk melanjutkan:
                 $question_msg .= "\nA. " . $question->optionA;
                 $question_msg .= "\nB. " . $question->optionB;
                 $question_msg .= "\nC. " . $question->optionC;
+                $question_msg .= "\n\nJawab dengan 'A', 'B', atau 'C'!";
+            } else {
+                $question_msg .= "\n\nJawab pertanyaan di atas!";
             }
 
             # attach question to the message and log
