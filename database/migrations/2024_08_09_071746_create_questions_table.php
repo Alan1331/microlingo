@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('questions', function (Blueprint $table) {
             $table->id();
-            $table->string('question')->nullable();
-            $table->string('answer')->nullable();
+            $table->text('question')->nullable();
+            $table->text('answer')->nullable();
             $table->string('type');
-            $table->string('optionA')->nullable();
-            $table->string('optionB')->nullable();
-            $table->string('optionC')->nullable();
+            $table->text('optionA')->nullable();
+            $table->text('optionB')->nullable();
+            $table->text('optionC')->nullable();
             $table->unsignedBigInteger('levelId');
             $table->timestamps();
 
