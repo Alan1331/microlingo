@@ -43,7 +43,6 @@ Route::middleware(CheckFirebaseRole::class)->group(function () {
     Route::get('/materiPembelajaran/{id}', [LearningUnitController::class, 'showLearningUnitById'])->name('units.levels');
     Route::put('/materiPembelajaran/{id}', [LearningUnitController::class, 'updateLearningUnit'])->name('units.update');
     Route::delete('/materiPembelajaran/{id}', [LearningUnitController::class, 'deleteUnit'])->name('units.delete');
-    Route::delete('/materiPembelajaran/{id}/levels/{levelId}', [LevelController::class, 'deleteLevel'])->name('units.levels.delete');
 });
 
 Route::get('/unauthorizedAccess', function () {

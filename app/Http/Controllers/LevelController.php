@@ -158,20 +158,4 @@ class LevelController extends Controller
 
         return view('admin.layouts.updateLevel', ['level' => $level, 'questions' => $level->questions]);
     }
-
-    public function deleteLevel($id, $levelId) {
-        // Delete all videos inside the level
-        $level = Level::find($levelId);
-        $level->videos()->delete();
-
-        // Delete the level
-        $result = $level->delete();
-
-        // Verify level was found
-        if (!$result) {
-            return redirect()->route('units.levels', $id)->with('failed', 'Failed to delete level!');
-        }
-
-        return redirect()->route('units.levels', $id)->with('success', 'Level deleted successfully!');
-    }
 }
