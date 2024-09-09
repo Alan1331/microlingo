@@ -67,8 +67,13 @@ class LearningUnitController extends Controller
 
     public function updateLearningUnit(Request $request, $id)
     {
-        // Update the learning unit
         $unit = LearningUnit::find($id);
+        // Check if the learning unit exists
+        if (!$unit) {
+            return redirect()->route('materiPembelajaran')->with('failed', 'Learning unit not found');
+        }
+        
+        // Update the learning unit
         $result = $unit->update($request->all());
 
         // Verify learning unit was found

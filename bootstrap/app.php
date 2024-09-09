@@ -13,10 +13,6 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->validateCsrfTokens(except: [
             '/whatsapp/*',
-            '/users',
-            '/users/*',
-            '/units',
-            '/units/*'
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

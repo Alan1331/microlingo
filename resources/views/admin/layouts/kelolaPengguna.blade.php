@@ -27,12 +27,17 @@
                             <tfoot>
                                 @foreach ($users as $user)
                                     <tr>
-                                        <?php $progress = explode("-", $user['progress']); ?>
                                         <td>{{$user['phoneNumber']}}</td>
                                         <td>{{$user['name']}}</td>
                                         <td>{{$user['occupation']}}</td>
-                                        <td>{{$progress[0]}}</td>
-                                        <td>{{$progress[1]}}</td>
+                                        @if(strtolower($user['progress']) == 'completed')
+                                            <td>Tamat</td>
+                                            <td>Tamat</td>
+                                        @else
+                                            <?php $progress = explode("-", $user['progress']); ?>
+                                            <td>{{$progress[0]}}</td>
+                                            <td>{{$progress[1]}}</td>
+                                        @endif
                                     </tr>
                                 @endforeach
                             </tfoot>

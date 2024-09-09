@@ -15,8 +15,8 @@ class TwilioServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->singleton(Client::class, function ($app) {
-            $sid = env('TWILIO_ACCOUNT_SID');
-            $token = env('TWILIO_AUTH_TOKEN');
+            $sid = config('services.twilio.account_sid');
+            $token = config('services.twilio.auth_token');
             return new Client($sid, $token);
         });
     }

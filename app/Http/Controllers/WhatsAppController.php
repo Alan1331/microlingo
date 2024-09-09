@@ -5,53 +5,14 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Twilio\Rest\Client;
-use App\Http\Controllers\UserController;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\App;
 use App\Models\LearningUnit;
 use App\Models\Level;
 use App\Models\User;
-use OpenAI;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 
 class WhatsAppController extends Controller
 {
-    protected $twilioClient;
-    protected $twilioWhatsAppNumber;
-    protected $learningUnit;
-    protected $openai;
-
-    public function __construct(Client $twilioClient, LearningUnit $learningUnit)
-    {
-        $this->twilioClient = $twilioClient;
-        $this->twilioClient->setLogLevel('debug');
-        $this->twilioWhatsAppNumber = env('TWILIO_WHATSAPP_NUMBER');
-        $this->learningUnit = $learningUnit;
-        $this->openai = OpenAI::client(env('OPENAI_API_KEY'));
-    }
-
-    public function sendMessage()
-    {
-        $sid = env('TWILIO_ACCOUNT_SID');
-        $token = env('TWILIO_AUTH_TOKEN');
-        $twilioWhatsAppNumber = env('TWILIO_WHATSAPP_NUMBER');
-        $recipientNumber = env('RECIPIENT_WHATSAPP_NUMBER'); // Change to the recipient's number
-
-        $client = new Client($sid, $token);
-
-        $message = $client->messages->create(
-            $recipientNumber,
-            [
-                'from' => $twilioWhatsAppNumber,
-                'body' => "Here's an audio file for you!"
-            ]
-        );
-
-        return response()->json(['message' => 'Audio message sent!', 'sid' => $message->sid, 'status' => $message->status]);
-    }
-
     public function receiveMessage(Request $request)
     {
         // Set the maximum execution time to 300 seconds (5 minutes)
@@ -81,7 +42,7 @@ class WhatsAppController extends Controller
         );
     }
 
-    private function handleMenuLocation($menuLocationWithSubMenu, $inputMessage, $userNumber)
+    public function handleMenuLocation($menuLocationWithSubMenu, $inputMessage, $userNumber)
     {
         $menuLocationWithSubMenu = explode('-', $menuLocationWithSubMenu);
         $menuLocation = $menuLocationWithSubMenu[0]; # extract menu without submenu
@@ -114,7 +75,7 @@ class WhatsAppController extends Controller
         }
     }
 
-    private function handleMainMenu($inputMessage, $userNumber)
+    public function handleMainMenu($inputMessage, $userNumber)
     {
         switch ($inputMessage) {
             case "1":
@@ -132,7 +93,7 @@ class WhatsAppController extends Controller
         }
     }
 
-    private function handleUserProfileMenu($inputMessage, $userNumber)
+    public function handleUserProfileMenu($inputMessage, $userNumber)
     {
         switch ($inputMessage) {
             case "1":
@@ -144,7 +105,7 @@ class WhatsAppController extends Controller
         }
     }
 
-    private function showPitchingMenu($userNumber)
+    public function showPitchingMenu($userNumber)
     {
         $userName = User::find($userNumber)->name;
 
@@ -157,7 +118,7 @@ class WhatsAppController extends Controller
         }
     }
 
-    private function pitchingMenuAskName($inputMessage, $userNumber) {
+    public function pitchingMenuAskName($inputMessage, $userNumber) {
         $userName = $inputMessage;
         $user = User::find($userNumber);
         $user->name = $userName;
@@ -166,7 +127,7 @@ class WhatsAppController extends Controller
         return $this->enterPitchingSession($userNumber, $userName);
     }
 
-    private function enterPitchingSession($userNumber, $userName)
+    public function enterPitchingSession($userNumber, $userName)
     {
         Log::info("[" . $userNumber . "] Enter pitching session");
         $this->changeMenuLocation($userNumber, 'pitchingSession');
@@ -185,7 +146,7 @@ class WhatsAppController extends Controller
         return $message;
     }
 
-    private function pitchingSession($inputMessage, $userNumber)
+    public function pitchingSession($inputMessage, $userNumber)
     {
         // Data for the API request
         $data = [
@@ -194,8 +155,15 @@ class WhatsAppController extends Controller
         ];
 
         Log::info("[" . $userNumber . "] Send received user message to pitching API");
+
         // Send a POST request using Laravel's Http client with 7 attempt and 3s delay between retry
-        $response = Http::retry(7,3000)->post(env('PITCHING_SERVICE_ENDPOINT'), $data);
+        try {
+            $response = Http::retry(7,3000)->post(config('endpoints.pitching_service'), $data);
+        } catch (\Exception $e) {
+            Log::info("[" . $userNumber . "] Failed to retrieve response from pitching API");
+            Log::info($e);
+            return 'Error internal chatbot: gagal memulai sesi pitching.';
+        }
 
         // Check for errors and return the response
         if ($response->successful()) {
@@ -225,13 +193,10 @@ class WhatsAppController extends Controller
 
             Log::info("[" . $userNumber . "] Sending response from pitching API to user: " . $message);
             return $message;
-        } else {
-            Log::info("[" . $userNumber . "] Failed to retrieve response from pitching API");
-            return 'Error internal chatbot: gagal memulai sesi pitching.';
         }
     }
 
-    private function setProfile($userNumber)
+    public function setProfile($userNumber)
     {
         # change menu location to userProfileSetName to ask user their name
         $this->changeMenuLocation($userNumber, 'userProfileSetName');
@@ -240,7 +205,7 @@ class WhatsAppController extends Controller
         return "Masukkan nama Anda:";
     }
 
-    private function handleUserProfileSetName($inputMessage, $userNumber)
+    public function handleUserProfileSetName($inputMessage, $userNumber)
     {
         # set user name and change menu location to userProfileSetJob to ask user their job
         $user = User::find($userNumber);
@@ -252,7 +217,7 @@ class WhatsAppController extends Controller
         return "Hallo, $inputMessage!! Apa pekerjaan Anda:";
     }
 
-    private function handleUserProfileSetJob($inputMessage, $userNumber)
+    public function handleUserProfileSetJob($inputMessage, $userNumber)
     {
         Log::info("[" . $userNumber . "] Updating user profile");
         # set user job and change menu location back to userProfile
@@ -266,32 +231,26 @@ class WhatsAppController extends Controller
         return "Profil berhasil diperbaharui.|" . $this->showProfileMenu($userNumber);
     }
 
-    private function comingSoon()
-    {
-        $message = "Feature is still in development";
-        return $message;
-    }
-
-    private function changeMenuLocation($userNumber, $menu) {
+    public function changeMenuLocation($userNumber, $menu) {
         # change menu location to mainMenu
         $user = User::find($userNumber);
         $user->menuLocation = $menu;
         return $user->save(); # return true or false
     }
 
-    private function showAboutUs()
+    public function showAboutUs()
     {
-        $message = env('ABOUT_US_PROMPT');
+        $message = config('prompts.about_us');
         $message .= '|Ketik *Kembali* untuk kembali ke main menu';
         return $message;
     }
 
-    private function showMainMenu()
+    public function showMainMenu()
     {
-        return env('MAIN_MENU_PROMPT');
+        return config('prompts.main_menu');
     }
 
-    private function backToMainMenu($userNumber)
+    public function backToMainMenu($userNumber)
     {
         # change menu location to mainMenu
         $result = $this->changeMenuLocation($userNumber, 'mainMenu');
@@ -306,7 +265,7 @@ class WhatsAppController extends Controller
         }
     }
 
-    private function showProfileMenu($userNumber)
+    public function showProfileMenu($userNumber)
     {
         # change menu location to userProfile
         Log::info("[" . $userNumber . "] Enter profile menu");
@@ -337,7 +296,7 @@ Pilih menu berikut untuk melanjutkan:
         return $message;
     }
 
-    private function promptResetProgress($inputMessage, $userNumber) {
+    public function promptResetProgress($inputMessage, $userNumber) {
         if(strval($inputMessage) == 1) {
             $user = User::find($userNumber);
             $user->progress = '1-1';
@@ -350,7 +309,7 @@ Pilih menu berikut untuk melanjutkan:
         return $this->showLearningMenu('lanjut', $userNumber);
     }
 
-    private function showLearningMenu($inputMessage, $userNumber)
+    public function showLearningMenu($inputMessage, $userNumber)
     {
         Log::info("[" . $userNumber . "] Enter Learning Menu");
         if(strtolower($inputMessage) == "keluar") { # if user quit learning menu
@@ -368,14 +327,9 @@ Pilih menu berikut untuk melanjutkan:
             $userProgress = $userData->progress;
 
             # send user to main menu or prompt for reset progress if they have completed all levels
-            if(strtolower($userProgress) == 'completed') {
-                $this->changeMenuLocation($userNumber, 'promptResetProgress');
-                Log::info("[" . $userNumber . "] User has completed all levels");
-                $message = "Anda telah menyelesaikan semua materi pembelajaran.|";
-                $message .= "Pilih opsi berikut untuk melanjutkan:\n";
-                $message .= "1. Ulang materi dari awal (unit 1 - level 1)\n";
-                $message .= "2. Kembali ke Main Menu";
-                return $message;
+            $isCompleted = $this->isProgressCompleted($userProgress, $userNumber);
+            if($isCompleted) {
+                return $isCompleted;
             }
 
             $userProgress = explode('-', $userProgress);
@@ -426,7 +380,7 @@ Pilih menu berikut untuk melanjutkan:
         return $message;
     }
 
-    private function giveUserQuestion($userNumber, $questionIndex, $inputMessage = null) {
+    public function giveUserQuestion($userNumber, $questionIndex, $inputMessage = null) {
         if(strtolower($inputMessage) == "keluar") { # if user quit learning menu
             # change menu location to mainMenu
             return $this->backToMainMenu($userNumber);
@@ -440,6 +394,12 @@ Pilih menu berikut untuk melanjutkan:
 
         if (isset($userData->progress)) {
             $userProgress = $userData->progress;
+
+            $isCompleted = $this->isProgressCompleted($userProgress, $userNumber);
+            if($isCompleted) {
+                return $isCompleted;
+            }
+
             $userProgress = explode('-', $userProgress);
             $learningUnitId = (int)$userProgress[0];
             $levelId = (int)$userProgress[1];
@@ -471,6 +431,9 @@ Pilih menu berikut untuk melanjutkan:
                 $question_msg .= "\nA. " . $question->optionA;
                 $question_msg .= "\nB. " . $question->optionB;
                 $question_msg .= "\nC. " . $question->optionC;
+                $question_msg .= "\n\nJawab dengan 'A', 'B', atau 'C'!";
+            } else {
+                $question_msg .= "\n\nJawab pertanyaan di atas!";
             }
 
             # attach question to the message and log
@@ -486,7 +449,7 @@ Pilih menu berikut untuk melanjutkan:
         return $message;
     }
 
-    private function handleUserAnswer($inputMessage, $userNumber, $questionIndex = 0) {
+    public function handleUserAnswer($inputMessage, $userNumber, $questionIndex = 0) {
 
         # get user progress
         Log::info("[" . $userNumber . "] Query level based on user progress");
@@ -496,6 +459,12 @@ Pilih menu berikut untuk melanjutkan:
 
         if (isset($userData->progress)) {
             $userProgress = $userData->progress;
+
+            $isCompleted = $this->isProgressCompleted($userProgress, $userNumber);
+            if($isCompleted) {
+                return $isCompleted;
+            }
+
             $userProgress = explode('-', $userProgress);
             $learningUnitId = (int)$userProgress[0];
             $levelId = (int)$userProgress[1];
@@ -635,7 +604,7 @@ Pilih menu berikut untuk melanjutkan:
         }
     }
 
-    private function findNextActiveLevel($currentUnitNumber, $currentLevelNumber)
+    public function findNextActiveLevel($currentUnitNumber, $currentLevelNumber)
     {
         $nextLevels = DB::table('levels')
                         ->join('learning_units', 'levels.unitId', '=', 'learning_units.id')
@@ -655,7 +624,7 @@ Pilih menu berikut untuk melanjutkan:
         return 'completed';
     }
 
-    private function generateLevelPrompt($learningUnit, $level)
+    public function generateLevelPrompt($learningUnit, $level)
     {
         // Base prompt for ChatGPT
         $basePrompt = "Selamat datang di *unit: {$learningUnit->sortId} - {$learningUnit->topic}*\n";
@@ -670,7 +639,7 @@ Pilih menu berikut untuk melanjutkan:
         return $basePrompt;
     }
 
-    private function checkUser($userNumber)
+    public function checkUser($userNumber)
     {
         $userData = User::find($userNumber);
         $menuLocation = 'mainMenu';
@@ -692,14 +661,24 @@ Pilih menu berikut untuk melanjutkan:
         return $menuLocation;
     }
 
-    private function formatUserPhoneNumber($recipientNumber)
+    public function isProgressCompleted($userProgress, $userNumber)
+    {
+        if(strtolower($userProgress) == 'completed') {
+            $this->changeMenuLocation($userNumber, 'promptResetProgress');
+            Log::info("[" . $userNumber . "] User has completed all levels");
+            $message = "Anda telah menyelesaikan semua materi pembelajaran.|";
+            $message .= "Pilih opsi berikut untuk melanjutkan:\n";
+            $message .= "1. Ulang materi dari awal (unit 1 - level 1)\n";
+            $message .= "2. Kembali ke Main Menu";
+            return $message;
+        } else {
+            return false;
+        }
+    }
+
+    public function formatUserPhoneNumber($recipientNumber)
     {
         // only include the phone number without 'whatsapp:' text behind it
         return explode(":", $recipientNumber)[1];
-    }
-
-    public function statusCallback()
-    {
-        return $this->twilioClient->$queues;
     }
 }

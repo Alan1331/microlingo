@@ -13,22 +13,4 @@ class UserController extends Controller
 
         return view('admin.layouts.kelolaPengguna', ['users' => $users]);
     }
-
-    public function createUser(Request $request)
-    {
-        // Validate the incoming request
-        $request->validate([
-            'noWhatsapp' => 'required|string'
-        ]);
-
-        // Create new user
-        User::create([
-            'phoneNumber' => $request->noWhatsapp,
-            'menuLocation' => 'mainMenu',
-            'progress' => '1-1',
-        ]);
-
-        // Return a status message instead of user data
-        return response()->json(['message' => 'User created successfully'], 201);
-    }
 }

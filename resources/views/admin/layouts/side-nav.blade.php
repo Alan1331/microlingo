@@ -87,12 +87,16 @@
     <div class="sidebar">
         <!-- Sidebar user panel (optional) -->
         <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+            @if(config('app.env') != 'testing')
             <div class="image">
                 <img src="{{ $admin->photoUrl }}" class="img-circle elevation-2" alt="User Image">
             </div>
+            @endif
             <div class="info">
                 <!-- ganti user sesuai siapa yang login -->
+                @if(config('app.env') != 'testing')
                 <a class="brand-text font-poppins-regular" style="color: black;">{{explode('(', $admin->displayName)[0]}}</a>
+                @endif
             </div>
         </div>
 
