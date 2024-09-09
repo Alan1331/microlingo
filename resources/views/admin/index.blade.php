@@ -27,7 +27,7 @@
               Total Pengguna
           </span>
           <span class="info-box-number">
-            4,210
+            {{ $numOfUsers }}
           </span>
         </div>
       </div>
@@ -39,7 +39,7 @@
           <img src="{{ asset('book.png') }}" >
             Pelajaran yang diselesaikan
           </span>
-          <span class="info-box-number">12,300</span>
+          <span class="info-box-number">{{ $numOfCompletedLevels }}</span>
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\FirebaseLoginController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LearningUnitController;
@@ -29,9 +30,7 @@ Route::get('/loginAdmin', function () {
 })->name('loginAdmin');
 
 Route::middleware(CheckFirebaseRole::class)->group(function () {
-    Route::get('admin-page', function(){
-        return view('admin.index');
-    });
+    Route::get('/admin-page', [AdminController::class, 'showDashboard']);
     Route::get('/logoutAdmin', [FirebaseLoginController::class, 'logout'])->name('logoutAdmin');
 
     Route::get('/kelolaPengguna', [UserController::class, 'showUsers'])->name('kelolaPengguna');
