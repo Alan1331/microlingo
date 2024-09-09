@@ -47,7 +47,7 @@
                                                 <td colspan="6" style="text-align: center;">
                                                     <a href="/updateLevel/{{ $level->id }}" class="edit-button">
                                                         <img src="{{ asset('edit.png') }}" alt="Edit Button">
-                                                        Update
+                                                        Perbarui
                                                     </a>
                                                 </td>
 
@@ -55,6 +55,7 @@
                                         @endforeach
                                     </tfoot>
                                 </table>
+                                <p style="color: #dc3545;">Catatan : Status aktif merupakan level yang ditampilkan di dalam chatbot, perbarui level jika ingin mengaktifkan pembelajaran</p>
                             @else
                                 <b>Tidak ada level untuk unit ini</b>
                             @endif

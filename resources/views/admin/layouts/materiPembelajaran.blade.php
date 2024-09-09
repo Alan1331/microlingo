@@ -83,11 +83,11 @@
                                             </a>
                                             <a class="edit-button" unit-id="{{ $unit['id'] }}">
                                                         <img src="{{ asset('edit.png') }}" alt="Edit Button">
-                                                        Update
+                                                        Perbarui
                                                     </a>
                                     <div id="updateModal-{{ $unit->id }}" class="modalAction2 update-modal">
                                     <div class="modal-content4" data-dismiss="modalAction2" aria-label="Close">
-                                        <h2 class="update-modal-title" id="updateModalTitle">Update Topik Unit {{ $unit->sortId }}</h2>
+                                        <h2 class="update-modal-title" id="updateModalTitle">Perbarui Topik Unit {{ $unit->sortId }}</h2>
                                         <form id="unit-update-form" method="POST" action="{{ route('units.update', ['id' => $unit->id]) }}">
                                             @csrf
                                             @method('PUT')

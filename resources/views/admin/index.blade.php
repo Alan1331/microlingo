@@ -10,7 +10,6 @@
         <h1 class="brand-text font-poppins-regular">Hi, {{ explode('(', $admin->displayName)[0] }}!</h1>
         <p>Selamat datang kembali di dashboard admin. Berikut adalah ringkasan dari aktivitas terbaru.</p>
       </div><!-- /.col -->
-      
     </div><!-- /.row -->
   </div><!-- /.container-fluid -->
 </div>
@@ -22,9 +21,11 @@
   <div class="row">
     <div class="col-12 col-sm-6 col-md-6">
       <div class="info-box">
-        <span class="info-box-icon bg-info "><i class="fas fa-comments"></i></span>
         <div class="info-box-content">
-          <span class="info-box-text">Total Interaksi</span>
+          <span class="badge badge-info" style="height: 100px; width: 105px; color: black; font-size: 18px;" >
+              <img src="{{ asset('users.png') }}" class="users">
+              Total Pengguna
+          </span>
           <span class="info-box-number">
             4,210
           </span>
@@ -33,9 +34,11 @@
     </div>
     <div class="col-12 col-sm-6 col-md-6">
       <div class="info-box mb-3">
-        <span class="info-box-icon bg-success elevation-1"><i class="fas fa-envelope"></i></span>
         <div class="info-box-content">
-          <span class="info-box-text">Pelajaran yang diselesaikan</span>
+          <span class="badge badge-success" style="height: 100px; width: 105px; color: black;  font-size: 18px;">
+          <img src="{{ asset('book.png') }}" >
+            Pelajaran yang diselesaikan
+          </span>
           <span class="info-box-number">12,300</span>
         </div>
       </div>
@@ -46,46 +49,7 @@
   
 
   <!-- Recent Activity Table -->
-  <div class="card">
-    <div class="card-header">
-      <h3 class="card-title">Aktivitas Pengguna</h3>
-    </div>
-    <div class="card-body p-0">
-      <table class="table table-striped">
-        <thead>
-          <tr>
-
-            <th>Nomor WhatsApp</th>
-            <th>Nama</th>
-            <th>Level</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>2123456</td>
-            <td>John Doe</td>
-            <td>1</td>
-            <td><span class="badge badge-success">Berhasil</span></td>
-          </tr>
-          <tr>
-            <td>1234654</td>
-            <td>Jane Smith</td>
-            <td>2</td>
-            <td><span class="badge badge-warning">Menunggu persetujuan</span></td>
-          </tr>
-          <tr>
-            <td>87653456</td>
-            <td>Michael Johnson</td>
-            <td>3</td>
-            <td><span class="badge badge-info">Diproses</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-  <!-- /.card -->
-</section>
+  
 @endsection
 
 @push('scripts')
@@ -115,4 +79,26 @@
     });
   });
 </script>
+
+<style>
+  .users {
+        display: inline-block;
+        margin-bottom: 1%;
+        font-size: 14px;
+        font-weight: bold;
+        color: black;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s, color 0.3s;
+        margin-left: 0px;
+    }
+    
+    .users img {
+        width: 5px;
+        height: 5px;
+    }
+
+    
+</style>
 @endpush
