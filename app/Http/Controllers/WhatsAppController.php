@@ -47,16 +47,6 @@ class WhatsAppController extends Controller
         $menuLocationWithSubMenu = explode('-', $menuLocationWithSubMenu);
         $menuLocation = $menuLocationWithSubMenu[0]; # extract menu without submenu
         switch ($menuLocation) {
-            case "pitchingMenuAskName":
-                return $this->pitchingMenuAskName($inputMessage, $userNumber);
-            case "pitchingSession":
-                return $this->pitchingSession($inputMessage, $userNumber);
-            case "userProfile":
-                return $this->handleUserProfileMenu($inputMessage, $userNumber);
-            case "userProfileSetName":
-                return $this->handleUserProfileSetName($inputMessage, $userNumber);
-            case "userProfileSetJob":
-                return $this->handleUserProfileSetJob($inputMessage, $userNumber);
             case "levelPrompt":
                 return $this->showLearningMenu($inputMessage, $userNumber);
             case "questionPrompt":
@@ -70,6 +60,16 @@ class WhatsAppController extends Controller
                 return $this->handleUserAnswer($inputMessage, $userNumber, intval($menuLocationWithSubMenu[1]));
             case "promptResetProgress":
                 return $this->promptResetProgress($inputMessage, $userNumber);
+            case "pitchingMenuAskName":
+                return $this->pitchingMenuAskName($inputMessage, $userNumber);
+            case "pitchingSession":
+                return $this->pitchingSession($inputMessage, $userNumber);
+            case "userProfile":
+                return $this->handleUserProfileMenu($inputMessage, $userNumber);
+            case "userProfileSetName":
+                return $this->handleUserProfileSetName($inputMessage, $userNumber);
+            case "userProfileSetJob":
+                return $this->handleUserProfileSetJob($inputMessage, $userNumber);
             default:
                 return $this->handleMainMenu($inputMessage, $userNumber);
         }
