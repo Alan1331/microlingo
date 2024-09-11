@@ -241,7 +241,41 @@ class WhatsAppController extends Controller
     public function showAboutUs()
     {
         $message = config('prompts.about_us');
+
+        $message .= '|' . $this->showTableOfContents();
+        
         $message .= '|Ketik *Kembali* untuk kembali ke main menu';
+        return $message;
+    }
+
+    public function showTableOfContents()
+    {
+        # Get learning units and levels to show table of contents
+        $message = "*Daftar Isi Materi:*\n";
+        $units = LearningUnit::all();
+        foreach ($units as $unit) {
+            $unitNumber = strval($unit->sortId);
+            $message .= "*Unit $unitNumber*: $unit->topic\n";
+            
+            $levels = $unit->levels;
+            $activeLevelFound = false;
+            foreach ($levels as $level) {
+                # Show only active levels
+                if($level->isActive) {
+                    $activeLevelFound = true;
+                    $levelNumber = strval($level->sortId);
+                    $message .= "- *Level $levelNumber*: $level->topic\n";
+                }
+            }
+            # Give explanation if the unit has no active levels
+            if(!$activeLevelFound) {
+                $message .= "\t- Materi pada unit ini belum dirilis\n";
+            }
+
+            # Add space between units
+            $message .= "\n";
+        }
+
         return $message;
     }
 
@@ -338,6 +372,21 @@ Pilih menu berikut untuk melanjutkan:
         } else {
             Log::info("[" . $userNumber . "] Failed to retrieve user progress");
             return "Error internal chatbot, gagal mendapatkan data pengguna dari database";
+        }
+
+        # Show table of contents for user in progress: 1-1
+        if($learningUnitId == 0 && $levelId == 0) {
+            # Format messages
+            $message = "Selamat datang di sesi pembelejaran, di sesi ini, Anda akan mempelajari hal-hal berikut:\n";
+            $message .= '|' . $this->showTableOfContents();
+            $message .= "|Ketik *Lanjut* untuk memulai pembelajaran atau *Keluar* untuk kembali ke Main Menu!";
+            
+            # Set user progress to the first unit & level and menu location to learning menu
+            $userData->progress = "1-1";
+            $userData->menuLocation = "levelPrompt";
+            $userData->save();
+
+            return $message;
         }
 
         // instantiate level and unit model
@@ -514,9 +563,16 @@ Pilih menu berikut untuk melanjutkan:
                     Log::info("[" . $userNumber . "] User's answer: " . $userAnswer);
                     Log::info("[" . $userNumber . "] Correct answer: " . $answerOption . ". " . $answerExact);
 
+                    # Give chance for user if they input unvailable option
+                    $multipleChoiceOptions = ['a', 'b', 'c'];
+                    if(strlen($userAnswer) == 1 && (!in_array($userAnswer, $multipleChoiceOptions))) {
+                        return "Opsi tidak tersedia, jawab dengan 'A', 'B', atau 'C'";
+                    }
+
                     if($userAnswer == $answerOption || $userAnswer == strtolower($answerExact)) {
                         $evaluation = true;
                     }
+
                 } else {
                     # evaluating answer of essay question
                     if($userAnswer == $answer) {
@@ -650,7 +706,7 @@ Pilih menu berikut untuk melanjutkan:
             User::create([
                 'phoneNumber' => $userNumber,
                 'menuLocation' => $menuLocation,
-                'progress' => '1-1',
+                'progress' => '0-0',
             ]);
         }
 
