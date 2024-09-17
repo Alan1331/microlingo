@@ -9,14 +9,21 @@
                 <div class="col-12">
                     <div class="card" style="margin-top: 25px;">
                         <div class="card-header">
-                            <h1 class="card-title">Daftar Level di Unit {{$unitNumber}}</h1>
-                        </div>
-                        <!-- /.card-header -->
-                        <div class="card-body">
                             <a href="{{route('materiPembelajaran')}}" class="back-button">
                                 <img src="{{ asset('backk.png') }}" alt="Back Button">
                                 Back
                             </a>
+                        </div>
+                        <!-- /.card-header -->
+                        <div class="card-body">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <h1 class="brand-text font-poppins-semibold" style="margin: 0;">Daftar Level di Unit {{$unitNumber}}</h1>
+                                <a href="{{ route('units.levels.form', ['unitId' => $unitId]) }}" class="add-button" id="addLevel"
+                                    style="display: flex; align-items: center; margin-bottom: 10px;">
+                                    <img src="{{ asset('add.png') }}" alt="add Button" style="margin-right: 8px;">
+                                    Tambah Level
+                                </a>
+                            </div>
                             @if($levels->count() != 0)
                                 <table id="example2" class="table table-bordered table-hover">
                                     <thead>
@@ -173,6 +180,36 @@ document.getElementById('deleteBtn').addEventListener('click', function (event) 
     </script>
 </body>
 <style>
+    .add-button {
+        display: inline-block;
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: bold;
+        color: white;
+        background-color: blue;
+        /* Warna merah untuk tombol delete */
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background-color 0.3s, color 0.3s;
+        text-align: center;
+    }
+
+    .add-button img {
+        width: 20px;
+        /* Sesuaikan ukuran gambar */
+        height: 20px;
+        /* Sesuaikan ukuran gambar */
+        margin-right: 5px;
+        /* Jarak antara gambar dan teks */
+    }
+
+    .add-button:hover {
+        background-color: #03346E;
+        /* Warna merah gelap saat hover */
+        color: #ffffff;
+    }
+
     .back-button {
         display: inline-block;
         margin-bottom: 1%;

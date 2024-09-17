@@ -18,7 +18,7 @@
                         <!-- /.card-header -->
                         <div class="card-body">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <h1 class="brand-text font-poppins-semibold" style="margin: 0;">Kelola Data</h1>
+                                <h1 class="brand-text font-poppins-semibold" style="margin: 0;">Kelola Unit Pembelajaran</h1>
                                 <a class="add-button" id="topikBtn"
                                     style="display: flex; align-items: center; margin-bottom: 10px;">
                                     <img src="{{ asset('add.png') }}" alt="add Button" style="margin-right: 8px;">

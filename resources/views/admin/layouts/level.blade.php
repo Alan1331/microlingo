@@ -5,23 +5,36 @@
 <body>
     <section class="content">
         <div class="modal-content3" data-dismiss="modalAction" aria-label="Close">
-            <h2 class="modal-title">Perbarui Unit {{$level->learningUnit->sortId}} Level {{$level->sortId}}</h2>
-            <form id="level-update-form" action="{{ route('units.levels.update', ['levelId' => $level->id]) }}" method="POST">
+            <h2 class="modal-title">
+                @if(isset($level))
+                    Perbarui Unit {{$level->learningUnit->sortId}} Level {{$level->sortId}}
+                @else
+                    Tambah Level Baru pada Unit {{ $unit->sortId }}
+                @endif
+            </h2>
+            <form id="level-update-form" action="{{ isset($level) ? route('units.levels.update', ['levelId' => $level->id]) : route('units.levels.create') }}" method="POST">
                 @csrf
-                @method('PUT')
+                @if(isset($level))
+                    @method('PUT')
+                @endif
                 <div class="form-group mb-3">
-                    <a href="{{route('units.levels', ['id' => $level->learningUnit->id])}}" class="back-button">
+                    <a href="{{route('units.levels', ['id' => isset($level) ? $level->learningUnit->id : $unit->id])}}" class="back-button">
                         <img src="{{ asset('backk.png') }}" alt="Back Button">
                         Back
                     </a>
                     <br>
+                    @if(isset($level))
+                        <input type="hidden" name="unitId" value="{{ $level->learningUnit->sortId }}"/>
+                    @else
+                        <input type="hidden" name="unitId" value="{{ $unit->id }}"/>
+                    @endif
                     <label for="editTopik" class="font-weight-bold">Topik<span style="color: red;"> *</span></label>
-                    <input required type="text" class="form-control" name="topic" id="editTopik" value="{{ old('topic', $level->topic) }}">
+                    <input required type="text" class="form-control" name="topic" id="editTopik" value="{{ old('topic', isset($level) ? $level->topic : '') }}">
                     <label for="editContent" class="font-weight-bold">Konten Pembelajaran<span style="color: red;"> *</span></label>
                     <textarea required type="text" class="form-control" name="content"
-                        id="editContent" rows="10" style="min-height: 200px;">{{ old('content', $level->content) }}</textarea>
+                        id="editContent" rows="10" style="min-height: 200px;">{{ old('content', isset($level) ? $level->content : '') }}</textarea>
                     <label for="editVideo" class="font-weight-bold">Link Video<span style="color: red;"> *</span></label>
-                    <input required type="text" class="form-control" name="videoLink" id="editVideo" value="{{ old('videoLink', $level->videoLink) }}">
+                    <input required type="text" class="form-control" name="videoLink" id="editVideo" value="{{ old('videoLink', isset($level) ? $level->videoLink : '') }}">
 
                     <div class="essay">
                         <label for="category1" class="font-weight-bold">Pertanyaan 1:<span style="color: red;"> *</span></label>
@@ -251,8 +264,12 @@
                     </div>
                 </div>
                 <button type="submit" class="save-button">
+                    @if(isset($level))
+                        Perbarui
+                    @else
                         Simpan
-                    </button>
+                    @endif
+                </button>
             </form>
     </section>
 </body>

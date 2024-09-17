@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
+use App\Models\LearningUnit;
 use App\Models\Level;
 use App\Models\Question;
 use Illuminate\Support\Facades\Http;
@@ -23,45 +24,31 @@ class LevelController extends Controller
         return view('admin.layouts.level', ['level' => $level, 'questions' => $level->questions]);
     }
 
-    public function updateLevel(Request $request, $levelId)
+    public function showLevelForm($unitId)
     {
-        $level = Level::find($levelId);
-        
-        # array of vars that require validation
-        $validate_vars = [
-            'topic' => 'required|max:255|string',
-            'content' => 'required|string',
-            'videoLink' => 'required|url',
-            'questionId1' => 'required|integer',
-            'questionId2' => 'integer',
-            'questionId3' => 'integer',
-            'category1' => 'required|max:30|string',
-            'category2' => 'max:30|string',
-            'category3' => 'max:30|string',
-        ];
+        $unit = LearningUnit::find($unitId);
+        return view('admin.layouts.level', ['unit' => $unit]);
+    }
 
-        # examine type of each question to validate its input
-        for($i = 1; $i <= 3; $i++) {
-            $currentQuestionType = $request->input('category' . $i);
-            switch ($currentQuestionType) {
-                case 'Essay': // validate essay input
-                    $validate_vars['editableQuestionEssay' . $i] = 'required|string';
-                    $validate_vars['editableAnswer' . $i] = 'required|string';
-                    break;
-                case 'Multiple Choice': // validate multiple choice input
-                    $validate_vars['editableQuestionMp' . $i] = 'required|string';
-                    $validate_vars['choice' . $i] = 'required|string|max:1';
-                    $validate_vars['customOptionInput' . $i . '-1'] = 'required|string';
-                    $validate_vars['customOptionInput' . $i . '-2'] = 'required|string';
-                    $validate_vars['customOptionInput' . $i . '-3'] = 'required|string';
-                    break;
-                default: // do nothing
-                    break;
-            }
+    public function upsertLevel(Request $request, $levelId = null)
+    {
+        $isNewLevel = false;
+        $level = null;
+
+        # create level if not existed
+        if($levelId == null) {
+            $isNewLevel = true;
+            $nextSortId = Level::max('sortId') + 1;
+            $level = Level::create([
+                'unitId' => $request->unitId,
+                'sortId' => $nextSortId,
+            ]);
+        } else {
+            $level = Level::find($levelId);
         }
 
-        # perform input validation
-        $validator = Validator::make($request->all(), $validate_vars);
+        # perform validation
+        $validator = $this->validateUpsert($request);
 
         # prevent update if validation was failed
         if ($validator->fails()) {
@@ -75,9 +62,16 @@ class LevelController extends Controller
             foreach ($messages as $message) {
                 Log::error('Validation error: ' . $message);
             }
-            return redirect(route('units.levels.show', $level->id))
-                        ->withErrors($validator)
-                        ->withInput();
+
+            if($isNewLevel) {
+                return redirect(route('units.levels.form', $request->unitId))
+                            ->withErrors($validator)
+                            ->withInput();
+            } else {
+                return redirect(route('units.levels.show', $level->id))
+                            ->withErrors($validator)
+                            ->withInput();
+            }
         }
 
         $validated = $validator->validated();
@@ -156,6 +150,48 @@ class LevelController extends Controller
             }
         }
 
-        return view('admin.layouts.level', ['level' => $level, 'questions' => $level->questions]);
+        if($isNewLevel) {
+            return redirect(route('units.levels', $request->unitId));
+        } else {
+            return view('admin.layouts.level', ['level' => $level, 'questions' => $level->questions]);
+        }
+    }
+
+    private function validateUpsert(Request $request) {
+        # array of vars that require validation
+        $validate_vars = [
+            'topic' => 'required|max:255|string',
+            'content' => 'required|string',
+            'videoLink' => 'required|url',
+            'questionId1' => 'required|integer',
+            'questionId2' => 'integer',
+            'questionId3' => 'integer',
+            'category1' => 'required|max:30|string',
+            'category2' => 'max:30|string',
+            'category3' => 'max:30|string',
+        ];
+
+        # examine type of each question to validate its input
+        for($i = 1; $i <= 3; $i++) {
+            $currentQuestionType = $request->input('category' . $i);
+            switch ($currentQuestionType) {
+                case 'Essay': // validate essay input
+                    $validate_vars['editableQuestionEssay' . $i] = 'required|string';
+                    $validate_vars['editableAnswer' . $i] = 'required|string';
+                    break;
+                case 'Multiple Choice': // validate multiple choice input
+                    $validate_vars['editableQuestionMp' . $i] = 'required|string';
+                    $validate_vars['choice' . $i] = 'required|string|max:1';
+                    $validate_vars['customOptionInput' . $i . '-1'] = 'required|string';
+                    $validate_vars['customOptionInput' . $i . '-2'] = 'required|string';
+                    $validate_vars['customOptionInput' . $i . '-3'] = 'required|string';
+                    break;
+                default: // do nothing
+                    break;
+            }
+        }
+
+        # perform input validation
+        return Validator::make($request->all(), $validate_vars);
     }
 }
