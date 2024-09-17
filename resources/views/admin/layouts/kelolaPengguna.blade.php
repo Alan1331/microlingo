@@ -16,9 +16,10 @@
                                 <tr>
                                     <th style="width: 150px;">Nomor WhatsApp</th>
                                     <th style="width: 200px;">Nama</th>
-                                    <th style="width: 200px;">Pekerjaan</th>
+                                    <th style="width: 100px;">Pekerjaan</th>
                                     <th style="width: 100px;">Unit</th>
                                     <th style="width: 100px;">Level</th>
+                                    <th style="width: 100px;">Terakhir Online</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -38,6 +39,7 @@
                                             <td>{{$progress[0]}}</td>
                                             <td>{{$progress[1]}}</td>
                                         @endif
+                                        <td>{{$user['updated_at']}}</td>
                                     </tr>
                                 @endforeach
                             </tfoot>
