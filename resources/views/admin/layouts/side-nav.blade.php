@@ -105,7 +105,7 @@
     <ul class="nav nav-pills nav-sidebar flex-column">
         <!-- Kelola Pengguna -->
         <li>
-            <a href="/kelolaPengguna" class="nav-link">
+            <a href="/users" class="nav-link">
                 <img src="{{ asset('managedata.png') }}" class="nav-icon" alt="kelola Icon" style="width: 25px; height: 25px;">
                 <p class="brand-text font-poppins-regular" style="color: black;">
                     Data Pengguna

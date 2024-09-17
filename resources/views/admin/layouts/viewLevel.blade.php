@@ -45,7 +45,7 @@
                                                     <td>Tidak Aktif</td>
                                                 @endif
                                                 <td colspan="6" style="text-align: center;">
-                                                    <a href="/updateLevel/{{ $level->id }}" class="edit-button">
+                                                    <a href="/levels/{{ $level->id }}" class="edit-button">
                                                         <img src="{{ asset('edit.png') }}" alt="Edit Button">
                                                         Perbarui
                                                     </a>

@@ -33,9 +33,9 @@ Route::middleware(CheckFirebaseRole::class)->group(function () {
     Route::get('/admin-page', [AdminController::class, 'showDashboard']);
     Route::get('/logoutAdmin', [FirebaseLoginController::class, 'logout'])->name('logoutAdmin');
 
-    Route::get('/kelolaPengguna', [UserController::class, 'showUsers'])->name('kelolaPengguna');
-    Route::get('/updateLevel/{levelId}', [LevelController::class, 'showLevelById'])->name('units.levels.show');
-    Route::put('/updateLevel/{levelId}', [LevelController::class, 'updateLevel'])->name('units.levels.update');
+    Route::get('/users', [UserController::class, 'showUsers'])->name('kelolaPengguna');
+    Route::get('/levels/{levelId}', [LevelController::class, 'showLevelById'])->name('units.levels.show');
+    Route::put('/levels/{levelId}', [LevelController::class, 'updateLevel'])->name('units.levels.update');
 
     Route::get('/materiPembelajaran', [LearningUnitController::class, 'showLearningUnits'])->name('materiPembelajaran');
     Route::post('/materiPembelajaran', [LearningUnitController::class, 'createLearningUnit'])->name('units.create');
