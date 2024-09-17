@@ -143,7 +143,9 @@ class LearningUnitControllerTest extends TestCase
     public function testUpdateLearningUnitNormalCase()
     {
         // Create a learning unit to update
+        $nextSortId = LearningUnit::max('sortId') + 1;
         $unit = LearningUnit::create([
+            'sortId' => $nextSortId,
             'topic' => 'Old Topic',
         ]);
 
@@ -195,7 +197,9 @@ class LearningUnitControllerTest extends TestCase
     public function testDeleteUnit()
     {
         // Create a learning unit with levels to delete
+        $nextSortId = LearningUnit::max('sortId') + 1;
         $unit = LearningUnit::create([
+            'sortId' => $nextSortId,
             'topic' => 'Test Unit',
         ]);
     

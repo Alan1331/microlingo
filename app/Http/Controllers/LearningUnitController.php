@@ -44,9 +44,14 @@ class LearningUnitController extends Controller
             'topic' => 'required|string',
         ]);
 
+        // Retrieve the highest unit sortId to assign the next sortId
+        $highestSortId = LearningUnit::max('sortId');
+        $nextSortId = $highestSortId + 1;
+
         // Create the learning unit
         $unit = LearningUnit::create([
             'topic' => $request->topic,
+            'sortId' => $nextSortId,
         ]);
 
         if ($unit != null) {
