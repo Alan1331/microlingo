@@ -19,10 +19,11 @@
                         <div class="card-body">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <h1 class="brand-text font-poppins-semibold" style="margin: 0;">Kelola Unit Pembelajaran</h1>
-                                <a class="add-button" id="topikBtn"
-                                    style="display: flex; align-items: center; margin-bottom: 10px;">
-                                    <img src="{{ asset('add.png') }}" alt="add Button" style="margin-right: 8px;">
-                                    Tambah Unit
+                                <a style="display: flex; align-items: center; margin-bottom: 10px;">
+                                    <button type="button" class="add-button" id="topikBtn">
+                                        <img src="{{ asset('add.png') }}" alt="add Button" style="margin-right: 8px;">
+                                        Tambah Unit
+                                    </button>
                                 </a>
                                 <div id="editModal" class="modalAction">
                                     <div class="modal-content4" data-dismiss="modalAction" aria-label="Close">
@@ -66,13 +67,17 @@
                                         <td>{{ $unit['sortId'] }}</td>
                                         <td>{{ $unit['topic'] }}</td>
                                         <td colspan="6" style="text-align: center;">
-                                            <a href="/materiPembelajaran/{{ $unit['id'] }}" class="view-button">
-                                                <img src="{{ asset('view.png') }}" alt="View Button">
-                                                Lihat Level
+                                            <a href="/materiPembelajaran/{{ $unit['id'] }}">
+                                                <button type="button" class="view-button">
+                                                    <img src="{{ asset('view.png') }}" alt="View Button">
+                                                    Lihat Level
+                                                </button>
                                             </a>
-                                            <a class="edit-button" unit-id="{{ $unit['id'] }}">
-                                                <img src="{{ asset('edit.png') }}" alt="Edit Button">
-                                                Perbarui
+                                            <a unit-id="{{ $unit['id'] }}">
+                                                <button type="button" class="edit-button">
+                                                    <img src="{{ asset('edit.png') }}" alt="Edit Button">
+                                                    Perbarui
+                                                </button>
                                             </a>
                                             <form id="unit-delete-form-{{ $unit['id'] }}" action="{{ route('units.delete', $unit['id']) }}" method="POST" style="display: none;">
                                                 @csrf

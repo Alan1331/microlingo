@@ -80,7 +80,7 @@
     <!-- Brand Logo -->
     <a href="/admin-page" class="brand-link">
         <img src="{{ asset('microLingo.png') }}" alt="MicroLingo Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-        <span class="brand-text font-poppins-semibold" style="color: #7288C7;">Micro Lingo</span>
+        <span class="brand-text font-poppins-semibold" style="color: #7288C7;">MicroLingo</span>
     </a>
 
     <!-- Sidebar -->
@@ -95,7 +95,7 @@
             <div class="info">
                 <!-- ganti user sesuai siapa yang login -->
                 @if(config('app.env') != 'testing')
-                <a class="brand-text font-poppins-regular" style="color: black;">{{explode('(', $admin->displayName)[0]}}</a>
+                <h1 class="brand-text font-poppins-regular" style="color: black;">{{explode('(', $admin->displayName)[0]}}</h1>
                 @endif
             </div>
         </div>

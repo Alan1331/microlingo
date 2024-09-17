@@ -18,9 +18,11 @@
                     @method('PUT')
                 @endif
                 <div class="form-group mb-3">
-                    <a href="{{route('units.levels', ['id' => isset($level) ? $level->learningUnit->id : $unit->id])}}" class="back-button">
-                        <img src="{{ asset('backk.png') }}" alt="Back Button">
-                        Back
+                    <a href="{{route('units.levels', ['id' => isset($level) ? $level->learningUnit->id : $unit->id])}}">
+                        <button type="button" class="back-button">
+                            <img src="{{ asset('backk.png') }}" alt="Back Button">
+                            Back
+                        </button>
                     </a>
                     <br>
                     @if(isset($level))

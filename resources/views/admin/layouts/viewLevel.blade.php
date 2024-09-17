@@ -5,35 +5,54 @@
 <body>
     <section class="content">
         <div class="container-fluid">
+        <!-- Flash Messages -->
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
             <div class="row">
                 <div class="col-12">
                     <div class="card" style="margin-top: 25px;">
                         <div class="card-header">
-                            <a href="{{route('materiPembelajaran')}}" class="back-button">
-                                <img src="{{ asset('backk.png') }}" alt="Back Button">
-                                Back
+                            <a href="{{route('materiPembelajaran')}}">
+                                <button class="back-button">
+                                    <img src="{{ asset('backk.png') }}" alt="Back Button">
+                                    Back
+                                </button>
                             </a>
                         </div>
                         <!-- /.card-header -->
                         <div class="card-body">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <h1 class="brand-text font-poppins-semibold" style="margin: 0;">Daftar Level di Unit {{$unitNumber}}</h1>
-                                <a href="{{ route('units.levels.form', ['unitId' => $unitId]) }}" class="add-button" id="addLevel"
-                                    style="display: flex; align-items: center; margin-bottom: 10px;">
-                                    <img src="{{ asset('add.png') }}" alt="add Button" style="margin-right: 8px;">
-                                    Tambah Level
+                                <a href="{{ route('units.levels.form', ['unitId' => $unitId]) }}" id="addLevel" style="display: flex; align-items: center; margin-bottom: 10px;">
+                                    <button class="add-button">
+                                        <img src="{{ asset('add.png') }}" alt="add Button" style="margin-right: 8px;">
+                                        Tambah Level
+                                    </button>
                                 </a>
                             </div>
+                            <b style="color: #dc3545;">Catatan : hanya level dengan status aktif yang ditampilkan ke pengguna pada WhatsApp chatbot</b>
                             @if($levels->count() != 0)
                                 <table id="example2" class="table table-bordered table-hover">
                                     <thead>
                                         <tr>
-                                            <th style="width: 100px;">Level</th>
-                                            <th style="width: 300px;">Topik</th>
-                                            <th style="width: 30px;">Pertanyaan</th>
-                                            <th style="width: 100px;">Avg. Nilai</th>
-                                            <th style="width: 100px;">Status</th>
-                                            <th style="width: 170px;">Aksi</th>
+                                            <th style="width: 8%;">Level</th>
+                                            <th style="width: 40%;">Topik</th>
+                                            <th style="width: 10%; text-align: center;">Pertanyaan</th>
+                                            <th style="width: 10%; text-align: center;">Avg. Nilai</th>
+                                            <th style="width: 10%; text-align: center;">Status</th>
+                                            <th style="width: 34%; text-align: center;">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -44,17 +63,34 @@
                                             <tr>
                                                 <td>{{ $level->sortId }}</td>
                                                 <td>{{ $level->topic }}</td>
-                                                <td>{{ $level->questions()->count() }}</td>
-                                                <td>{{ $level->averageGrade }}%</td>
-                                                @if($level->isActive)
-                                                    <td>Aktif</td>
-                                                @else
-                                                    <td>Tidak Aktif</td>
-                                                @endif
+                                                <td style="text-align: center;">
+                                                    {{ $level->questions()->count() }}
+                                                </td>
+                                                <td style="text-align: center;">
+                                                    {{ $level->averageGrade }}%
+                                                </td>
+                                                <td class="status-column">
+                                                    <!-- Toggle Switch -->
+                                                    <label class="switch">
+                                                        <input type="checkbox" class="toggle-status" data-level-id="{{ $level['id'] }}" {{ $level->isActive ? 'checked' : '' }}>
+                                                        <span class="slider round"></span>
+                                                    </label>
+                                                    <br>
+                                                    <!-- Status Text -->
+                                                    <span class="status-text-{{ $level->id }}">
+                                                        @if($level->isActive)
+                                                            <span class="text-success">Aktif</span>
+                                                        @else
+                                                            <span class="text-danger">Tidak Aktif</span>
+                                                        @endif
+                                                    </span>
+                                                </td>
                                                 <td colspan="6" style="text-align: center;">
-                                                    <a href="/levels/{{ $level->id }}" class="edit-button">
-                                                        <img src="{{ asset('edit.png') }}" alt="Edit Button">
-                                                        Perbarui
+                                                    <a href="/levels/{{ $level->id }}">
+                                                        <button type="button" class="edit-button">
+                                                            <img src="{{ asset('edit.png') }}" alt="Edit Button">
+                                                            Perbarui
+                                                        </button>
                                                     </a>
                                                     <form id="level-delete-form-{{ $level->id }}" action="{{ route('units.levels.delete', $level->id) }}" method="POST" style="display: none;">
                                                         @csrf
@@ -73,7 +109,6 @@
                                         @endforeach
                                     </tfoot>
                                 </table>
-                                <p style="color: #dc3545;">Catatan : Status aktif merupakan level yang ditampilkan di dalam chatbot, perbarui level jika ingin mengaktifkan pembelajaran</p>
                             @else
                                 <b>Tidak ada level untuk unit ini</b>
                             @endif
@@ -101,77 +136,57 @@
     var editBtn = document.querySelectorAll('.edit-button');
     var editModal = document.getElementById('editModal');
    
+    // Attach event listener to all toggle-status switches
+    document.querySelectorAll('.toggle-status').forEach(function (toggle) {
+        toggle.addEventListener('change', function () {
+            var levelId = this.getAttribute('data-level-id');
+            var isChecked = this.checked; // Check if the switch is turned on or off
 
-    // Fungsi untuk menampilkan modal upload
-    uploadBtn.forEach(function (button) {
-        button.addEventListener('click', function () {
-            var unitId = this.getAttribute('unit-id');
-            var levelId = this.getAttribute('level-id');
-
-            // Dynamically set the form action
-            var actionUrl = `/materiPembelajaran/${unitId}/levels/${levelId}/videos`;
-            document.getElementById('uploadForm').action = actionUrl;
-            modalUpload.style.display = 'block';
-        });
-    });
-
-    // Fungsi untuk menampilkan modal edit di bawah tabel example2
-    editBtn.forEach(function (button) {
-        button.addEventListener('click', function () {
-            var levelId = this.getAttribute('level-id');
-            fetch(`/levels/${levelId}`)
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('editTopik').value = data.topic;
-                    document.getElementById('editContent').value = data.content;
-                    document.getElementById('editVideo').value = data.videoLink;
-                    document.getElementById('level-update-form').action = `/levels/${levelId}`;
-                    
-                    // Pindahkan modal ke bawah tabel example2 dan tampilkan
-                    exampleTable.insertAdjacentElement('afterend', editModal);
-                    editModal.style.display = "block";
-                });
-        });
-    });
-
-    // Menangani pengiriman form edit untuk memperbarui data di halaman yang sama tanpa reload
-    document.getElementById('level-update-form').addEventListener('submit', function (event) {
-        event.preventDefault(); // Mencegah form melakukan submit secara default
-
-        var formData = new FormData(this);
-        var actionUrl = this.action;
-
-        fetch(actionUrl, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-            },
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Update the page content or specific element(s) with the updated data
-                alert('Level updated successfully!');
-                // Here you can update the UI dynamically without refreshing the page
-                editModal.style.display = 'none'; // Close the modal
+            // Immediately update the UI (Optimistic update)
+            var statusTextElement = document.querySelector('.status-text-' + levelId);
+            if (isChecked) {
+                statusTextElement.innerHTML = '<span class="text-success">Aktif</span>';
             } else {
-                alert('An error occurred while updating the level.');
+                statusTextElement.innerHTML = '<span class="text-danger">Tidak Aktif</span>';
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An unexpected error occurred.');
-        });
-    });
 
-    // Menutup modal ketika klik di luar konten modal
-    window.addEventListener('click', function (event) {
-        if (event.target == modalUpload) {
-            modalUpload.style.display = 'none';
-        } else if (event.target == editModal) {
-            editModal.style.display = 'none';
-        }
+            // Perform an AJAX request to toggle the status
+            fetch(`/levels/${levelId}/toggle-status`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    levelId: levelId,
+                    isActive: isChecked // Send the new status
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (!data.success) {
+                    // Revert the UI if the server returns an error (if needed)
+                    alert('Failed to update status.');
+                    // Revert to the previous state
+                    if (isChecked) {
+                        statusTextElement.innerHTML = '<span class="text-danger">Tidak Aktif</span>';
+                    } else {
+                        statusTextElement.innerHTML = '<span class="text-success">Aktif</span>';
+                    }
+                    toggle.checked = !isChecked; // Revert the checkbox state
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Revert the UI if there's an error
+                if (isChecked) {
+                    statusTextElement.innerHTML = '<span class="text-danger">Tidak Aktif</span>';
+                } else {
+                    statusTextElement.innerHTML = '<span class="text-success">Aktif</span>';
+                }
+                toggle.checked = !isChecked; // Revert the checkbox state
+            });
+        });
     });
 
     // Menutup modal ketika klik batalkan
@@ -191,6 +206,85 @@ document.getElementById('deleteBtn').addEventListener('click', function (event) 
     </script>
 </body>
 <style>
+    .status-column {
+        text-align: center;
+        vertical-align: middle;
+    }
+
+    .status-container {
+        display: flex;
+        flex-direction: column; /* Stack elements vertically */
+        align-items: center;    /* Center them horizontally */
+        justify-content: center; /* Center them vertically */
+    }
+
+    .switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    }
+
+    /* Hide default HTML checkbox */
+    .switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    }
+
+    /* The slider */
+    .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: .4s;
+    }
+
+    .slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: .4s;
+    }
+
+    input:checked + .slider {
+    background-color: #2196F3;
+    }
+
+    input:focus + .slider {
+    box-shadow: 0 0 1px #2196F3;
+    }
+
+    input:checked + .slider:before {
+    transform: translateX(26px);
+    }
+
+    /* Rounded sliders */
+    .slider.round {
+    border-radius: 34px;
+    }
+
+    .slider.round:before {
+    border-radius: 50%;
+    }
+
+    .toggle-status-button {
+        font-weight: bold;
+        text-decoration: none;
+    }
+
+    .toggle-status-button:hover {
+        text-decoration: underline;
+    }
+
     .add-button {
         display: inline-block;
         padding: 10px 20px;

@@ -81,7 +81,6 @@ class LevelController extends Controller
             'topic' => $validated['topic'],
             'content' => $validated['content'],
             'videoLink' => $validated['videoLink'],
-            'isActive' => true, # activate level
         ]);
 
         for($i = 1; $i <= 3; $i++) {
@@ -157,7 +156,8 @@ class LevelController extends Controller
         }
     }
 
-    private function validateUpsert(Request $request) {
+    private function validateUpsert(Request $request)
+    {
         # array of vars that require validation
         $validate_vars = [
             'topic' => 'required|max:255|string',
@@ -195,7 +195,8 @@ class LevelController extends Controller
         return Validator::make($request->all(), $validate_vars);
     }
 
-    public function deleteLevel($levelId) {
+    public function deleteLevel($levelId)
+    {
         $level = Level::find($levelId);
         $unitId = $level->learningUnit->id;
         $sortId = $level->sortId;
@@ -211,5 +212,19 @@ class LevelController extends Controller
                 ->decrement('sortId', 1);
 
         return redirect()->route('units.levels', $unitId)->with('success', 'Level deleted successfully!');
+    }
+
+    public function toggleStatus(Request $request, $levelId)
+    {
+        $level = Level::findOrFail($levelId);
+        // Update the isActive status based on the checkbox value
+        $level->isActive = $request->isActive;
+        $level->save();
+    
+        // Return the new status as JSON
+        return response()->json([
+            'success' => true,
+            'newStatus' => $level->isActive
+        ]);
     }
 }
