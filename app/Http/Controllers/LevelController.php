@@ -38,7 +38,7 @@ class LevelController extends Controller
         # create level if not existed
         if($levelId == null) {
             $isNewLevel = true;
-            $nextSortId = Level::max('sortId') + 1;
+            $nextSortId = Level::where('unitId', $request->unitId)->max('sortId') + 1;
             $level = Level::create([
                 'unitId' => $request->unitId,
                 'sortId' => $nextSortId,
@@ -193,5 +193,23 @@ class LevelController extends Controller
 
         # perform input validation
         return Validator::make($request->all(), $validate_vars);
+    }
+
+    public function deleteLevel($levelId) {
+        $level = Level::find($levelId);
+        $unitId = $level->learningUnit->id;
+        $sortId = $level->sortId;
+        $result = $level->delete();
+
+        // Verify level was found
+        if (!$result) {
+            return redirect()->route('units.levels', $unitId)->with('failed', 'Failed to delete the level!');
+        }
+
+        Level::where('unitId', '=', $unitId)
+                ->where('sortId', '>', $sortId)
+                ->decrement('sortId', 1);
+
+        return redirect()->route('units.levels', $unitId)->with('success', 'Level deleted successfully!');
     }
 }

@@ -54,15 +54,7 @@ class LearningUnitController extends Controller
             'sortId' => $nextSortId,
         ]);
 
-        if ($unit != null) {
-            // Create 5 levels for the learning unit
-            for ($i = 1; $i <= 5; $i++) {
-                Level::create([
-                    'sortId' => $i,
-                    'unitId' => $unit->id,
-                ]);
-            }
-        } else {
+        if ($unit == null) {
             return redirect()->route('materiPembelajaran')->with('failed', 'Failed to create learning unit');
         }
 

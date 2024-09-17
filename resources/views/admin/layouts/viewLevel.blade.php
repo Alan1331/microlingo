@@ -30,10 +30,10 @@
                                         <tr>
                                             <th style="width: 100px;">Level</th>
                                             <th style="width: 300px;">Topik</th>
-                                            <th style="width: 100px;">Pertanyaan</th>
+                                            <th style="width: 30px;">Pertanyaan</th>
                                             <th style="width: 100px;">Avg. Nilai</th>
                                             <th style="width: 100px;">Status</th>
-                                            <th style="width: 100px;">Aksi</th>
+                                            <th style="width: 170px;">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -55,6 +55,17 @@
                                                     <a href="/levels/{{ $level->id }}" class="edit-button">
                                                         <img src="{{ asset('edit.png') }}" alt="Edit Button">
                                                         Perbarui
+                                                    </a>
+                                                    <form id="level-delete-form-{{ $level->id }}" action="{{ route('units.levels.delete', $level->id) }}" method="POST" style="display: none;">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                    </form>
+                                                    <a onclick="event.preventDefault(); if(confirm('Apakah admin yakin akan menghapus level ini?\nKarena level setelahnya akan dipindahkan ke atas')) document.getElementById('level-delete-form-{{ $level->id }}').submit();">
+                                                        @method('DELETE')
+                                                        <button type="button" class="delete-button">
+                                                            <img src="{{ asset('delete.png') }}" alt="Delete Button">
+                                                            Hapus
+                                                        </button>
                                                     </a>
                                                 </td>
 

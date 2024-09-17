@@ -70,21 +70,21 @@
                                                 <img src="{{ asset('view.png') }}" alt="View Button">
                                                 Lihat Level
                                             </a>
+                                            <a class="edit-button" unit-id="{{ $unit['id'] }}">
+                                                <img src="{{ asset('edit.png') }}" alt="Edit Button">
+                                                Perbarui
+                                            </a>
                                             <form id="unit-delete-form-{{ $unit['id'] }}" action="{{ route('units.delete', $unit['id']) }}" method="POST" style="display: none;">
                                                 @csrf
                                                 @method('DELETE')
                                             </form>
-                                            <a onclick="event.preventDefault(); if(confirm('Apakah admin yakin akan menghapus unit ini?\nKarena unit sebelumnya akan dipindahkan ke atas')) document.getElementById('unit-delete-form-{{ $unit['id'] }}').submit();">
+                                            <a onclick="event.preventDefault(); if(confirm('Apakah admin yakin akan menghapus unit ini?\nKarena unit setelahnya akan dipindahkan ke atas')) document.getElementById('unit-delete-form-{{ $unit['id'] }}').submit();">
                                                 @method('DELETE')
                                                 <button type="button" class="delete-button">
                                                     <img src="{{ asset('delete.png') }}" alt="Delete Button">
                                                     Hapus
                                                 </button>
                                             </a>
-                                            <a class="edit-button" unit-id="{{ $unit['id'] }}">
-                                                        <img src="{{ asset('edit.png') }}" alt="Edit Button">
-                                                        Perbarui
-                                                    </a>
                                     <div id="updateModal-{{ $unit->id }}" class="modalAction2 update-modal">
                                     <div class="modal-content4" data-dismiss="modalAction2" aria-label="Close">
                                         <h2 class="update-modal-title" id="updateModalTitle">Perbarui Topik Unit {{ $unit->sortId }}</h2>

@@ -38,6 +38,7 @@ Route::middleware(CheckFirebaseRole::class)->group(function () {
     Route::post('/levels', [LevelController::class, 'upsertLevel'])->name('units.levels.create');
     Route::get('/levels/{levelId}', [LevelController::class, 'showLevelById'])->name('units.levels.show');
     Route::put('/levels/{levelId}', [LevelController::class, 'upsertLevel'])->name('units.levels.update');
+    Route::delete('levels/{levelId}', [LevelController::class, 'deleteLevel'])->name('units.levels.delete');
 
     Route::get('/materiPembelajaran', [LearningUnitController::class, 'showLearningUnits'])->name('materiPembelajaran');
     Route::post('/materiPembelajaran', [LearningUnitController::class, 'createLearningUnit'])->name('units.create');
