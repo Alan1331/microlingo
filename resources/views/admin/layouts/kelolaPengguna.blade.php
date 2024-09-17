@@ -31,8 +31,8 @@
                                         <td>{{$user['name']}}</td>
                                         <td>{{$user['occupation']}}</td>
                                         @if(strtolower($user['progress']) == 'completed')
-                                            <td>Tamat</td>
-                                            <td>Tamat</td>
+                                            <td>Lulus</td>
+                                            <td>Lulus</td>
                                         @else
                                             <?php $progress = explode("-", $user['progress']); ?>
                                             <td>{{$progress[0]}}</td>
