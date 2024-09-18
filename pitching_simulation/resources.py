@@ -18,7 +18,7 @@ class PitchResource(Resource):
 
         if input_msg.lower() == 'keluar':
             end_conversation('quit')
-            return jsonify({"message": "Anda telah meninggalkan percakapan!", "mission_status": mission_status})
+            return jsonify({"message": "Bye, let's have a chat again another time!", "mission_status": mission_status})
 
         response = conversational_rag_chain.invoke(
             {"input": input_msg},

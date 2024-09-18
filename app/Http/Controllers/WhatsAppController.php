@@ -170,7 +170,7 @@ class WhatsAppController extends Controller
         if ($response->successful()) {
             Log::info("[" . $userNumber . "] Response from pitching API was retrieved");
             $responseData = $response->json();
-            $message = $responseData['message'];
+            $message = "🗣️: " . $responseData['message'];
             $missionStatus = $responseData['mission_status'];
 
             if($missionStatus != "ongoing") {
@@ -189,6 +189,7 @@ class WhatsAppController extends Controller
             }
 
             if($missionStatus == "quit") {
+                $message .= "|Anda telah meninggalkan percakapan!";
                 $message .= "|" . $this->showMainMenu();
             }
 
