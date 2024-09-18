@@ -11,15 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('user_grade', function (Blueprint $table) {
-            // Defining the composite primary key
+        Schema::create('user_grades', function (Blueprint $table) {
+            $table->id();
             $table->string('user_phoneNumber');
             $table->unsignedBigInteger('level_id');
             $table->integer('score');
             $table->timestamps();
-
-            // Setting the composite primary key
-            $table->primary(['user_phoneNumber', 'level_id']);
 
             // Foreign keys
             $table->foreign('user_phoneNumber')->references('phoneNumber')->on('users')->onDelete('cascade');
@@ -32,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('user_grade');
+        Schema::dropIfExists('user_grades');
     }
 };

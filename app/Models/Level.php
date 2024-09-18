@@ -57,11 +57,11 @@ class Level extends Model
     }
 
     /**
-     * The users that belong to the level.
+     * Get the userGrades for the level.
      */
-    public function users(): BelongsToMany
+    public function userGrades(): HasMany
     {
-        return $this->belongsToMany(User::class, 'user_grade')->as('score');
+        return $this->hasMany(UserGrade::class, 'level_id');
     }
 
     public static function findBy($attribute, $value)

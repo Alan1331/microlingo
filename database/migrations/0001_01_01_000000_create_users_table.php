@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('occupation')->nullable();
             $table->string('menuLocation');
             $table->string('progress');
-            $table->string('currentQuestion')->nullable();
+            $table->integer('progressPercentage')->nullable();
             $table->string('currentGrade')->nullable();
             $table->timestamps();
         });

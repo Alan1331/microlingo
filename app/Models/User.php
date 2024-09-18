@@ -23,7 +23,7 @@ class User extends Model
         'occupation',
         'menuLocation',
         'progress',
-        'currentQuestion',
+        'progressPercentage',
         'currentGrade',
     ];
 
@@ -38,15 +38,15 @@ class User extends Model
         'occupation' => 'string',
         'menuLocation' => 'string',
         'progress' => 'string',
-        'currentQuestion' => 'string',
+        'progressPercentage' => 'integer',
         'currentGrade' => 'string',
     ];
 
     /**
-     * The levels that belong to the user.
+     * Get the userGrades for the user.
      */
-    public function levels(): BelongsToMany
+    public function userGrades(): HasMany
     {
-        return $this->belongsToMany(Level::class, 'user_grade')->as('score');
+        return $this->hasMany(UserGrade::class, 'user_phoneNumber');
     }
 }
