@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\App;
 use App\Models\LearningUnit;
 use App\Models\Level;
 use App\Models\User;
+use App\Models\UserGrade;
 use Illuminate\Support\Facades\DB;
 
 class WhatsAppController extends Controller
@@ -334,6 +335,7 @@ Pilih menu berikut untuk melanjutkan:
         if(strval($inputMessage) == 1) {
             $user = User::find($userNumber);
             $user->progress = '1-1';
+            $user->progressPercentage = 0;
             $user->menuLocation = 'levelPrompt';
             $user->save();
         } elseif(strval($inputMessage) == 2) {
@@ -400,7 +402,7 @@ Pilih menu berikut untuk melanjutkan:
         $message = '';
         
         # generate prompt for the current level
-        $prompt = $this->generateLevelPrompt($learningUnit, $level);
+        $prompt = $this->generateLevelPrompt($learningUnit, $level, $userData->progressPercentage);
         $message .= $prompt . '|';
         
         if($level->videoLink != null) {
@@ -616,22 +618,20 @@ Pilih menu berikut untuk melanjutkan:
                     $score = ($correctAnswers / $numberOfQuestions) * 100; // return (float) score
                     $score = round($score); // round the score to integer
 
+                    // insert the score
+                    UserGrade::create([
+                        'user_phoneNumber' => $userData->phoneNumber,
+                        'level_id' => $level->id,
+                        'score' => $score,
+                    ]);
+
                     if($score >= 50) {
                         # increase the level
                         Log::info("[" . $userNumber . "] User has passed the level");
-                        $userData->progress = $this->findNextActiveLevel($learningUnitId, $levelId);
+                        $updatedProgress = $this->findNextActiveLevel($learningUnitId, $levelId);
+                        $userData->progress = $updatedProgress;
+                        $userData->progressPercentage = $this->calculateProgressInPercentage($updatedProgress);
                         $userData->save();
-
-                        # upsert the user score
-                        DB::table('user_grade')->upsert(
-                            [
-                                'user_phoneNumber' => $userData->phoneNumber,
-                                'level_id' => $level->id,
-                                'score' => $score,
-                            ],
-                            ['user_phoneNumber', 'level_id'],  // Composite unique key
-                            ['score']  // Columns to update if a record with the unique keys already exists
-                        );
 
                         $message .= "Selamat, Anda telah berhasil menyelesaikan level ini dengan *nilai: " . strval($score) . "*";
                         $message .= "\n\nketik *Lanjut* untuk melanjutkan ke level berikutnya atau *Keluar* untuk kembali ke Main Menu! Tenang aja, progress kamu tidak akan hilang kok!";
@@ -680,12 +680,59 @@ Pilih menu berikut untuk melanjutkan:
         return 'completed';
     }
 
-    public function generateLevelPrompt($learningUnit, $level)
+    public function calculateProgressInPercentage($progress)
+    {
+        if($progress == 'completed') {
+            return 100;
+        }
+
+        # Extract current unit and level
+        $progress_arr = explode('-', $progress);
+        $currentUnit = intval($progress_arr[0]);
+        $currentLevel = intval($progress_arr[1]);
+
+        # Count completed levels
+        $completedLevels = 0;
+        for($unit = 1; $unit < $currentUnit; $unit++) {
+            $unitId = LearningUnit::where('sortId', $unit)->value('id');
+
+            if ($unitId) {
+                $completedLevels += Level::where('unitId', $unitId)
+                                        ->where('isActive', true)
+                                        ->count();
+            }
+        }
+
+        Log::info("Completed levels from previous units: " . strval($completedLevels));
+
+        $unitId = LearningUnit::where('sortId', $currentUnit)->value('id');
+
+        if ($unitId) {
+            $completedLevels += Level::where('unitId', $unitId)
+                                    ->where('isActive', true)
+                                    ->where('sortId', '<', $currentLevel)
+                                    ->count();
+        }
+
+        Log::info("Total of completed levels: " . strval($completedLevels));
+        
+        $totalLevels = Level::where('isActive', true)->count();
+        $result = round(($completedLevels / $totalLevels) * 100);
+        Log::info("New progress percentage: " . strval($result));
+
+        return $result;
+    }
+
+    public function generateLevelPrompt($learningUnit, $level, $progressPercentage = null)
     {
         // Base prompt for ChatGPT
-        $basePrompt = "Selamat datang di *unit: {$learningUnit->sortId} - {$learningUnit->topic}*\n";
-        $basePrompt .= "Saat ini, Anda berada pada *level: {$level->sortId} - {$level->topic}*\n\n";
-        $basePrompt .= "Simak ringkasan materi berikut:|";
+        $basePrompt = "Selamat datang di:\n";
+        $basePrompt .= "- *Unit: {$learningUnit->sortId} - {$learningUnit->topic}*\n";
+        $basePrompt .= "- *Level: {$level->sortId} - {$level->topic}*\n";
+        if($progressPercentage != null) {
+            $basePrompt .= "- *Progress Pembelajaran: {$progressPercentage}%*\n";
+        }
+        $basePrompt .= "\nSimak ringkasan materi berikut:|";
         if ($level->content != null) {
             $basePrompt .= $level->content;
         } else {

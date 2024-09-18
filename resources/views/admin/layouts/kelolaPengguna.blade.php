@@ -14,12 +14,13 @@
                         <table id="example2" class="table table-bordered table-hover">
                             <thead>
                                 <tr>
-                                    <th style="width: 150px;">Nomor WhatsApp</th>
-                                    <th style="width: 200px;">Nama</th>
-                                    <th style="width: 100px;">Pekerjaan</th>
-                                    <th style="width: 100px;">Unit</th>
-                                    <th style="width: 100px;">Level</th>
-                                    <th style="width: 100px;">Terakhir Online</th>
+                                    <th style="width: 20%;">Nomor WhatsApp</th>
+                                    <th style="width: 26.67%;">Nama</th>
+                                    <th style="width: 13.33%;">Pekerjaan</th>
+                                    <th style="width: 13.33%;">Progress</th>
+                                    <th style="width: 6.67%;">Unit</th>
+                                    <th style="width: 6.67%;">Level</th>
+                                    <th style="width: 13.33%;">Terakhir Online</th>                                    
                                 </tr>
                             </thead>
                             <tbody>
@@ -31,6 +32,7 @@
                                         <td>{{$user['phoneNumber']}}</td>
                                         <td>{{$user['name']}}</td>
                                         <td>{{$user['occupation']}}</td>
+                                        <td>{{$user['progressPercentage']}}</td>
                                         @if(strtolower($user['progress']) == 'completed')
                                             <td>Lulus</td>
                                             <td>Lulus</td>
