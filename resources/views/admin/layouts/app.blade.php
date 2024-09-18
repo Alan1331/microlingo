@@ -1,4 +1,3 @@
-<!-- home dan contact diapus aja (app.blade.php)-->
 <!DOCTYPE html>
 <html lang="en">
 <head>

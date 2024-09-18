@@ -53,9 +53,9 @@
                             <table id="example2" class="table table-bordered table-hover">
                                 <thead>
                                     <tr>
-                                        <th style="width: 100px;">Unit</th>
-                                        <th style="width: 500px;">Topik</th>
-                                        <th style="width: 300px;">Aksi</th>
+                                        <th style="width: 5.56%;">Unit</th>
+                                        <th style="width: 55.56%;">Topik</th>
+                                        <th style="width: 38.89%; text-align: center;">Aksi</th>
                                     </tr>
                                 </thead>
                                 <tbody id="dataTableBody">
@@ -73,8 +73,8 @@
                                                     Lihat Level
                                                 </button>
                                             </a>
-                                            <a unit-id="{{ $unit['id'] }}">
-                                                <button type="button" class="edit-button">
+                                            <a>
+                                                <button type="button" class="edit-button" unit-id="{{ $unit['id'] }}">
                                                     <img src="{{ asset('edit.png') }}" alt="Edit Button">
                                                     Perbarui
                                                 </button>
@@ -228,7 +228,6 @@
     }
 
     .add-button {
-        display: inline-block;
         padding: 10px 20px;
         font-size: 14px;
         font-weight: bold;
