@@ -724,13 +724,13 @@ Pilih menu berikut untuk melanjutkan:
         return $result;
     }
 
-    public function generateLevelPrompt($learningUnit, $level, $progressPercentage = -1)
+    public function generateLevelPrompt($learningUnit, $level, $progressPercentage = null)
     {
         // Base prompt for ChatGPT
         $basePrompt = "Selamat datang di:\n";
         $basePrompt .= "- *Unit: {$learningUnit->sortId} - {$learningUnit->topic}*\n";
         $basePrompt .= "- *Level: {$level->sortId} - {$level->topic}*\n";
-        if($progressPercentage != -1) {
+        if($progressPercentage !== null) {
             $basePrompt .= "- *Progress Pembelajaran: {$progressPercentage}%*\n";
         }
         $basePrompt .= "\nSimak ringkasan materi berikut:|";
